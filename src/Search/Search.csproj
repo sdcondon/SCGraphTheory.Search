@@ -10,10 +10,8 @@
     <PackageTags>graphs graph theory a* dijkstra depth-first breadth-first</PackageTags>
     <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>G:\Code\Projects\SCGraphTheory.Search\src\Search\SCGraphTheory.Search.xml</DocumentationFile>
+    <DocumentationFile>SCGraphTheory.Search.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
