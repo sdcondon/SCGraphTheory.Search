@@ -35,8 +35,8 @@ namespace SCGraphTheory.Search
         public void BasicTests(Graph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
         {
             var search = new BreadthFirstSearch<Graph.Node, Graph.Edge>(
-                graph.Nodes.Single(n => n.Id == sourceId),
-                n => n.Id == targetId);
+                source: graph.Nodes.Single(n => n.Id == sourceId),
+                isTarget: n => n.Id == targetId);
 
             SearchAssert.ProgressesAsExpected(graph, search, targetId, expectedSteps);
         }

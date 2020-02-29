@@ -30,9 +30,9 @@ namespace SCGraphTheory.Search
         public void BasicTests(Graph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
         {
             var search = new DijkstraSearch<Graph.Node, Graph.Edge>(
-                graph.Nodes.Single(n => n.Id == sourceId),
-                n => n.Id == targetId,
-                e => e.Cost);
+                source: graph.Nodes.Single(n => n.Id == sourceId),
+                isTarget: n => n.Id == targetId,
+                getEdgeCost: e => e.Cost);
 
             SearchAssert.ProgressesAsExpected(graph, search, targetId, expectedSteps);
         }
