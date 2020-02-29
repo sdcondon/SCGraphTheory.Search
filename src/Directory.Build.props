@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Simon Condon</Authors>
+    <Company />
+    <Product>Graph Theory</Product>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/sdcondon/GraphTheory</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/sdcondon/GraphTheory</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>$(SolutionDir)\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+</Project>
