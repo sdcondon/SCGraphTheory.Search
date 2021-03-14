@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SCGraphTheory.Search
 {
@@ -13,8 +14,9 @@ namespace SCGraphTheory.Search
         where TEdge : IEdge<TNode, TEdge>
     {
         private readonly Predicate<TNode> isTarget;
-        private readonly Queue<KeyValuePair<TNode, TEdge>> edgeQueue;
-        private readonly Dictionary<TNode, TEdge> predecessors;
+
+        private readonly Dictionary<TNode, TEdge> predecessors = new Dictionary<TNode, TEdge>();
+        private readonly Queue<(TNode node, TEdge edge)> frontier = new Queue<(TNode, TEdge)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BreadthFirstSearch{TNode, TEdge}"/> class.
@@ -25,17 +27,9 @@ namespace SCGraphTheory.Search
         {
             this.isTarget = isTarget;
 
-            // Create a queue of nodes to consider and the edges that lead us there.
-            // Add the source node with a null edge.
-            // Strictly speaking we only NEED to keep track of the nodes - but keeping track of the
-            // edges that lead us there means we can maintain a full predecessor tree as defined by
-            // the ISearch interface, which in turn makes things nice and easy to render.
-            edgeQueue = new Queue<KeyValuePair<TNode, TEdge>>();
-            edgeQueue.Enqueue(new KeyValuePair<TNode, TEdge>(source, default));
-
-            predecessors = new Dictionary<TNode, TEdge>();
-
-            // Immediately add source node to search tree
+            // Initialize the frontier with the source node and immediately discover it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            frontier.Enqueue((source, default));
             NextStep();
         }
 
@@ -51,40 +45,38 @@ namespace SCGraphTheory.Search
         /// <inheritdoc />
         public void NextStep()
         {
-            if (this.IsConcluded)
+            if (IsConcluded)
             {
                 throw new InvalidOperationException("Search is concluded");
             }
 
-            // Grab the next node and edge leading to it.
-            // Add it to the predecessor tree.
-            var next = edgeQueue.Dequeue();
-            this.predecessors[next.Key] = next.Value;
+            var next = frontier.Dequeue();
+            predecessors[next.node] = next.edge;
 
-            // Exit if the target has been found
-            if (isTarget(next.Key))
+            if (isTarget(next.node))
             {
-                this.Target = next.Key;
-                this.IsConcluded = true;
+                Target = next.node;
+                IsConcluded = true;
                 return;
             }
 
-            // Push the adjacent nodes (and the edges that lead to them) onto
-            // the queue (omitting those already visited).
-            foreach (var edge in next.Key.Edges)
+            foreach (var edge in next.node.Edges)
             {
-                if (!this.predecessors.ContainsKey(edge.To))
+                // NB: Iterating the frontier each time to check for duplicates could be slow. Originally we
+                // added nodes on the frontier to the predecessor queue with a edge value of default to
+                // avoid this - but of course predecessors is public (and a null edge value in it more ordinarily
+                // indicates the source node) so this isn't great. Could have another hashtable field to keep track
+                // of this.. Then again, if the frontier is small enough, this might actually be quicker
+                // (not that it will be in a BFS - hmm, maybe I should just add another field..).
+                if (!predecessors.ContainsKey(edge.To) && !frontier.Any(f => f.node.Equals(edge.To)))
                 {
-                    // BUG/TODO: Avoid null predecessor value here, now that predecessors is exposed publicly.
-                    this.predecessors[edge.To] = default;
-                    edgeQueue.Enqueue(new KeyValuePair<TNode, TEdge>(edge.To, edge));
+                    frontier.Enqueue((edge.To, edge));
                 }
             }
 
-            // Check if we've run out of edges to continue to the search with
-            if (edgeQueue.Count == 0)
+            if (frontier.Count == 0)
             {
-                this.IsConcluded = true;
+                IsConcluded = true;
             }
         }
     }

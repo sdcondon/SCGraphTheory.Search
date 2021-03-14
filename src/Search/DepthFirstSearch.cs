@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SCGraphTheory.Search
 {
@@ -12,49 +13,24 @@ namespace SCGraphTheory.Search
         where TNode : INode<TNode, TEdge>
         where TEdge : IEdge<TNode, TEdge>
     {
-        private readonly IEnumerator<TNode> sourceEnumerator;
         private readonly Predicate<TNode> isTarget;
-        private readonly Stack<KeyValuePair<TNode, TEdge>> stack;
-        private readonly Dictionary<TNode, TEdge> predecessors;
+
+        private readonly Dictionary<TNode, TEdge> predecessors = new Dictionary<TNode, TEdge>();
+        private readonly Stack<(TNode node, TEdge edge)> frontier = new Stack<(TNode, TEdge)>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DepthFirstSearch{TNode, TEdge}"/> class that ensures a whole (even disconnected) graph is searched.
-        /// </summary>
-        /// <param name="graph">The graph to search.</param>
-        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
-        public DepthFirstSearch(IGraph<TNode, TEdge> graph, Predicate<TNode> isTarget)
-        {
-            this.sourceEnumerator = graph.Nodes.GetEnumerator();
-            this.isTarget = isTarget;
-            this.stack = new Stack<KeyValuePair<TNode, TEdge>>();
-            this.predecessors = new Dictionary<TNode, TEdge>();
-
-            TryNextSource();
-            if (!IsConcluded)
-            {
-                // Immediately add source node to search tree
-                NextStep();
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DepthFirstSearch{TNode, TEdge}"/> class that uses a specified source node.
+        /// Initializes a new instance of the <see cref="DepthFirstSearch{TNode, TEdge}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from.</param>
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
         public DepthFirstSearch(TNode source, Predicate<TNode> isTarget)
         {
-            this.sourceEnumerator = ((IEnumerable<TNode>)new TNode[] { source }).GetEnumerator();
             this.isTarget = isTarget;
-            this.stack = new Stack<KeyValuePair<TNode, TEdge>>();
-            this.predecessors = new Dictionary<TNode, TEdge>();
 
-            TryNextSource();
-            if (!IsConcluded)
-            {
-                // Immediately add source node to search tree
-                NextStep();
-            }
+            // Initialize the frontier with the source node and immediately discover it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            frontier.Push((source, default));
+            NextStep();
         }
 
         /// <inheritdoc />
@@ -69,65 +45,37 @@ namespace SCGraphTheory.Search
         /// <inheritdoc />
         public void NextStep()
         {
-            if (this.IsConcluded)
+            if (IsConcluded)
             {
                 throw new InvalidOperationException("Search is concluded");
             }
 
-            // Grab the next node and edge leading to it.
-            // Add it to the predecessor tree.
-            var next = stack.Pop();
-            this.predecessors[next.Key] = next.Value;
+            var next = frontier.Pop();
+            predecessors[next.node] = next.edge;
 
-            // If the target has been found the search can return success
-            if (isTarget(next.Key))
+            if (isTarget(next.node))
             {
-                this.Target = next.Key;
-                this.IsConcluded = true;
+                Target = next.node;
+                IsConcluded = true;
                 return;
             }
 
-            // Push the adjacent nodes (and the edges that lead to them) onto
-            // the stack (omitting those already visited).
-            foreach (var edge in next.Key.Edges)
+            foreach (var edge in next.node.Edges)
             {
-                if (!this.predecessors.ContainsKey(edge.To))
+                // NB: Iterating the frontier each time to check for duplicates could be slow. Originally we
+                // added nodes on the frontier to the predecessor queue with a edge value of default to
+                // avoid this - but of course predecessors is public (and a null edge value in it more ordinarily
+                // indicates the source node) so this isn't great. Could have another hashtable field to keep track
+                // of this.. Then again, if the frontier is small enough, this might actually be quicker.
+                if (!predecessors.ContainsKey(edge.To) && !frontier.Any(f => f.node.Equals(edge.To)))
                 {
-                    // TODO: Explain adding null predecessor value here
-                    this.predecessors[edge.To] = default;
-                    this.stack.Push(new KeyValuePair<TNode, TEdge>(edge.To, edge));
+                    frontier.Push((edge.To, edge));
                 }
             }
 
-            // Check if we've run out of nodes to continue the search with
-            if (this.stack.Count == 0)
+            if (frontier.Count == 0)
             {
-                TryNextSource();
-            }
-        }
-
-        /// <summary>
-        /// Pushes the next source node that has not already been visited onto the stack,
-        /// or marks the search as concluded if there are none.
-        /// </summary>
-        private void TryNextSource()
-        {
-            while (this.sourceEnumerator.MoveNext())
-            {
-                if (!this.predecessors.ContainsKey(sourceEnumerator.Current))
-                {
-                    // Add the source node to the stack with a null edge.
-                    // Strictly speaking we only NEED to keep track of the nodes - but keeping track of the
-                    // edges that lead us there means we can maintain a full predecessor tree as defined by
-                    // the ISearch interface, which in turn makes things nice and easy to render.
-                    this.stack.Push(new KeyValuePair<TNode, TEdge>(this.sourceEnumerator.Current, default));
-                    break;
-                }
-            }
-
-            if (this.stack.Count == 0)
-            {
-                this.IsConcluded = true;
+                IsConcluded = true;
             }
         }
     }

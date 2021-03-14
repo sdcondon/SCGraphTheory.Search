@@ -15,11 +15,11 @@ namespace SCGraphTheory.Search
     {
         private readonly Predicate<TNode> isTarget;
         private readonly Func<TEdge, float> getEdgeCost;
-        private readonly Dictionary<TNode, TEdge> shortestPathPredecessors = new Dictionary<TNode, TEdge>();
-        private readonly Dictionary<TNode, TEdge> frontierPredecessors = new Dictionary<TNode, TEdge>();
-        private readonly Dictionary<TNode, float> costs = new Dictionary<TNode, float>();
 
-        private readonly KeyedPriorityQueue<float, TNode> nodeQueue;
+        // TODO: Modify priority queue so that it can include the frontier details rather than needing another dictionary (but still allow updating priority by just node).
+        private readonly Dictionary<TNode, TEdge> shortestPathTree = new Dictionary<TNode, TEdge>();
+        private readonly KeyedPriorityQueue<float, TNode> frontierNodeQueue = new KeyedPriorityQueue<float, TNode>((x, y) => y.CompareTo(x));
+        private readonly Dictionary<TNode, (TEdge bestEdge, float bestCost)> frontierDetailsByNode = new Dictionary<TNode, (TEdge, float)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DijkstraSearch{TNode, TEdge}"/> class.
@@ -29,22 +29,13 @@ namespace SCGraphTheory.Search
         /// <param name="getEdgeCost">A function for calculating the cost of an edge.</param>
         public DijkstraSearch(TNode source, Predicate<TNode> isTarget, Func<TEdge, float> getEdgeCost)
         {
-            this.getEdgeCost = getEdgeCost;
             this.isTarget = isTarget;
+            this.getEdgeCost = getEdgeCost;
 
-            this.costs[source] = 0;
-            this.frontierPredecessors[source] = default;
-
-            // Create an indexed priority queue that prioritises by cost, lowest first.
-            // Put the source node on the queue
-            this.nodeQueue = new KeyedPriorityQueue<float, TNode>((x, y) => y.CompareTo(x));
-            this.nodeQueue.Enqueue(0, source);
-
-            if (!IsConcluded)
-            {
-                // Immediately add source node to search tree
-                NextStep();
-            }
+            // Initialize the frontier with the source node and immediately discover it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            UpdateFrontier(source, default, 0);
+            NextStep();
         }
 
         /// <inheritdoc />
@@ -54,70 +45,60 @@ namespace SCGraphTheory.Search
         public TNode Target { get; private set; }
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<TNode, TEdge> Predecessors => shortestPathPredecessors;
+        public IReadOnlyDictionary<TNode, TEdge> Predecessors => shortestPathTree;
+
+        /// <summary>
+        /// Gets the search frontier - the next nodes (and edges leading to them) under consideration in the search.
+        /// </summary>
+        public IReadOnlyDictionary<TNode, (TEdge bestEdge, float bestCost)> Frontier => frontierDetailsByNode;
 
         /// <inheritdoc />
         public void NextStep()
         {
-            // while the queue is not empty
-            if (this.nodeQueue.Count > 0)
+            if (IsConcluded)
             {
-                // get lowest cost node from the queue. This node is the node not already
-                // on the SPT that is the closest to the source node
-                var nextClosestNode = this.nodeQueue.Dequeue();
-
-                // move this edge from the frontier to the shortest path tree
-                this.frontierPredecessors.TryGetValue(nextClosestNode, out var predecessor);
-                this.shortestPathPredecessors[nextClosestNode] = predecessor;
-
-                // if the target has been found exit
-                if (this.isTarget(nextClosestNode))
-                {
-                    this.Target = nextClosestNode;
-                    this.IsConcluded = true;
-                    return;
-                }
-
-                // for each edge connected to the next closest node
-                foreach (var edge in nextClosestNode.Edges)
-                {
-                    // the total cost to the node this edge points to is the cost to the
-                    // current node plus the cost of the edge connecting them.
-                    var newCost = this.costs[nextClosestNode] + this.getEdgeCost(edge);
-
-                    // If this edge has never been on the frontier make a note of the cost
-                    // to get to the node it points to, then add the edge to the frontier
-                    // and the destination node to the PQ.
-                    // Else, test to see if the cost to reach the destination node via the
-                    // current node is cheaper than the cheapest cost found so far. If
-                    // this path is cheaper, we assign the new cost to the destination
-                    // node, update its entry in the PQ to reflect the change and add the
-                    // edge to the frontier.
-                    if (!this.frontierPredecessors.ContainsKey(edge.To))
-                    {
-                        this.costs[edge.To] = newCost;
-                        this.frontierPredecessors[edge.To] = edge;
-                        this.nodeQueue.Enqueue(newCost, edge.To);
-                    }
-                    else if (newCost < this.costs[edge.To] && !this.shortestPathPredecessors.ContainsKey(edge.To))
-                    {
-                        this.costs[edge.To] = newCost;
-                        this.frontierPredecessors[edge.To] = edge;
-                        this.nodeQueue.IncreasePriority(edge.To, newCost);
-                    }
-                }
+                throw new InvalidOperationException("Search is concluded");
             }
-            else
+
+            var nextClosestNode = frontierNodeQueue.Dequeue();
+            float costToNode;
+            (shortestPathTree[nextClosestNode], costToNode) = frontierDetailsByNode[nextClosestNode];
+            frontierDetailsByNode.Remove(nextClosestNode);
+
+            if (isTarget(nextClosestNode))
             {
-                this.IsConcluded = true;
+                Target = nextClosestNode;
+                IsConcluded = true;
+                return;
+            }
+
+            foreach (var edge in nextClosestNode.Edges)
+            {
+                UpdateFrontier(edge.To, edge, costToNode + getEdgeCost(edge));
+            }
+
+            if (frontierNodeQueue.Count == 0)
+            {
+                IsConcluded = true;
             }
         }
 
-        /// <summary>
-        /// Gets the cost to a particular node (as long as it was visited by the search).
-        /// </summary>
-        /// <param name="node">The node to get the cost to.</param>
-        /// <returns>The cost to the node.</returns>
-        public float GetCostTo(TNode node) => this.costs[node];
+        private void UpdateFrontier(TNode node, TEdge edge, float totalCostToNodeViaEdge)
+        {
+            var isAlreadyOnFrontier = frontierDetailsByNode.TryGetValue(node, out var frontierDetails);
+            if (!isAlreadyOnFrontier && !shortestPathTree.ContainsKey(node))
+            {
+                // Node has not been added to the frontier - add it
+                frontierNodeQueue.Enqueue(totalCostToNodeViaEdge, node);
+                frontierDetailsByNode[node] = (edge, totalCostToNodeViaEdge);
+            }
+            else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCost)
+            {
+                // Node is already on the frontier, but the cost via this edge
+                // is cheaper than has been found previously - update the frontier
+                frontierNodeQueue.IncreasePriority(node, totalCostToNodeViaEdge);
+                frontierDetailsByNode[node] = (edge, totalCostToNodeViaEdge);
+            }
+        }
     }
 }
