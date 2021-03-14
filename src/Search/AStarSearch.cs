@@ -17,9 +17,10 @@ namespace SCGraphTheory.Search
         private readonly Func<TEdge, float> getEdgeCost;
         private readonly Func<TNode, float> getEstimatedCostToTarget;
 
-        // TODO: Modify priority queue so that it can include the frontier details rather than needing another dictionary (but still allow updating priority by just node).
+        // TODO: Modify priority queue so that it can include the frontier details rather than needing another dictionary
+        // (but still allow for keying by just node for checking existence and updating priority by just node).
         private readonly Dictionary<TNode, TEdge> shortestPathTree = new Dictionary<TNode, TEdge>();
-        private readonly KeyedPriorityQueue<float, TNode> frontierNodeQueue = new KeyedPriorityQueue<float, TNode>((x, y) => y.CompareTo(x));
+        private readonly KeyedPriorityQueue<TNode, float> frontierNodeQueue = new KeyedPriorityQueue<TNode, float>((x, y) => y.CompareTo(x));
         private readonly Dictionary<TNode, (TEdge bestEdge, float bestCost)> frontierDetailsByNode = new Dictionary<TNode, (TEdge, float)>();
 
         /// <summary>
@@ -97,7 +98,7 @@ namespace SCGraphTheory.Search
             if (!isAlreadyOnFrontier && !shortestPathTree.ContainsKey(node))
             {
                 // Node has not been added to the frontier - add it, including the total cost to it
-                frontierNodeQueue.Enqueue(estimatedTotalCostViaNode, node);
+                frontierNodeQueue.Enqueue(node, estimatedTotalCostViaNode);
                 frontierDetailsByNode[node] = (edge, totalCostToNodeViaEdge);
             }
             else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCost)

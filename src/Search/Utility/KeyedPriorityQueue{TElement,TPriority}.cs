@@ -6,39 +6,39 @@ namespace SCGraphTheory.Search.Utility
     /// <summary>
     /// Max priority queue implementation that uses a binary heap. Supports priority increases.
     /// </summary>
-    /// <typeparam name="TKey">The type of the key used to determine object priority.</typeparam>
-    /// <typeparam name="TValue">The type of objects to be stored.</typeparam>
-    internal sealed class KeyedPriorityQueue<TKey, TValue>
+    /// <typeparam name="TElement">The type of objects to be stored.</typeparam>
+    /// <typeparam name="TPriority">The type used to determine object priority.</typeparam>
+    internal sealed class KeyedPriorityQueue<TElement, TPriority>
     {
-        private readonly IComparer<TKey> comparer;
-        private readonly IDictionary<TValue, int> lookup;
-        private (TKey, TValue)[] heap = new (TKey, TValue)[16];
+        private readonly IComparer<TPriority> comparer;
+        private readonly IDictionary<TElement, int> lookup;
+        private (TElement element, TPriority priority)[] heap = new (TElement, TPriority)[16];
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TKey,TValue}"/> class that uses the default comparer for TKey.
+        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class that uses the default comparer for TPriority.
         /// </summary>
         public KeyedPriorityQueue()
-            : this(Comparer<TKey>.Default)
+            : this(Comparer<TPriority>.Default)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TKey,TValue}"/> class that uses the specified comparison method.
+        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class that uses the specified comparison method.
         /// </summary>
         /// <param name="comparison">The delegate to use to compare items in the queue.</param>
-        public KeyedPriorityQueue(Comparison<TKey> comparison)
-            : this(Comparer<TKey>.Create(comparison ?? throw new ArgumentNullException(nameof(comparison))))
+        public KeyedPriorityQueue(Comparison<TPriority> comparison)
+            : this(Comparer<TPriority>.Create(comparison ?? throw new ArgumentNullException(nameof(comparison))))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TKey,TValue}"/> class that uses the specified comparer.
+        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class that uses the specified comparer.
         /// </summary>
         /// <param name="comparer">The comparer to use to compare items in the queue.</param>
-        public KeyedPriorityQueue(IComparer<TKey> comparer)
+        public KeyedPriorityQueue(IComparer<TPriority> comparer)
         {
             this.comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
-            this.lookup = new Dictionary<TValue, int>();
+            this.lookup = new Dictionary<TElement, int>();
         }
 
         /// <summary>
@@ -49,17 +49,17 @@ namespace SCGraphTheory.Search.Utility
         /// <summary>
         /// Enqueues an item.
         /// </summary>
-        /// <param name="key">The key for the item.</param>
-        /// <param name="value">The item to enqueue.</param>
-        public void Enqueue(TKey key, TValue value)
+        /// <param name="element">The item to enqueue.</param>
+        /// <param name="priority">The priority of the item.</param>
+        public void Enqueue(TElement element, TPriority priority)
         {
             if (Count >= heap.Length)
             {
                 Array.Resize(ref heap, Math.Max(heap.Length * 2, 1));
             }
 
-            heap[Count] = (key, value);
-            lookup[value] = Count;
+            heap[Count] = (element, priority);
+            lookup[element] = Count;
             Count++;
             BubbleUp(Count - 1);
         }
@@ -68,14 +68,14 @@ namespace SCGraphTheory.Search.Utility
         /// Retrieves the highest-priority item from the queue.
         /// </summary>
         /// <returns>The dequeued item.</returns>
-        public TValue Dequeue()
+        public TElement Dequeue()
         {
             if (Count == 0)
             {
                 throw new InvalidOperationException("Queue is empty");
             }
 
-            (_, TValue value) = heap[0];
+            (TElement value, _) = heap[0];
 
             Count--;
             Swap(Count, 0);
@@ -90,33 +90,33 @@ namespace SCGraphTheory.Search.Utility
         /// Retrieves the highest-priority item from the queue, without actually removing it from the queue.
         /// </summary>
         /// <returns>The next item in the queue.</returns>
-        public TValue Peek()
+        public TElement Peek()
         {
             if (Count == 0)
             {
                 throw new InvalidOperationException("Queue is empty");
             }
 
-            return heap[0].Item2;
+            return heap[0].element;
         }
 
         /// <summary>
         /// Increase the priority of an item in the queue.
         /// </summary>
         /// <param name="item">The item to increase the priority of.</param>
-        /// <param name="newKey">The item's new key. Must result in an increase in priority.</param>
-        public void IncreasePriority(TValue item, TKey newKey)
+        /// <param name="newPriority">The item's new priority. Must result in an increase in priority.</param>
+        public void IncreasePriority(TElement item, TPriority newPriority)
         {
             var i = lookup[item];
 
             // Not foolproof, sometimes won't fire for priority reduction,
-            // but better than checking against old key (which could have changed in place).
-            if ((LChild(i) < Count && this.comparer.Compare(newKey, heap[LChild(i)].Item1) < 0) || (RChild(i) < Count && this.comparer.Compare(newKey, heap[RChild(i)].Item1) < 0))
+            // but better than checking against old priority (which could have changed in place).
+            if ((LChild(i) < Count && this.comparer.Compare(newPriority, heap[LChild(i)].priority) < 0) || (RChild(i) < Count && this.comparer.Compare(newPriority, heap[RChild(i)].priority) < 0))
             {
-                throw new ArgumentException("Priority reduction not supported", nameof(newKey));
+                throw new ArgumentException("Priority reduction not supported", nameof(newPriority));
             }
 
-            heap[i].Item1 = newKey;
+            heap[i].priority = newPriority;
             BubbleUp(i);
         }
 
@@ -158,7 +158,7 @@ namespace SCGraphTheory.Search.Utility
             return highIndex < Count && !Dominates(lowIndex, highIndex) ? highIndex : lowIndex;
         }
 
-        private bool Dominates(int i, int j) => this.comparer.Compare(heap[i].Item1, heap[j].Item1) >= 0;
+        private bool Dominates(int i, int j) => this.comparer.Compare(heap[i].priority, heap[j].priority) >= 0;
 
         private void Swap(int i, int j)
         {
@@ -167,8 +167,8 @@ namespace SCGraphTheory.Search.Utility
             heap[j] = temp;
 
             // don't forget to update the lookup
-            this.lookup[heap[i].Item2] = i;
-            this.lookup[heap[j].Item2] = j;
+            this.lookup[heap[i].element] = i;
+            this.lookup[heap[j].element] = j;
         }
     }
 }
