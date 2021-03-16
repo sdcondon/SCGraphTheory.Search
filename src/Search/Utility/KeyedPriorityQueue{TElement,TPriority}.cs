@@ -8,37 +8,22 @@ namespace SCGraphTheory.Search.Utility
     /// </summary>
     /// <typeparam name="TElement">The type of objects to be stored.</typeparam>
     /// <typeparam name="TPriority">The type used to determine object priority.</typeparam>
+    /// seealso https://github.com/eiriktsarpalis/pq-tests/blob/master/PriorityQueue/PrioritySet.cs
     internal sealed class KeyedPriorityQueue<TElement, TPriority>
     {
-        private readonly IComparer<TPriority> comparer;
-        private readonly IDictionary<TElement, int> lookup;
+        private readonly IDictionary<TElement, int> indicesByElement;
+        private readonly IComparer<TPriority> priorityComparer;
+
         private (TElement element, TPriority priority)[] heap = new (TElement, TPriority)[16];
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class that uses the default comparer for TPriority.
+        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class.
         /// </summary>
-        public KeyedPriorityQueue()
-            : this(Comparer<TPriority>.Default)
+        /// <param name="priorityComparer">The comparer to use to compare priorities.</param>
+        public KeyedPriorityQueue(IComparer<TPriority> priorityComparer)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class that uses the specified comparison method.
-        /// </summary>
-        /// <param name="comparison">The delegate to use to compare items in the queue.</param>
-        public KeyedPriorityQueue(Comparison<TPriority> comparison)
-            : this(Comparer<TPriority>.Create(comparison ?? throw new ArgumentNullException(nameof(comparison))))
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KeyedPriorityQueue{TElement, TPriority}"/> class that uses the specified comparer.
-        /// </summary>
-        /// <param name="comparer">The comparer to use to compare items in the queue.</param>
-        public KeyedPriorityQueue(IComparer<TPriority> comparer)
-        {
-            this.comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
-            this.lookup = new Dictionary<TElement, int>();
+            this.indicesByElement = new Dictionary<TElement, int>();
+            this.priorityComparer = priorityComparer ?? throw new ArgumentNullException(nameof(priorityComparer));
         }
 
         /// <summary>
@@ -53,15 +38,17 @@ namespace SCGraphTheory.Search.Utility
         /// <param name="priority">The priority of the item.</param>
         public void Enqueue(TElement element, TPriority priority)
         {
+            if (indicesByElement.ContainsKey(element))
+            {
+                throw new ArgumentException("Element already exists in the queue", nameof(element));
+            }
+
             if (Count >= heap.Length)
             {
                 Array.Resize(ref heap, Math.Max(heap.Length * 2, 1));
             }
 
-            heap[Count] = (element, priority);
-            lookup[element] = Count;
-            Count++;
-            BubbleUp(Count - 1);
+            BubbleUp(Count++, (element, priority));
         }
 
         /// <summary>
@@ -70,20 +57,31 @@ namespace SCGraphTheory.Search.Utility
         /// <returns>The dequeued item.</returns>
         public TElement Dequeue()
         {
+            return Dequeue(out _);
+        }
+
+
+        /// <summary>
+        /// Retrieves the highest-priority item from the queue.
+        /// </summary>
+        /// <param name="priority">The priority of the dequeued item.</param>
+        /// <returns>The dequeued item.</returns>
+        public TElement Dequeue(out TPriority priority)
+        {
             if (Count == 0)
             {
                 throw new InvalidOperationException("Queue is empty");
             }
 
-            (TElement value, _) = heap[0];
+            var entry = heap[0];
 
-            Count--;
-            Swap(Count, 0);
+            BubbleDown(0, heap[--Count]);
+
             heap[Count] = default; // To avoid memory leak for reference types
-            lookup.Remove(value); // also to avoid memory leak
-            BubbleDown(0);
+            indicesByElement.Remove(entry.element);
 
-            return value;
+            priority = entry.priority;
+            return entry.element;
         }
 
         /// <summary>
@@ -92,11 +90,22 @@ namespace SCGraphTheory.Search.Utility
         /// <returns>The next item in the queue.</returns>
         public TElement Peek()
         {
+            return Peek(out _);
+        }
+
+        /// <summary>
+        /// Retrieves the highest-priority item from the queue, without actually removing it from the queue.
+        /// </summary>
+        /// <param name="priority">The priority of the next item in the queue.</param>
+        /// <returns>The next item in the queue.</returns>
+        public TElement Peek(out TPriority priority)
+        {
             if (Count == 0)
             {
                 throw new InvalidOperationException("Queue is empty");
             }
 
+            priority = heap[0].priority;
             return heap[0].element;
         }
 
@@ -107,68 +116,86 @@ namespace SCGraphTheory.Search.Utility
         /// <param name="newPriority">The item's new priority. Must result in an increase in priority.</param>
         public void IncreasePriority(TElement item, TPriority newPriority)
         {
-            var i = lookup[item];
+            var i = indicesByElement[item];
+            ref var entry = ref heap[i];
 
-            // Not foolproof, sometimes won't fire for priority reduction,
-            // but better than checking against old priority (which could have changed in place).
-            if ((LChild(i) < Count && this.comparer.Compare(newPriority, heap[LChild(i)].priority) < 0) || (RChild(i) < Count && this.comparer.Compare(newPriority, heap[RChild(i)].priority) < 0))
+            if (priorityComparer.Compare(newPriority, entry.priority) < 0)
             {
                 throw new ArgumentException("Priority reduction not supported", nameof(newPriority));
             }
 
-            heap[i].priority = newPriority;
-            BubbleUp(i);
+            BubbleUp(i, (entry.element, newPriority));
         }
 
-        private static int Parent(int i) => (i + 1) / 2 - 1;
-
-        private static int LChild(int i) => (i + 1) * 2 - 1;
-
-        private static int RChild(int i) => LChild(i) + 1;
-
-        private void BubbleUp(int i)
+        /// <summary>
+        /// Gets the priority associated with a given element, if it is present.
+        /// </summary>
+        /// <param name="element">The element whose priority to retrieve.</param>
+        /// <param name="priority">
+        /// When this method returns, the priority associated with the specified element, if the
+        /// element is found; otherwise, the default value for the type of the value parameter.
+        /// </param>
+        /// <returns>
+        /// true if the queue contains an element with the specified key; otherwise, false.
+        /// </returns>
+        public bool TryGetPriority(TElement element, out TPriority priority)
         {
-            while (i > 0 && !Dominates(Parent(i), i))
+            if (indicesByElement.TryGetValue(element, out var index))
             {
-                Swap(i, Parent(i));
-                i = Parent(i);
+                priority = heap[index].priority;
+                return true;
+            }
+            else
+            {
+                priority = default;
+                return false;
             }
         }
 
-        private void BubbleDown(int i)
+        private void BubbleUp(int index, (TElement element, TPriority priority) entry)
         {
-            int dominating;
-            while ((dominating = GetDominating(i)) != i)
+            while (index > 0)
             {
-                Swap(i, dominating);
-                i = dominating;
+                var parentIndex = (index - 1) / 2;
+                ref var parent = ref heap[parentIndex];
+
+                if (priorityComparer.Compare(parent.priority, entry.priority) >= 0)
+                {
+                    break;
+                }
+
+                heap[index] = parent;
+                indicesByElement[parent.element] = index;
+
+                index = parentIndex;
             }
+
+            heap[index] = entry;
+            indicesByElement[entry.element] = index;
         }
 
-        private int GetDominating(int parentIndex)
+        private void BubbleDown(int i, (TElement element, TPriority priority) entry)
         {
-            var dominating = parentIndex;
-            dominating = GetDominating(dominating, LChild(parentIndex));
-            dominating = GetDominating(dominating, RChild(parentIndex));
-            return dominating;
-        }
+            while (i != -1)
+            {
+                var dominatingIndex = -1;
+                var dominating = entry;
 
-        private int GetDominating(int lowIndex, int highIndex)
-        {
-            return highIndex < Count && !Dominates(lowIndex, highIndex) ? highIndex : lowIndex;
-        }
+                for (int childIndex = 2 * i + 1; childIndex - 2 * i <= 2 && childIndex < Count; childIndex++)
+                {
+                    ref var child = ref heap[childIndex];
+                    if (priorityComparer.Compare(child.priority, dominating.priority) > 0)
+                    {
+                        dominatingIndex = childIndex;
+                        dominating = child;
+                    }
+                }
 
-        private bool Dominates(int i, int j) => this.comparer.Compare(heap[i].priority, heap[j].priority) >= 0;
+                heap[i] = dominating;
+                indicesByElement[dominating.element] = i;
 
-        private void Swap(int i, int j)
-        {
-            var temp = heap[i];
-            heap[i] = heap[j];
-            heap[j] = temp;
-
-            // don't forget to update the lookup
-            this.lookup[heap[i].element] = i;
-            this.lookup[heap[j].element] = j;
+                i = dominatingIndex;
+            }
         }
     }
 }
