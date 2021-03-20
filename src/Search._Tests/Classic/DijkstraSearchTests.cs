@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SCGraphTheory.Search.Classic;
 using System;
 using System.Collections.Generic;
 using System.Linq;

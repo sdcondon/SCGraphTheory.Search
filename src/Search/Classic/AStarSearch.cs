@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search
+namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
     /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the A* algorithm.
@@ -17,7 +17,7 @@ namespace SCGraphTheory.Search
         private readonly Func<TEdge, float> getEdgeCost;
         private readonly Func<TNode, float> getEstimatedCostToTarget;
 
-        private readonly Dictionary<TNode, TEdge> shortestPathTree = new Dictionary<TNode, TEdge>();
+        private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
         private readonly KeyedPriorityQueue<TNode, (TEdge bestEdge, float bestCostToNode, float estimatedBestCostViaNode)> frontier = new KeyedPriorityQueue<TNode, (TEdge, float, float)>(new FrontierPriorityComparer());
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace SCGraphTheory.Search
         public TNode Target { get; private set; } = default;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<TNode, TEdge> Predecessors => shortestPathTree;
+        public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited => visited;
 
         /// <inheritdoc />
         public void NextStep()
@@ -61,7 +61,7 @@ namespace SCGraphTheory.Search
             }
 
             var node = frontier.Dequeue(out var frontierInfo);
-            shortestPathTree[node] = frontierInfo.bestEdge;
+            visited[node] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdge, false);
 
             if (isTarget(node))
             {
@@ -85,16 +85,18 @@ namespace SCGraphTheory.Search
         {
             var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
             var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
-            if (!isAlreadyOnFrontier && !shortestPathTree.ContainsKey(node))
+            if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
             {
                 // Node has not been added to the frontier - add it
                 frontier.Enqueue(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
             }
             else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCostToNode)
             {
                 // Node is already on the frontier, but the cost via this edge
-                // is cheaper than has been found previously - update the frontier and costs map
+                // is cheaper than has been found previously - increase its priority
                 frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
             }
         }
 

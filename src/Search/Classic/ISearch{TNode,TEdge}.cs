@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SCGraphTheory.Search
+namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
     /// Interface for algorithms that search a graph for a target node.
@@ -22,9 +22,9 @@ namespace SCGraphTheory.Search
         TNode Target { get; }
 
         /// <summary>
-        /// Gets the search tree (or forest). Each visited node is present as a key. The associated value is the edge used to discover it, or null for source nodes.
+        /// Gets the search tree (or forest). Each visited node is present as a key. The associated value is the edge used to discover it (or null for source nodes).
         /// </summary>
-        IReadOnlyDictionary<TNode, TEdge> Predecessors { get; }
+        IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
         /// <summary>
         /// Executes the next step of the search.

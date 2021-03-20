@@ -8,7 +8,6 @@ namespace SCGraphTheory.Search.Utility
     /// </summary>
     /// <typeparam name="TElement">The type of objects to be stored.</typeparam>
     /// <typeparam name="TPriority">The type used to determine object priority.</typeparam>
-    /// seealso https://github.com/eiriktsarpalis/pq-tests/blob/master/PriorityQueue/PrioritySet.cs
     internal sealed class KeyedPriorityQueue<TElement, TPriority>
     {
         private readonly IDictionary<TElement, int> indicesByElement;
@@ -59,7 +58,6 @@ namespace SCGraphTheory.Search.Utility
         {
             return Dequeue(out _);
         }
-
 
         /// <summary>
         /// Retrieves the highest-priority item from the queue.

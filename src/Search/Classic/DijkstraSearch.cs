@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search
+namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
     /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses Dijkstra's algorithm.
@@ -16,7 +16,7 @@ namespace SCGraphTheory.Search
         private readonly Predicate<TNode> isTarget;
         private readonly Func<TEdge, float> getEdgeCost;
 
-        private readonly Dictionary<TNode, TEdge> shortestPathTree = new Dictionary<TNode, TEdge>();
+        private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
         private readonly KeyedPriorityQueue<TNode, (TEdge bestEdge, float bestCost)> frontier = new KeyedPriorityQueue<TNode, (TEdge, float)>(new FrontierPriorityComparer());
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace SCGraphTheory.Search
         public TNode Target { get; private set; }
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<TNode, TEdge> Predecessors => shortestPathTree;
+        public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited => visited;
 
         /// <inheritdoc />
         public void NextStep()
@@ -54,7 +54,7 @@ namespace SCGraphTheory.Search
             }
 
             var nextClosestNode = frontier.Dequeue(out var frontierInfo);
-            shortestPathTree[nextClosestNode] = frontierInfo.bestEdge;
+            visited[nextClosestNode] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdge, false);
 
             if (isTarget(nextClosestNode))
             {
@@ -77,16 +77,18 @@ namespace SCGraphTheory.Search
         private void UpdateFrontier(TNode node, TEdge edge, float totalCostToNodeViaEdge)
         {
             var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
-            if (!isAlreadyOnFrontier && !shortestPathTree.ContainsKey(node))
+            if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
             {
                 // Node has not been added to the frontier - add it
                 frontier.Enqueue(node, (edge, totalCostToNodeViaEdge));
+                visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
             }
             else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCost)
             {
                 // Node is already on the frontier, but the cost via this edge
                 // is cheaper than has been found previously - update the frontier
                 frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge));
+                visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
             }
         }
 

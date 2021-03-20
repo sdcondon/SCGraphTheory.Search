@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SCGraphTheory.Search.Classic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Linq;
 namespace SCGraphTheory.Search
 {
     [TestClass]
-    public class AStarSearchTests
+    public class DepthFirstSearchTests
     {
         public static IEnumerable<object[]> BasicTestCases => new object[][]
         {
@@ -14,26 +15,29 @@ namespace SCGraphTheory.Search
             // step traverses an edge, or the search is immediately complete. This is (admittedly somewhat subjectively)
             // more intuitive behaviour than the first step just adding the source node to the search tree.
             MakeBasicTestCase(
-                graph: new Graph((1, 2, 1)),
+                graph: new Graph((1, 2)),
                 sourceId: 1,
                 targetId: 1,
                 expectedSteps: Array.Empty<(int, int)>()),
             MakeBasicTestCase(
-                graph: new Graph((1, 2, 1), (1, 9, 1), (2, 10, 1), (9, 10, 10)),
+                graph: new Graph((1, 2), (2, 3), (1, 4), (4, 5)),
                 sourceId: 1,
-                targetId: 10,
-                expectedSteps: new[] { (1, 9), (1, 2), (2, 10) }),
+                targetId: 5,
+                expectedSteps: new[] { (1, 4), (4, 5) }),
+            MakeBasicTestCase(
+                graph: new Graph((1, 2), (2, 3), (1, 4), (4, 5)),
+                sourceId: 1,
+                targetId: -1,
+                expectedSteps: new[] { (1, 4), (4, 5), (1, 2), (2, 3) }),
         };
 
         [DataTestMethod]
         [DynamicData(nameof(BasicTestCases), DynamicDataSourceType.Property)]
         public void BasicTests(Graph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
         {
-            var search = new AStarSearch<Graph.Node, Graph.Edge>(
+            var search = new DepthFirstSearch<Graph.Node, Graph.Edge>(
                 source: graph.Nodes.Single(n => n.Id == sourceId),
-                isTarget: n => n.Id == targetId,
-                getEdgeCost: e => e.Cost,
-                getEstimatedCostToTarget: n => targetId - n.Id);
+                isTarget: n => n.Id == targetId);
 
             SearchAssert.ProgressesAsExpected(graph, search, targetId, expectedSteps);
         }

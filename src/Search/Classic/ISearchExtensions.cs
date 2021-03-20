@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search
+namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
     /// Extension methods for the <see cref="ISearch{TNode, TEdge}"/> interface.
@@ -42,9 +42,9 @@ namespace SCGraphTheory.Search
 
             var path = new List<TEdge>();
 
-            for (var node = search.Target; search.Predecessors[node] != null; node = search.Predecessors[node].From)
+            for (var node = search.Target; !search.Visited[node].Edge.Equals(default(TEdge)); node = search.Visited[node].Edge.From)
             {
-                path.Add(search.Predecessors[node]);
+                path.Add(search.Visited[node].Edge);
             }
 
             path.Reverse(); // PERFORMANCE: probably better to use a linked list and continuously add to the front of it
@@ -62,7 +62,7 @@ namespace SCGraphTheory.Search
             where TNode : INode<TNode, TEdge>
             where TEdge : IEdge<TNode, TEdge>
         {
-            return search.Predecessors.Values.Where(a => a != null);
+            return search.Visited.Values.Where(a => !a.Edge.Equals(default(TEdge))).Select(ke => ke.Edge);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SCGraphTheory.Search.Classic;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,7 +21,7 @@ namespace SCGraphTheory.Search
                 search.NextStep();
                 CollectionAssert.AreEquivalent(
                     expectedSearchTree.Select(kvp => (kvp.Value, kvp.Key)).ToArray(),
-                    search.Predecessors.Where(kvp => kvp.Value != null).Select(kvp => (kvp.Value.From.Id, kvp.Key.Id)).ToArray());
+                    search.Visited.Values.Where(ke => !ke.IsOnFrontier && ke.Edge != null).Select(ke => (ke.Edge.From.Id, ke.Edge.To.Id)).ToArray());
             }
 
             Assert.IsTrue(search.IsConcluded);
