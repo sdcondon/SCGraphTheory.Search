@@ -42,7 +42,7 @@ namespace SCGraphTheory.Search.Classic
 
             var path = new List<TEdge>();
 
-            for (var node = search.Target; !search.Visited[node].Edge.Equals(default(TEdge)); node = search.Visited[node].Edge.From)
+            for (var node = search.Target; !object.Equals(search.Visited[node].Edge, default(TEdge)); node = search.Visited[node].Edge.From)
             {
                 path.Add(search.Visited[node].Edge);
             }
@@ -62,7 +62,7 @@ namespace SCGraphTheory.Search.Classic
             where TNode : INode<TNode, TEdge>
             where TEdge : IEdge<TNode, TEdge>
         {
-            return search.Visited.Values.Where(a => !a.Edge.Equals(default(TEdge))).Select(ke => ke.Edge);
+            return search.Visited.Values.Where(a => !object.Equals(a.Edge, default(TEdge))).Select(ke => ke.Edge);
         }
     }
 }
