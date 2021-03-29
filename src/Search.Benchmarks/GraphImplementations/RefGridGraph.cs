@@ -1,8 +1,8 @@
 ﻿using SCGraphTheory.AdjacencyList;
 
-namespace Search.Benchmarks.GraphImplementations
+namespace SCGraphTheory.Search.Benchmarks.GraphImplementations
 {
-    public class RefSquareGridGraph
+    public class RefGridGraph
     {
         public static Graph<Node, Edge> Create((int X, int Y) size, out Node originNode)
         {

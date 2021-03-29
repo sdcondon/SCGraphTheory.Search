@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SCGraphTheory.Search.Classic;
+using SCGraphTheory.Search.Tests.GraphImplementations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Linq;
 namespace SCGraphTheory.Search
 {
     [TestClass]
-    public class DepthFirstSearchTests
+    public class AStarSearchTests
     {
         public static IEnumerable<object[]> BasicTestCases => new object[][]
         {
@@ -15,34 +16,31 @@ namespace SCGraphTheory.Search
             // step traverses an edge, or the search is immediately complete. This is (admittedly somewhat subjectively)
             // more intuitive behaviour than the first step just adding the source node to the search tree.
             MakeBasicTestCase(
-                graph: new Graph((1, 2)),
+                graph: new LinqGraph((1, 2, 1)),
                 sourceId: 1,
                 targetId: 1,
                 expectedSteps: Array.Empty<(int, int)>()),
             MakeBasicTestCase(
-                graph: new Graph((1, 2), (2, 3), (1, 4), (4, 5)),
+                graph: new LinqGraph((1, 2, 1), (1, 9, 1), (2, 10, 1), (9, 10, 10)),
                 sourceId: 1,
-                targetId: 5,
-                expectedSteps: new[] { (1, 4), (4, 5) }),
-            MakeBasicTestCase(
-                graph: new Graph((1, 2), (2, 3), (1, 4), (4, 5)),
-                sourceId: 1,
-                targetId: -1,
-                expectedSteps: new[] { (1, 4), (4, 5), (1, 2), (2, 3) }),
+                targetId: 10,
+                expectedSteps: new[] { (1, 9), (1, 2), (2, 10) }),
         };
 
         [DataTestMethod]
         [DynamicData(nameof(BasicTestCases), DynamicDataSourceType.Property)]
-        public void BasicTests(Graph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
+        public void BasicTests(LinqGraph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
         {
-            var search = new DepthFirstSearch<Graph.Node, Graph.Edge>(
+            var search = new AStarSearch<LinqGraph.Node, LinqGraph.Edge>(
                 source: graph.Nodes.Single(n => n.Id == sourceId),
-                isTarget: n => n.Id == targetId);
+                isTarget: n => n.Id == targetId,
+                getEdgeCost: e => e.Cost,
+                getEstimatedCostToTarget: n => targetId - n.Id);
 
             SearchAssert.ProgressesAsExpected(graph, search, targetId, expectedSteps);
         }
 
-        private static object[] MakeBasicTestCase(Graph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
+        private static object[] MakeBasicTestCase(LinqGraph graph, int sourceId, int targetId, (int from, int to)[] expectedSteps)
         {
             return new object[] { graph, sourceId, targetId, expectedSteps };
         }

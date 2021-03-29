@@ -1,68 +1,68 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using SCGraphTheory.AdjacencyList;
+using SCGraphTheory.Search.Benchmarks.GraphImplementations;
 using SCGraphTheory.Search.Classic;
-using Search.Benchmarks.GraphImplementations;
 using System;
 
-namespace Search.Benchmarks
+namespace SCGraphTheory.Search.Benchmarks
 {
     [MemoryDiagnoser]
     public class SearchBenchmarks
     {
         private const int SIZE = 20;
 
-        private readonly ValSquareGridGraph<bool> valGraph;
-        private readonly Graph<RefSquareGridGraph.Node, RefSquareGridGraph.Edge> refGraph;
-        private readonly RefSquareGridGraph.Node originNode;
+        private readonly ValGridGraph<bool> valGraph;
+        private readonly Graph<RefGridGraph.Node, RefGridGraph.Edge> refGraph;
+        private readonly RefGridGraph.Node originNode;
 
         public SearchBenchmarks()
         {
-            valGraph = new ValSquareGridGraph<bool>((SIZE, SIZE));
-            refGraph = RefSquareGridGraph.Create((SIZE, SIZE), out originNode);
+            valGraph = new ValGridGraph<bool>((SIZE, SIZE));
+            refGraph = RefGridGraph.Create((SIZE, SIZE), out originNode);
         }
 
         [Benchmark]
-        public ValSquareGridGraph<bool> MakeValGraph() => new ValSquareGridGraph<bool>((SIZE, SIZE));
+        public ValGridGraph<bool> MakeValGraph() => new ValGridGraph<bool>((SIZE, SIZE));
 
         [Benchmark]
-        public Graph<RefSquareGridGraph.Node, RefSquareGridGraph.Edge> MakeRefGraph() => RefSquareGridGraph.Create((SIZE, SIZE), out _);
+        public Graph<RefGridGraph.Node, RefGridGraph.Edge> MakeRefGraph() => RefGridGraph.Create((SIZE, SIZE), out _);
 
         [Benchmark]
-        public void ValBFS() => new BreadthFirstSearch<ValSquareGridGraph<bool>.Node, ValSquareGridGraph<bool>.Edge>(
+        public void ValBFS() => new BreadthFirstSearch<ValGridGraph<bool>.Node, ValGridGraph<bool>.Edge>(
             valGraph[0, 0],
             n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
         [Benchmark]
-        public void ValDFS() => new DepthFirstSearch<ValSquareGridGraph<bool>.Node, ValSquareGridGraph<bool>.Edge>(
+        public void ValDFS() => new DepthFirstSearch<ValGridGraph<bool>.Node, ValGridGraph<bool>.Edge>(
             valGraph[0, 0],
             n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
         [Benchmark]
-        public void ValDijkstra() => new DijkstraSearch<ValSquareGridGraph<bool>.Node, ValSquareGridGraph<bool>.Edge>(
+        public void ValDijkstra() => new DijkstraSearch<ValGridGraph<bool>.Node, ValGridGraph<bool>.Edge>(
             valGraph[0, 0],
             n => n.Coordinates == (SIZE - 1, SIZE - 1),
             e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete(); // NB: unfair test - largely constant costs means Dijkstra's pretty much same as BFS with more work..
 
         [Benchmark]
-        public void ValAStar() => new AStarSearch<ValSquareGridGraph<bool>.Node, ValSquareGridGraph<bool>.Edge>(
+        public void ValAStar() => new AStarSearch<ValGridGraph<bool>.Node, ValGridGraph<bool>.Edge>(
             valGraph[0, 0],
             n => n.Coordinates == (SIZE - 1, SIZE - 1),
             e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
             n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
 
         [Benchmark]
-        public void RefBFS() => new BreadthFirstSearch<RefSquareGridGraph.Node, RefSquareGridGraph.Edge>(
+        public void RefBFS() => new BreadthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
             originNode,
             n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
         [Benchmark]
-        public void RefDFS() => new DepthFirstSearch<RefSquareGridGraph.Node, RefSquareGridGraph.Edge>(
+        public void RefDFS() => new DepthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
             originNode,
             n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
         [Benchmark]
-        public void RefDijkstra() => new DijkstraSearch<RefSquareGridGraph.Node, RefSquareGridGraph.Edge>(
+        public void RefDijkstra() => new DijkstraSearch<RefGridGraph.Node, RefGridGraph.Edge>(
             originNode,
             n => n.Coordinates == (SIZE - 1, SIZE - 1),
             e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete(); // NB: unfair test - largely constant costs means Dijkstra's pretty much same as BFS with more work..
@@ -70,7 +70,7 @@ namespace Search.Benchmarks
         [Benchmark]
         public void RefAStar()
         {
-            new AStarSearch<RefSquareGridGraph.Node, RefSquareGridGraph.Edge>(
+            new AStarSearch<RefGridGraph.Node, RefGridGraph.Edge>(
                 originNode,
                 n => n.Coordinates == (SIZE - 1, SIZE - 1),
                 e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
