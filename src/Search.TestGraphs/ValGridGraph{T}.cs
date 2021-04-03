@@ -3,13 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Benchmarks.GraphImplementations
+namespace SCGraphTheory.Search.TestGraphs
 {
     /// <summary>
     /// Graph implementation for a square grid (with associated values), where the nodes, edges and edge collections are all structs.
-    /// Wondered if the lack of heap allocations ahead of time would outweigh the heavier search load (because more data is copied around).
     /// </summary>
     /// <typeparam name="T">The type of the values associated with each node of the graph.</typeparam>
+    /// <remarks>
+    /// Motivation: I wondered if the lack of heap allocations ahead of time would outweigh the heavier search load (because more data needs to be copied around).
+    /// See the Benchmarks project for results..
+    /// </remarks>
     public class ValGridGraph<T> : IGraph<ValGridGraph<T>.Node, ValGridGraph<T>.Edge>
     {
         private readonly T[,] index;
@@ -77,7 +80,7 @@ namespace SCGraphTheory.Search.Benchmarks.GraphImplementations
             /// <summary>
             /// Gets the coordinates of the node.
             /// </summary>
-            public (int X, int Y) Coordinates => edgesPrototype.EnumeratorPrototype.CurrentPrototype.from;
+            public (int X, int Y) Coordinates => edgesPrototype.EnumeratorPrototype.CurrentPrototype.FromCoords;
 
             /// <summary>
             /// Gets or sets the value of the node.
@@ -102,35 +105,38 @@ namespace SCGraphTheory.Search.Benchmarks.GraphImplementations
                 Coordinates);
         }
 
+        /// <summary>
+        /// Edge structure for <see cref="ValGridGraph{T}"/>.
+        /// </summary>
         public struct Edge : IEdge<Node, Edge>
         {
             internal readonly T[,] Index;
-            internal readonly (int X, int Y) from;
+            internal readonly (int X, int Y) FromCoords;
             internal (sbyte X, sbyte Y) Delta;
 
-            public Edge(T[,] index, (int X, int Y) from, (sbyte X, sbyte Y) d)
+            internal Edge(T[,] index, (int X, int Y) fromCoords, (sbyte X, sbyte Y) d)
             {
                 this.Index = index;
-                this.from = from;
+                this.FromCoords = fromCoords;
                 this.Delta = d;
             }
 
             /// <inheritdoc />
-            public Node From => new Node(Index, from);
+            public Node From => new Node(Index, FromCoords);
 
             /// <inheritdoc />
-            public Node To => new Node(Index, (from.X + Delta.X, from.Y + Delta.Y));
+            public Node To => new Node(Index, (FromCoords.X + Delta.X, FromCoords.Y + Delta.Y));
 
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Edge e
                 && Equals(Index, e.Index)
-                && Equals(from, e.from)
+                && Equals(FromCoords, e.FromCoords)
                 && Equals(Delta, e.Delta);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
                 Index,
-                from,
+                FromCoords,
                 Delta);
         }
 
@@ -183,10 +189,10 @@ namespace SCGraphTheory.Search.Benchmarks.GraphImplementations
                     }
                 }
                 while (
-                    CurrentPrototype.from.X + CurrentPrototype.Delta.X < CurrentPrototype.Index.GetLowerBound(0)
-                    || CurrentPrototype.from.X + CurrentPrototype.Delta.X > CurrentPrototype.Index.GetUpperBound(0)
-                    || CurrentPrototype.from.Y + CurrentPrototype.Delta.Y < CurrentPrototype.Index.GetLowerBound(1)
-                    || CurrentPrototype.from.Y + CurrentPrototype.Delta.Y > CurrentPrototype.Index.GetUpperBound(1)
+                    CurrentPrototype.FromCoords.X + CurrentPrototype.Delta.X < CurrentPrototype.Index.GetLowerBound(0)
+                    || CurrentPrototype.FromCoords.X + CurrentPrototype.Delta.X > CurrentPrototype.Index.GetUpperBound(0)
+                    || CurrentPrototype.FromCoords.Y + CurrentPrototype.Delta.Y < CurrentPrototype.Index.GetLowerBound(1)
+                    || CurrentPrototype.FromCoords.Y + CurrentPrototype.Delta.Y > CurrentPrototype.Index.GetUpperBound(1)
                     || CurrentPrototype.Delta == (0, 0));
 
                 return true;

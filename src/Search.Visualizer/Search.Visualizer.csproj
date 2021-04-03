@@ -4,6 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>SCGraphTheory.Search.Visualizer</AssemblyName>
+    <RootNamespace>SCGraphTheory.Search.Visualizer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Search.TestGraphs\Search.TestGraphs.csproj" />
     <ProjectReference Include="..\Search\Search.csproj" />
   </ItemGroup>
 

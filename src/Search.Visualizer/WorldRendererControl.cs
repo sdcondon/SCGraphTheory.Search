@@ -3,19 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using WorldGraph = SCGraphTheory.Search.Visualizer.GraphImplementations.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
+using WorldGraph = SCGraphTheory.Search.TestGraphs.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
 
 namespace SCGraphTheory.Search.Visualizer
 {
     public class WorldRendererControl : Control
     {
-        private World world;
-        private GameRenderer renderer;
+        private readonly GdiWorldRenderer renderer;
 
         public WorldRendererControl(World world, int cellSize)
         {
-            this.world = world;
-            this.renderer = new GameRenderer(world, cellSize);
+            this.renderer = new GdiWorldRenderer(world, cellSize);
 
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
@@ -23,8 +21,12 @@ namespace SCGraphTheory.Search.Visualizer
             this.SetStyle(ControlStyles.ResizeRedraw, true);
         }
 
+        /// <summary>
+        /// Gets or sets the action to be invoked when a tile is clicked on.
+        /// </summary>
         public Action<int, int> ClickHandler { get; set; }
 
+        /// <inheritdoc />
         protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
@@ -36,27 +38,27 @@ namespace SCGraphTheory.Search.Visualizer
             this.Invalidate();
         }
 
+        /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs pe)
         {
             renderer.Render(pe.Graphics, pe.ClipRectangle);
         }
 
-        private class GameRenderer
+        private class GdiWorldRenderer
         {
-            private Dictionary<World.Terrain, Brush> brushes;
+            private readonly Dictionary<World.Terrain, Brush> brushes;
+            private readonly World world;
 
-            private World world;
-
-            public GameRenderer(World world, int cellSize)
+            public GdiWorldRenderer(World world, int cellSize)
             {
                 this.world = world;
                 this.CellSize = cellSize;
 
                 brushes = new Dictionary<World.Terrain, Brush>()
                 {
-                    { World.Terrain.Floor, Brushes.White },
-                    { World.Terrain.Water, Brushes.RoyalBlue },
-                    { World.Terrain.Wall, Brushes.Black },
+                    [World.Terrain.Floor] = Brushes.White,
+                    [World.Terrain.Water] = Brushes.RoyalBlue,
+                    [World.Terrain.Wall] = Brushes.Black,
                 };
             }
 

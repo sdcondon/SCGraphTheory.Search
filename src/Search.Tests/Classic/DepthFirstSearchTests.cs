@@ -1,11 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SCGraphTheory.Search.Classic;
-using SCGraphTheory.Search.Tests.GraphImplementations;
+using SCGraphTheory.Search.TestGraphs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search
+namespace SCGraphTheory.Search.Classic
 {
     [TestClass]
     public class DepthFirstSearchTests

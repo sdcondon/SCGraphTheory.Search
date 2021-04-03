@@ -25,7 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Search.TestGraphs\Search.TestGraphs.csproj" />
     <ProjectReference Include="..\Search\Search.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Local\" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Visualizer.GraphImplementations
+namespace SCGraphTheory.Search.TestGraphs
 {
     /// <summary>
     /// Graph implementation that wraps a <see cref="SCGraphTheory.AdjacencyList.Graph{TNode, TEdge}"/> and represents a square grid of values, using a delegate to determine which adjacencies are navigable.

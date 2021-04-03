@@ -21,19 +21,19 @@ namespace SCGraphTheory.Search.Visualizer
 
             brushButtons = new Dictionary<ToolStripButton, Action<int, int>>
             {
-                { paintStartButton, (x, y) => world.Start = (x, y) },
-                { paintTargetButton, (x, y) => world.Target = (x, y) },
-                { paintFloorButton, (x, y) => world[x, y] = World.Terrain.Floor },
-                { paintWaterButton, (x, y) => world[x, y] = World.Terrain.Water },
-                { paintWallButton, (x, y) => world[x, y] = World.Terrain.Wall },
+                [paintStartButton] = (x, y) => world.Start = (x, y),
+                [paintTargetButton] = (x, y) => world.Target = (x, y),
+                [paintFloorButton] = (x, y) => world[x, y] = World.Terrain.Floor,
+                [paintWaterButton] = (x, y) => world[x, y] = World.Terrain.Water,
+                [paintWallButton] = (x, y) => world[x, y] = World.Terrain.Wall,
             };
 
             algorithmButtons = new Dictionary<ToolStripButton, Action>
             {
-                { useBreadthFirstButton, () => { world.RecreateSearch = world.MakeBreadthFirstSearch; } },
-                { useDepthFirstButton, () => { world.RecreateSearch = world.MakeDepthFirstSearch; } },
-                { useDjikstraButton, () => { world.RecreateSearch = world.MakeDijkstraSearch; } },
-                { useAStarButton, () => { world.RecreateSearch = world.MakeAStarSearch; } },
+                [useBreadthFirstButton] = () => { world.RecreateSearch = world.MakeBreadthFirstSearch; },
+                [useDepthFirstButton] = () => { world.RecreateSearch = world.MakeDepthFirstSearch; },
+                [useDjikstraButton] = () => { world.RecreateSearch = world.MakeDijkstraSearch; },
+                [useAStarButton] = () => { world.RecreateSearch = world.MakeAStarSearch; },
             };
 
             this.gameControl = new WorldRendererControl(world, cellSize);
@@ -48,6 +48,17 @@ namespace SCGraphTheory.Search.Visualizer
             this.gameControl.Parent = this;
 
             this.ResumeLayout(false);
+        }
+
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        public static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
         }
 
         private void BrushButton_Click(object sender, EventArgs e)
@@ -75,11 +86,6 @@ namespace SCGraphTheory.Search.Visualizer
 
                 clickedButton.Checked = true;
             }
-        }
-
-        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
         }
     }
 }

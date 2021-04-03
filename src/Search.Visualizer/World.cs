@@ -1,9 +1,8 @@
 ﻿using SCGraphTheory.Search.Classic;
-using SCGraphTheory.Search.Visualizer.GraphImplementations;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using WorldGraph = SCGraphTheory.Search.Visualizer.GraphImplementations.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
+using WorldGraph = SCGraphTheory.Search.TestGraphs.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
 
 namespace SCGraphTheory.Search.Visualizer
 {
@@ -31,7 +30,7 @@ namespace SCGraphTheory.Search.Visualizer
         public World((int X, int Y) size)
         {
             Size = size;
-            graph = new GridGraph<Terrain>(size, (from, to) => from != Terrain.Wall && to != Terrain.Wall);
+            graph = new WorldGraph(size, (from, to) => from != Terrain.Wall && to != Terrain.Wall);
 
             Target = (0, 0);
             Start = (size.X - 1, size.Y - 1);
@@ -61,6 +60,9 @@ namespace SCGraphTheory.Search.Visualizer
             Wall,
         }
 
+        /// <summary>
+        /// Gets the size of the world.
+        /// </summary>
         public (int X, int Y) Size { get; }
 
         /// <summary>
