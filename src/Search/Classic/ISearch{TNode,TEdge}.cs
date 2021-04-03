@@ -17,12 +17,12 @@ namespace SCGraphTheory.Search.Classic
         bool IsConcluded { get; }
 
         /// <summary>
-        /// Gets the target node if the search is concluded and found a matching node, otherwise returns <see langword="null"/>.
+        /// Gets the target node if the search is concluded and found a matching node, otherwise returns <see langword="default"/>.
         /// </summary>
         TNode Target { get; }
 
         /// <summary>
-        /// Gets the search tree (or forest). Each visited node is present as a key. The associated value is the edge used to discover it (or null for source nodes).
+        /// Gets the search tree (or forest). Each visited node is present as a key. The associated value is the edge used to discover it (or <see langword="default"/> for source nodes).
         /// </summary>
         IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
