@@ -27,8 +27,8 @@ namespace SCGraphTheory.Search.Classic
         /// <param name="getEdgeCost">A function for calculating the cost of an edge.</param>
         public DijkstraSearch(TNode source, Predicate<TNode> isTarget, Func<TEdge, float> getEdgeCost)
         {
-            this.isTarget = isTarget;
-            this.getEdgeCost = getEdgeCost;
+            this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
+            this.getEdgeCost = getEdgeCost ?? throw new ArgumentNullException(nameof(getEdgeCost));
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.

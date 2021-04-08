@@ -23,7 +23,7 @@ namespace SCGraphTheory.Search.Benchmarks
         }
 
         /// <summary>
-        /// Entry point.
+        /// Application entry point.
         /// </summary>
         public static void Main()
         {
@@ -38,52 +38,51 @@ namespace SCGraphTheory.Search.Benchmarks
 
         [Benchmark]
         public void ValBFS() => new BreadthFirstSearch<ValGridGraph.Node, ValGridGraph.Edge>(
-            valGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
+            source: valGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
         [Benchmark]
         public void ValDFS() => new DepthFirstSearch<ValGridGraph.Node, ValGridGraph.Edge>(
-            valGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
+            source: valGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
+        // NB: unfair test - largely constant costs means Dijkstra's pretty much same as BFS with more work..
         [Benchmark]
         public void ValDijkstra() => new DijkstraSearch<ValGridGraph.Node, ValGridGraph.Edge>(
-            valGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1),
-            e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete(); // NB: unfair test - largely constant costs means Dijkstra's pretty much same as BFS with more work..
+            source: valGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1),
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();
 
         [Benchmark]
         public void ValAStar() => new AStarSearch<ValGridGraph.Node, ValGridGraph.Edge>(
-            valGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1),
-            e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
-            n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
+            source: valGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1),
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
+            getEstimatedCostToTarget: n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
 
         [Benchmark]
         public void RefBFS() => new BreadthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-            refGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
+            source: refGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
         [Benchmark]
         public void RefDFS() => new DepthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-            refGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
+            source: refGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
 
+        // NB: unfair test - largely constant costs means Dijkstra's pretty much same as BFS with more work..
         [Benchmark]
         public void RefDijkstra() => new DijkstraSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-            refGraph[0, 0],
-            n => n.Coordinates == (SIZE - 1, SIZE - 1),
-            e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete(); // NB: unfair test - largely constant costs means Dijkstra's pretty much same as BFS with more work..
+            source: refGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1),
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();
 
         [Benchmark]
-        public void RefAStar()
-        {
-            new AStarSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-                refGraph[0, 0],
-                n => n.Coordinates == (SIZE - 1, SIZE - 1),
-                e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
-                n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
-        }
+        public void RefAStar() => new AStarSearch<RefGridGraph.Node, RefGridGraph.Edge>(
+            source: refGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1),
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
+            getEstimatedCostToTarget: n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
 
         private static float EuclideanDistance((int x, int y) a, (int x, int y) b)
         {

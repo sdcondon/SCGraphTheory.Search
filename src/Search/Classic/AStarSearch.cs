@@ -33,9 +33,9 @@ namespace SCGraphTheory.Search.Classic
             Func<TEdge, float> getEdgeCost,
             Func<TNode, float> getEstimatedCostToTarget)
         {
-            this.isTarget = isTarget;
-            this.getEdgeCost = getEdgeCost;
-            this.getEstimatedCostToTarget = getEstimatedCostToTarget;
+            this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
+            this.getEdgeCost = getEdgeCost ?? throw new ArgumentNullException(nameof(getEdgeCost));
+            this.getEstimatedCostToTarget = getEstimatedCostToTarget ?? throw new ArgumentNullException(nameof(getEstimatedCostToTarget));
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.

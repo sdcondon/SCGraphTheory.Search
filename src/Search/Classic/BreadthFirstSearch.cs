@@ -24,7 +24,7 @@ namespace SCGraphTheory.Search.Classic
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
         public BreadthFirstSearch(TNode source, Predicate<TNode> isTarget)
         {
-            this.isTarget = isTarget;
+            this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.

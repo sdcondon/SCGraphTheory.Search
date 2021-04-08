@@ -16,7 +16,7 @@ namespace SCGraphTheory.Search.TestGraphs
         private readonly Func<T, T, bool> adjacencyIsNavigable;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class.
+        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class initialized with the default value for each node.
         /// </summary>
         /// <param name="size">The size of the grid.</param>
         /// <param name="adjacencyIsNavigable">A predicate to determine whether a given adjacency is navigable (i.e. a given edge exists), based on the value of the adjacent nodes.</param>
@@ -41,6 +41,41 @@ namespace SCGraphTheory.Search.TestGraphs
                     SetNodeEdges(x, y);
                 }
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class initialized with the default value for each node, and with all adjacencies navigable.
+        /// </summary>
+        /// <param name="size">The size of the grid.</param>
+        public GridGraph((int X, int Y) size)
+            : this(size, (_, _) => true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class.
+        /// </summary>
+        /// <param name="values">The node values for the grid.</param>
+        /// <param name="adjacencyIsNavigable">A predicate to determine whether a given adjacency is navigable (i.e. a given edge exists), based on the value of the adjacent nodes.</param>
+        public GridGraph(T[,] values, Func<T, T, bool> adjacencyIsNavigable)
+            : this((values.GetLength(0), values.GetLength(1)), adjacencyIsNavigable)
+        {
+            for (int x = 0; x < values.GetLength(0); x++)
+            {
+                for (int y = 0; y < values.GetLength(1); y++)
+                {
+                    this[x, y].Value = values[x, y];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class with all adjacencies navigable.
+        /// </summary>
+        /// <param name="values">The node values for the grid.</param>
+        public GridGraph(T[,] values)
+            : this(values, (_, _) => true)
+        {
         }
 
         /// <inheritdoc />
