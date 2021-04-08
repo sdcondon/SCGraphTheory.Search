@@ -32,9 +32,26 @@ var aStar = new AStarSearch<MyNodeType, MyEdgeType>(
 Searches are executed step-by-step via the `NextStep()` method of the [ISearch](/src/Search/Classic/ISearch{TNode,TEdge}.cs) interface. This (as opposed to having to execute a search all the way to completion) is to maximise the flexibility with which potentially expensive searches can be executed. A `Complete()` extension method is defined though; which continuously calls `NextStep()` until the search completes.
 
 Notes:
-- All search algorithms expose details of visited edges via the `Visited` property. This does add a little to the memory footprint that is overhead if you don't need this information. The extra is relatively small though, since all of the algorithms require a quick way to determine if a node has already been visited anyway. Using a Dictionary (as opposed to a HashSet) for this is a relatively minor addition.
+- All search algorithms expose details of visited edges via the `Visited` property. This does add a little to the memory footprint that is overhead if you don't need this information. The extra is relatively small though, since all of the algorithms require a quick way to determine if a node has already been visited anyway. Using a Dictionary (as opposed to a HashSet) for this is a relatively minor addition. _If it comes to it, NextStep() could be modified to return the explored edge, so that recording the search tree could be a higher level concern_
 - Only the basic versions of these algorithms implemented thus far - no depth-limited, iterative deepening or other variants.
 
 ## Local search algorithms
 
-_Not yet - but will have a crack at hill climb and simulated annealing at some point soon.._
+The `Local` namespace contains implementations of the (steepest-ascent) hill climb and simulated annealing search algorithms. They should also be fairly intuitive to use. Here are some example instantiations:
+
+```
+var hillClimb = new HillClimb<MyNodeType, MyEdgeType>(
+    source: mySpecificSourceNode,
+    getUtility: n => n == n.MyUtilityProp);
+
+var simulatedAnnealing = new SimulatedAnnealing<MyNodeType, MyEdgeType>(
+    source: mySpecificSourceNode,
+    getUtility: n => n == n.MyUtilityProp,
+    annealingSchedule: t => Math.Max(1 - (.01f * t), 0));
+```
+
+Like the `Classic` searches, the local searches are executed step-by-step via a `NextStep()` method. This (as opposed to having to execute a search all the way to completion) is to maximise the flexibility with which potentially expensive searches can be executed.
+
+## Adversarial search algorithms
+
+_Not yet, but may have a crack at min-max, alpha-beta pruning et al at some point._ 
