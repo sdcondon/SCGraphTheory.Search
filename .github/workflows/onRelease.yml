@@ -19,6 +19,7 @@ jobs:
 
     - name: Get release tag
       id: getReleaseTag
+      shell: bash
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
     - name: Build
