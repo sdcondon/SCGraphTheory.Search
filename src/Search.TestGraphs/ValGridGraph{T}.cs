@@ -80,15 +80,15 @@ namespace SCGraphTheory.Search.TestGraphs
             /// <summary>
             /// Gets the coordinates of the node.
             /// </summary>
-            public (int X, int Y) Coordinates => edgesPrototype.EnumeratorPrototype.CurrentPrototype.FromCoords;
+            public (int X, int Y) Coordinates => edgesPrototype.Coordinates;
 
             /// <summary>
             /// Gets or sets the value of the node.
             /// </summary>
             public T Value
             {
-                get => edgesPrototype.EnumeratorPrototype.CurrentPrototype.Index[Coordinates.X, Coordinates.Y];
-                set => edgesPrototype.EnumeratorPrototype.CurrentPrototype.Index[Coordinates.X, Coordinates.Y] = value;
+                get => edgesPrototype.Index[Coordinates.X, Coordinates.Y];
+                set => edgesPrototype.Index[Coordinates.X, Coordinates.Y] = value;
             }
 
             /// <inheritdoc />
@@ -96,12 +96,12 @@ namespace SCGraphTheory.Search.TestGraphs
 
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Node n
-                && Equals(edgesPrototype.EnumeratorPrototype.CurrentPrototype.Index, n.edgesPrototype.EnumeratorPrototype.CurrentPrototype.Index)
+                && Equals(edgesPrototype.Index, n.edgesPrototype.Index)
                 && Equals(Coordinates, n.Coordinates);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
-                edgesPrototype.EnumeratorPrototype.CurrentPrototype.Index,
+                edgesPrototype.Index,
                 Coordinates);
         }
 
@@ -142,18 +142,16 @@ namespace SCGraphTheory.Search.TestGraphs
 
         private struct EdgeCollection : IReadOnlyCollection<Edge>
         {
-            internal readonly EdgeEnumerator EnumeratorPrototype;
+            internal readonly T[,] Index;
+            internal readonly (int X, int Y) Coordinates;
 
-            internal EdgeCollection(T[,] index, (int X, int Y) coordinates)
-            {
-                EnumeratorPrototype = new EdgeEnumerator(index, coordinates);
-            }
+            internal EdgeCollection(T[,] index, (int X, int Y) coordinates) => (Index, Coordinates) = (index, coordinates);
 
             public int Count => this.Count();
 
-            public IEnumerator<Edge> GetEnumerator() => EnumeratorPrototype;
+            public IEnumerator<Edge> GetEnumerator() => new EdgeEnumerator(Index, Coordinates);
 
-            IEnumerator IEnumerable.GetEnumerator() => EnumeratorPrototype;
+            IEnumerator IEnumerable.GetEnumerator() => new EdgeEnumerator(Index, Coordinates);
         }
 
         private struct EdgeEnumerator : IEnumerator<Edge>

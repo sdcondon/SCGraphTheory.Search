@@ -28,6 +28,7 @@ namespace SCGraphTheory.Search.Benchmarks
         public static void Main()
         {
             BenchmarkRunner.Run<SearchBenchmarks>();
+            Console.ReadLine(); // ..because I like to be able to run this from the solution explorer in VS.
         }
 
         [Benchmark]
