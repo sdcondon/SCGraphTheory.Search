@@ -11,17 +11,18 @@ namespace SCGraphTheory.Search.Visualizer
     /// </summary>
     public class World
     {
-        private static readonly Dictionary<Terrain, float> TerrainCosts = new Dictionary<Terrain, float>()
+        private static readonly Dictionary<Terrain, float> TerrainCosts = new ()
         {
             [Terrain.Floor] = 1f,
             [Terrain.Water] = 3f,
         };
 
-        private readonly Stopwatch searchTimer = new Stopwatch();
+        private readonly Stopwatch searchTimer = new ();
         private readonly WorldGraph graph;
 
         private (int X, int Y) startPosition;
         private (int X, int Y) targetPosition;
+        private Action recreateSearch;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="World"/> class.
@@ -36,7 +37,6 @@ namespace SCGraphTheory.Search.Visualizer
             Start = (size.X - 1, size.Y - 1);
 
             RecreateSearch = MakeAStarSearch;
-            RecreateSearch();
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace SCGraphTheory.Search.Visualizer
             set
             {
                 startPosition = value;
-                RecreateSearch?.Invoke();
+                recreateSearch?.Invoke();
             }
         }
 
@@ -92,7 +92,7 @@ namespace SCGraphTheory.Search.Visualizer
             set
             {
                 targetPosition = value;
-                RecreateSearch?.Invoke();
+                recreateSearch?.Invoke();
             }
         }
 
@@ -102,9 +102,16 @@ namespace SCGraphTheory.Search.Visualizer
         public TimeSpan SearchDuration => searchTimer.Elapsed;
 
         /// <summary>
-        /// Gets or sets the delegate used to recreate the current search. Invoked whenever some aspect of the world changes.
+        /// Sets the delegate used to recreate the current search (and invokes it immediately). Invoked whenever some aspect of the world changes.
         /// </summary>
-        public Action RecreateSearch { get; set; }
+        public Action RecreateSearch
+        {
+            set
+            {
+                recreateSearch = value;
+                recreateSearch?.Invoke();
+            }
+        }
 
         /// <summary>
         /// Gets an index of node values by position.
@@ -122,7 +129,7 @@ namespace SCGraphTheory.Search.Visualizer
                 }
 
                 graph[x, y].Value = value;
-                RecreateSearch?.Invoke();
+                recreateSearch?.Invoke();
             }
         }
 
@@ -135,8 +142,8 @@ namespace SCGraphTheory.Search.Visualizer
             LatestSearch = new AStarSearch<WorldGraph.Node, WorldGraph.Edge>(
                 graph[Start.X, Start.Y],
                 t => t.Coordinates == Target,
-                EdgeCost,
-                n => EuclideanDistance(n.Coordinates, Target));
+                EuclideanEdgeCost,
+                n => ManhattanDistance(n.Coordinates, Target));
             LatestSearch.Complete();
             searchTimer.Stop();
         }
@@ -150,7 +157,7 @@ namespace SCGraphTheory.Search.Visualizer
             LatestSearch = new DijkstraSearch<WorldGraph.Node, WorldGraph.Edge>(
                 graph[Start.X, Start.Y],
                 t => t.Coordinates == Target,
-                EdgeCost);
+                EuclideanEdgeCost);
             LatestSearch.Complete();
             searchTimer.Stop();
         }
@@ -181,12 +188,17 @@ namespace SCGraphTheory.Search.Visualizer
             searchTimer.Stop();
         }
 
-        private float EuclideanDistance((int X, int Y) a, (int X, int Y) b)
+        private static float EuclideanDistance((int X, int Y) a, (int X, int Y) b)
         {
             return (float)Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         }
 
-        private float EdgeCost(WorldGraph.Edge edge)
+        private static float ManhattanDistance((int X, int Y) a, (int X, int Y) b)
+        {
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+        }
+
+        private static float EuclideanEdgeCost(WorldGraph.Edge edge)
         {
             return EuclideanDistance(edge.From.Coordinates, edge.To.Coordinates) * 0.5f * (TerrainCosts[edge.From.Value] + TerrainCosts[edge.To.Value]);
         }

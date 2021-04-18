@@ -5,13 +5,18 @@ using System.Windows.Forms;
 
 namespace SCGraphTheory.Search.Visualizer
 {
+    /// <summary>
+    /// The main form of the search bisualizer app.
+    /// </summary>
     public partial class MainForm : Form
     {
-        private IDictionary<ToolStripButton, Action<int, int>> brushButtons;
-        private IDictionary<ToolStripButton, Action> algorithmButtons;
+        private readonly IDictionary<ToolStripButton, Action<int, int>> brushButtons;
+        private readonly IDictionary<ToolStripButton, Action> algorithmButtons;
+        private readonly WorldRendererControl gameControl;
 
-        private WorldRendererControl gameControl;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainForm"/> class.
+        /// </summary>
         public MainForm()
         {
             InitializeComponent();
@@ -61,6 +66,19 @@ namespace SCGraphTheory.Search.Visualizer
             Application.Run(new MainForm());
         }
 
+        private static void RadioToolStripButtonClick(ToolStripButton clickedButton, IEnumerable<ToolStripButton> group)
+        {
+            if (!clickedButton.Checked)
+            {
+                foreach (var button in group)
+                {
+                    button.Checked = false;
+                }
+
+                clickedButton.Checked = true;
+            }
+        }
+
         private void BrushButton_Click(object sender, EventArgs e)
         {
             var pressedButton = sender as ToolStripButton;
@@ -73,19 +91,7 @@ namespace SCGraphTheory.Search.Visualizer
             var pressedButton = sender as ToolStripButton;
             RadioToolStripButtonClick(pressedButton, algorithmButtons.Keys);
             algorithmButtons[pressedButton]();
-        }
-
-        private void RadioToolStripButtonClick(ToolStripButton clickedButton, IEnumerable<ToolStripButton> group)
-        {
-            if (!clickedButton.Checked)
-            {
-                foreach (var button in group)
-                {
-                    button.Checked = false;
-                }
-
-                clickedButton.Checked = true;
-            }
+            gameControl.Invalidate();
         }
     }
 }
