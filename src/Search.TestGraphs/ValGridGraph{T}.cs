@@ -63,9 +63,6 @@ namespace SCGraphTheory.Search.TestGraphs
         /// <summary>
         /// Node structure for <see cref="ValGridGraph{T}"/>.
         /// </summary>
-        /// <remarks>
-        /// Note how we retrieve the index and coordinates from the edge collection prototype rather than storing it twice - to ensure the struct is as small as it can be.</remarks>
-        /// </remarks>
         public struct Node : INode<Node, Edge>
         {
             private readonly EdgeCollection edgesPrototype;
@@ -156,16 +153,16 @@ namespace SCGraphTheory.Search.TestGraphs
 
         private struct EdgeEnumerator : IEnumerator<Edge>
         {
-            internal Edge CurrentPrototype;
+            private Edge currentPrototype;
 
             internal EdgeEnumerator(T[,] index, (int X, int Y) coordinates)
             {
-                CurrentPrototype = new Edge(index, coordinates, (-2, -1));
+                currentPrototype = new Edge(index, coordinates, (-2, -1));
             }
 
-            public Edge Current => CurrentPrototype;
+            public Edge Current => currentPrototype;
 
-            object IEnumerator.Current => CurrentPrototype;
+            object IEnumerator.Current => currentPrototype;
 
             public void Dispose()
             {
@@ -175,28 +172,28 @@ namespace SCGraphTheory.Search.TestGraphs
             {
                 do
                 {
-                    CurrentPrototype.Delta.X++;
-                    if (CurrentPrototype.Delta.X > 1)
+                    currentPrototype.Delta.X++;
+                    if (currentPrototype.Delta.X > 1)
                     {
-                        CurrentPrototype.Delta.X = -1;
-                        CurrentPrototype.Delta.Y++;
-                        if (CurrentPrototype.Delta.Y > 1)
+                        currentPrototype.Delta.X = -1;
+                        currentPrototype.Delta.Y++;
+                        if (currentPrototype.Delta.Y > 1)
                         {
                             return false;
                         }
                     }
                 }
                 while (
-                    CurrentPrototype.FromCoords.X + CurrentPrototype.Delta.X < CurrentPrototype.Index.GetLowerBound(0)
-                    || CurrentPrototype.FromCoords.X + CurrentPrototype.Delta.X > CurrentPrototype.Index.GetUpperBound(0)
-                    || CurrentPrototype.FromCoords.Y + CurrentPrototype.Delta.Y < CurrentPrototype.Index.GetLowerBound(1)
-                    || CurrentPrototype.FromCoords.Y + CurrentPrototype.Delta.Y > CurrentPrototype.Index.GetUpperBound(1)
-                    || CurrentPrototype.Delta == (0, 0));
+                    currentPrototype.FromCoords.X + currentPrototype.Delta.X < currentPrototype.Index.GetLowerBound(0)
+                    || currentPrototype.FromCoords.X + currentPrototype.Delta.X > currentPrototype.Index.GetUpperBound(0)
+                    || currentPrototype.FromCoords.Y + currentPrototype.Delta.Y < currentPrototype.Index.GetLowerBound(1)
+                    || currentPrototype.FromCoords.Y + currentPrototype.Delta.Y > currentPrototype.Index.GetUpperBound(1)
+                    || currentPrototype.Delta == (0, 0));
 
                 return true;
             }
 
-            public void Reset() => CurrentPrototype.Delta = (-2, -1);
+            public void Reset() => currentPrototype.Delta = (-2, -1);
         }
     }
 }
