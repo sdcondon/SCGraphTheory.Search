@@ -8,7 +8,7 @@ Graph search algorithms that work against any graph type implementing the interf
 
 The `Classic` namespace contains implementations of the breadth-first, depth-first (including limited and iterative deepening variants), Dijkstra, and A-star search algorithms, all conforming to a common interface - [ISearch<TNode,TEdge>](/src/Search/Classic/ISearch{TNode,TEdge}.cs). They should be fairly intuitive to use. Here are some example instantiations:
 
-```
+```csharp
 var breadthFirst = new BreadthFirstSearch<MyNodeType, MyEdgeType>(
     source: mySpecificSourceNode,
     isTarget: n => n == mySpecificTargetNode);
@@ -38,7 +38,7 @@ Notes:
 
 The `Local` namespace contains implementations of the (steepest-ascent) hill climb and simulated annealing search algorithms. They should also be fairly intuitive to use. Here are some example instantiations:
 
-```
+```csharp
 var hillClimb = new HillClimb<MyNodeType, MyEdgeType>(
     source: mySpecificSourceNode,
     getUtility: n => n == n.MyUtilityProp);
