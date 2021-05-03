@@ -33,6 +33,12 @@ namespace SCGraphTheory.Search.Classic
             Func<TEdge, float> getEdgeCost,
             Func<TNode, float> getEstimatedCostToTarget)
         {
+            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.getEdgeCost = getEdgeCost ?? throw new ArgumentNullException(nameof(getEdgeCost));
             this.getEstimatedCostToTarget = getEstimatedCostToTarget ?? throw new ArgumentNullException(nameof(getEstimatedCostToTarget));

@@ -28,6 +28,12 @@ namespace SCGraphTheory.Search.Classic
         /// <param name="depthLimit">The depth at which the search should be cut off.</param>
         public LimitedDepthFirstSearch(TNode source, Predicate<TNode> isTarget, int depthLimit)
         {
+            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.depthLimit = depthLimit;
 

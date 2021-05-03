@@ -26,6 +26,12 @@ namespace SCGraphTheory.Search.Local
             TNode source,
             Func<TNode, TUtility> getUtility)
         {
+            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
             this.getUtility = getUtility ?? throw new ArgumentNullException(nameof(getUtility));
             this.Current = source;
         }

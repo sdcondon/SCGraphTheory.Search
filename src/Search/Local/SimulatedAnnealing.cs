@@ -31,6 +31,12 @@ namespace SCGraphTheory.Search.Local
             Func<TNode, float> getUtility,
             Func<int, float> annealingSchedule)
         {
+            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
             this.getUtility = getUtility ?? throw new ArgumentNullException(nameof(getUtility));
             this.annealingSchedule = annealingSchedule ?? throw new ArgumentNullException(nameof(annealingSchedule));
             this.Current = source;

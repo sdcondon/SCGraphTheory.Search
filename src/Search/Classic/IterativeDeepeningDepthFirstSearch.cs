@@ -25,7 +25,13 @@ namespace SCGraphTheory.Search.Classic
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
         public IterativeDeepeningDepthFirstSearch(TNode source, Predicate<TNode> isTarget)
         {
-            this.source = source;
+            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            this.source = source; 
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.currentDepthLimit = 0;
             this.currentSearch = new LimitedDepthFirstSearch<TNode, TEdge>(source, isTarget, currentDepthLimit);
