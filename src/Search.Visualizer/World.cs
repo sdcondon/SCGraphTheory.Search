@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using WorldGraph = SCGraphTheory.Search.TestGraphs.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
+using WorldGraph = SCGraphTheory.Search.TestGraphs.ValGridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
 
 namespace SCGraphTheory.Search.Visualizer
 {
@@ -127,8 +127,8 @@ namespace SCGraphTheory.Search.Visualizer
                 {
                     return;
                 }
-
-                graph[x, y].Value = value;
+                graph.Set(x, y, value);
+                //graph[x, y].Value = value;
                 recreateSearch?.Invoke();
             }
         }

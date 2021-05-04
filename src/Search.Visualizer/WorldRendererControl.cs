@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using WorldGraph = SCGraphTheory.Search.TestGraphs.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
+using WorldGraph = SCGraphTheory.Search.TestGraphs.ValGridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
 
 namespace SCGraphTheory.Search.Visualizer
 {

@@ -17,12 +17,18 @@ namespace SCGraphTheory.Search.TestGraphs
     public class ValGridGraph<T> : IGraph<ValGridGraph<T>.Node, ValGridGraph<T>.Edge>
     {
         private readonly T[,] index;
+        private readonly Func<T, T, bool> adjacencyIsNavigable;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValGridGraph{T}"/> class.
         /// </summary>
         /// <param name="size">The size of the graph.</param>
-        public ValGridGraph((int X, int Y) size) => index = new T[size.X, size.Y];
+        /// <param name="adjacencyIsNavigable"></param>
+        public ValGridGraph((int X, int Y) size, Func<T, T, bool> adjacencyIsNavigable)
+        {
+            index = new T[size.X, size.Y];
+            this.adjacencyIsNavigable = adjacencyIsNavigable;
+        }
 
         /// <inheritdoc />
         public IEnumerable<Node> Nodes
@@ -33,7 +39,7 @@ namespace SCGraphTheory.Search.TestGraphs
                 {
                     for (int y = index.GetLowerBound(1); y <= index.GetUpperBound(1); y++)
                     {
-                        yield return new Node(index, (x, y));
+                        yield return new Node(this, (x, y));
                     }
                 }
             }
@@ -59,7 +65,12 @@ namespace SCGraphTheory.Search.TestGraphs
         /// </summary>
         /// <param name="x">The x-ordinate of the node to retrieve.</param>
         /// <param name="y">The y-ordinate of the node to retrieve.</param>
-        public Node this[int x, int y] => new Node(index, (x, y));
+        public Node this[int x, int y] => new Node(this, (x, y));
+
+        public void Set(int x, int y, T value)
+        {
+            index[x, y] = value;
+        }
 
         /// <summary>
         /// Node structure for <see cref="ValGridGraph{T}"/>.
@@ -71,9 +82,9 @@ namespace SCGraphTheory.Search.TestGraphs
             /// <summary>
             /// Initializes a new instance of the <see cref="Node"/> struct.
             /// </summary>
-            /// <param name="index">The index of node values to use when getting or setting node value.</param>
+            /// <param name="graph">The graph that this node belongs to.</param>
             /// <param name="coordinates">The coordinates of the node.</param>
-            internal Node(T[,] index, (int X, int Y) coordinates) => edgesPrototype = new EdgeCollection(index, coordinates);
+            internal Node(ValGridGraph<T> graph, (int X, int Y) coordinates) => edgesPrototype = new EdgeCollection(graph, coordinates);
 
             /// <summary>
             /// Gets the coordinates of the node.
@@ -85,8 +96,8 @@ namespace SCGraphTheory.Search.TestGraphs
             /// </summary>
             public T Value
             {
-                get => edgesPrototype.Index[Coordinates.X, Coordinates.Y];
-                set => edgesPrototype.Index[Coordinates.X, Coordinates.Y] = value;
+                get => edgesPrototype.Graph.index[Coordinates.X, Coordinates.Y];
+                set => edgesPrototype.Graph.index[Coordinates.X, Coordinates.Y] = value;
             }
 
             /// <inheritdoc />
@@ -94,12 +105,12 @@ namespace SCGraphTheory.Search.TestGraphs
 
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Node n
-                && Equals(edgesPrototype.Index, n.edgesPrototype.Index)
+                && Equals(edgesPrototype.Graph.index, n.edgesPrototype.Graph.index)
                 && Equals(Coordinates, n.Coordinates);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
-                edgesPrototype.Index,
+                edgesPrototype.Graph.index,
                 Coordinates);
         }
 
@@ -108,32 +119,32 @@ namespace SCGraphTheory.Search.TestGraphs
         /// </summary>
         public struct Edge : IEdge<Node, Edge>
         {
-            internal readonly T[,] Index;
+            internal readonly ValGridGraph<T> Graph;
             internal readonly (int X, int Y) FromCoords;
             internal (sbyte X, sbyte Y) Delta;
 
-            internal Edge(T[,] index, (int X, int Y) fromCoords, (sbyte X, sbyte Y) d)
+            internal Edge(ValGridGraph<T> graph, (int X, int Y) fromCoords, (sbyte X, sbyte Y) d)
             {
-                this.Index = index;
+                this.Graph = graph;
                 this.FromCoords = fromCoords;
                 this.Delta = d;
             }
 
             /// <inheritdoc />
-            public Node From => new Node(Index, FromCoords);
+            public Node From => new Node(Graph, FromCoords);
 
             /// <inheritdoc />
-            public Node To => new Node(Index, (FromCoords.X + Delta.X, FromCoords.Y + Delta.Y));
+            public Node To => new Node(Graph, (FromCoords.X + Delta.X, FromCoords.Y + Delta.Y));
 
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Edge e
-                && Equals(Index, e.Index)
+                && Equals(Graph, e.Graph)
                 && Equals(FromCoords, e.FromCoords)
                 && Equals(Delta, e.Delta);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
-                Index,
+                Graph,
                 FromCoords,
                 Delta);
         }
@@ -141,25 +152,25 @@ namespace SCGraphTheory.Search.TestGraphs
         // NB: Used via its interface in search algorithms, so presumably will be getting boxed :(
         private struct EdgeCollection : IReadOnlyCollection<Edge>
         {
-            internal readonly T[,] Index;
+            internal readonly ValGridGraph<T> Graph;
             internal readonly (int X, int Y) Coordinates;
 
-            internal EdgeCollection(T[,] index, (int X, int Y) coordinates) => (Index, Coordinates) = (index, coordinates);
+            internal EdgeCollection(ValGridGraph<T> graph, (int X, int Y) coordinates) => (Graph, Coordinates) = (graph, coordinates);
 
             public int Count => this.Count();
 
-            public IEnumerator<Edge> GetEnumerator() => new EdgeEnumerator(Index, Coordinates);
+            public IEnumerator<Edge> GetEnumerator() => new EdgeEnumerator(Graph, Coordinates);
 
-            IEnumerator IEnumerable.GetEnumerator() => new EdgeEnumerator(Index, Coordinates);
+            IEnumerator IEnumerable.GetEnumerator() => new EdgeEnumerator(Graph, Coordinates);
         }
 
         private struct EdgeEnumerator : IEnumerator<Edge>
         {
             private Edge currentPrototype;
 
-            internal EdgeEnumerator(T[,] index, (int X, int Y) coordinates)
+            internal EdgeEnumerator(ValGridGraph<T> graph, (int X, int Y) coordinates)
             {
-                currentPrototype = new Edge(index, coordinates, (-2, -1));
+                currentPrototype = new Edge(graph, coordinates, (-2, -1));
             }
 
             public Edge Current => currentPrototype;
@@ -186,11 +197,12 @@ namespace SCGraphTheory.Search.TestGraphs
                     }
                 }
                 while (
-                    currentPrototype.FromCoords.X + currentPrototype.Delta.X < currentPrototype.Index.GetLowerBound(0)
-                    || currentPrototype.FromCoords.X + currentPrototype.Delta.X > currentPrototype.Index.GetUpperBound(0)
-                    || currentPrototype.FromCoords.Y + currentPrototype.Delta.Y < currentPrototype.Index.GetLowerBound(1)
-                    || currentPrototype.FromCoords.Y + currentPrototype.Delta.Y > currentPrototype.Index.GetUpperBound(1)
-                    || currentPrototype.Delta == (0, 0));
+                    currentPrototype.FromCoords.X + currentPrototype.Delta.X < currentPrototype.Graph.index.GetLowerBound(0)
+                    || currentPrototype.FromCoords.X + currentPrototype.Delta.X > currentPrototype.Graph.index.GetUpperBound(0)
+                    || currentPrototype.FromCoords.Y + currentPrototype.Delta.Y < currentPrototype.Graph.index.GetLowerBound(1)
+                    || currentPrototype.FromCoords.Y + currentPrototype.Delta.Y > currentPrototype.Graph.index.GetUpperBound(1)
+                    || currentPrototype.Delta == (0, 0)
+                    || !currentPrototype.Graph.adjacencyIsNavigable(currentPrototype.Graph.index[currentPrototype.FromCoords.X, currentPrototype.FromCoords.Y], currentPrototype.Graph.index[currentPrototype.FromCoords.X + currentPrototype.Delta.X, currentPrototype.FromCoords.Y + currentPrototype.Delta.Y]));
 
                 return true;
             }
