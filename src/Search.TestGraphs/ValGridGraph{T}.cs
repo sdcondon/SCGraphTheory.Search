@@ -162,6 +162,7 @@ namespace SCGraphTheory.Search.TestGraphs
                 currentPrototype = new Edge(index, coordinates, (-2, -1));
             }
 
+            // NB: A bug here - getting Current before MoveNext gives a wrong edge instead of throwing.
             public Edge Current => currentPrototype;
 
             object IEnumerator.Current => currentPrototype;
