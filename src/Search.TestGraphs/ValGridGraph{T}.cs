@@ -29,7 +29,7 @@ namespace SCGraphTheory.Search.TestGraphs
         {
             get
             {
-                for (int x = index.GetLowerBound(0); x <= index.GetLowerBound(0); x++)
+                for (int x = index.GetLowerBound(0); x <= index.GetUpperBound(0); x++)
                 {
                     for (int y = index.GetLowerBound(1); y <= index.GetUpperBound(1); y++)
                     {
