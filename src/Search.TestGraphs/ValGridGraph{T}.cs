@@ -10,9 +10,10 @@ namespace SCGraphTheory.Search.TestGraphs
     /// </summary>
     /// <typeparam name="T">The type of the values associated with each node of the graph.</typeparam>
     /// <remarks>
-    /// Motivation: I wondered to what degree the lack of heap allocations ahead of time would counteract the heavier search load (because more data needs to be copied around).
-    /// See the Benchmarks project for results. Generally, I suspect that ALL structs is of limited use, but for graphs with a regular structure (like grids) a hybrid
-    /// approach where the nodes are classes but the edges are structs works well. No test graph or benchmark for that as yet though.
+    /// Motivation: I wondered to what degree the lack of heap allocations ahead of time would counteract the heavier search load (because
+    /// more data needs to be copied around). Run the Benchmarks project for results. Generally, I suspect that ALL structs is of limited
+    /// use, but for graphs with a regular structure (like grids) a hybrid approach where the nodes are classes but the edges are structs
+    /// would work well. No test graph or benchmark for that as yet though.
     /// </remarks>
     public class ValGridGraph<T> : IGraph<ValGridGraph<T>.Node, ValGridGraph<T>.Edge>
     {

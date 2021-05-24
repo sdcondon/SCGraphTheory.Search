@@ -13,8 +13,4 @@
 
     <Version>1.0.0</Version>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>$(SolutionDir)\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
 </Project>

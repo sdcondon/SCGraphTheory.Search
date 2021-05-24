@@ -31,7 +31,7 @@ namespace SCGraphTheory.Search.Classic
                 throw new ArgumentNullException(nameof(source));
             }
 
-            this.source = source; 
+            this.source = source;
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.currentDepthLimit = 0;
             this.currentSearch = new LimitedDepthFirstSearch<TNode, TEdge>(source, isTarget, currentDepthLimit);
