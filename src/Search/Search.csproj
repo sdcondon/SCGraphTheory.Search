@@ -4,18 +4,23 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>SCGraphTheory.Search</AssemblyName>
     <RootNamespace>SCGraphTheory.Search</RootNamespace>
-    <Description>Graph theory search algorithms.</Description>
+    <Description>Graph search algorithms that work against any graph type implementing the interfaces defined in SCGraphTheory.Abstractions.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>graphs graph theory a* dijkstra depth-first breadth-first</PackageTags>
     <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
+    <PackageIcon>SCGraphTheoryIcon.png</PackageIcon>
 
     <DocumentationFile>SCGraphTheory.Search.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SCGraphTheory.Abstractions" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SCGraphTheoryIcon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
 
 </Project>
