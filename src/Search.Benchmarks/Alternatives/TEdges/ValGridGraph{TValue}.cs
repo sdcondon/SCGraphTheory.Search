@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.TestGraphs
+namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
 {
     /// <summary>
     /// Graph implementation for a square grid (with associated values), where the nodes, edges and edge collections are all structs.
@@ -15,7 +15,7 @@ namespace SCGraphTheory.Search.TestGraphs
     /// use, but for graphs with a regular structure (like grids) a hybrid approach where the nodes are classes but the edges are structs
     /// would work well. No test graph or benchmark for that as yet though.
     /// </remarks>
-    public class ValGridGraph<T> : IGraph<ValGridGraph<T>.Node, ValGridGraph<T>.Edge>
+    public class ValGridGraph<T> : IGraph<ValGridGraph<T>.Node, ValGridGraph<T>.Edge, ValGridGraph<T>.EdgeCollection>
     {
         private readonly T[,] index;
 
@@ -65,7 +65,7 @@ namespace SCGraphTheory.Search.TestGraphs
         /// <summary>
         /// Node structure for <see cref="ValGridGraph{T}"/>.
         /// </summary>
-        public struct Node : INode<Node, Edge>
+        public struct Node : INode<Node, Edge, EdgeCollection>
         {
             private readonly EdgeCollection edgesPrototype;
 
@@ -90,13 +90,8 @@ namespace SCGraphTheory.Search.TestGraphs
                 set => edgesPrototype.Index[Coordinates.X, Coordinates.Y] = value;
             }
 
-            /// <summary>
-            /// Gets the collection of edges that are outbound from this node.
-            /// </summary>
-            public EdgeCollection Edges => edgesPrototype;
-
             /// <inheritdoc />
-            IReadOnlyCollection<Edge> INode<Node, Edge>.Edges => edgesPrototype;
+            public EdgeCollection Edges => edgesPrototype;
 
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Node n
@@ -112,7 +107,7 @@ namespace SCGraphTheory.Search.TestGraphs
         /// <summary>
         /// Edge structure for <see cref="ValGridGraph{T}"/>.
         /// </summary>
-        public struct Edge : IEdge<Node, Edge>
+        public struct Edge : IEdge<Node, Edge, EdgeCollection>
         {
             internal readonly T[,] Index;
             internal readonly (int X, int Y) FromCoords;
