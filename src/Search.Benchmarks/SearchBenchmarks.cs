@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿#pragma warning disable SA1600 // Elements should be documented
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using SCGraphTheory.Search.Classic;
 using System;
@@ -162,3 +163,4 @@ namespace SCGraphTheory.Search.Benchmarks
         }
     }
 }
+#pragma warning restore SA1600

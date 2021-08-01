@@ -23,4 +23,3 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
         TNode To { get; }
     }
 }
-

@@ -12,9 +12,6 @@ namespace SCGraphTheory.Search.TestGraphs
         /// Initializes a new instance of the <see cref="LinqGraph"/> class.
         /// </summary>
         /// <param name="edges">The edges that comprise the graph, each represented as a tuple indicating the nodes (in turn represented by IDs) that are connected.</param>
-        /// <remarks>
-        /// Motivation: A simple-as-possible graph implementation to test graph algorithm behaviour.
-        /// </remarks>
         public LinqGraph(params (int from, int to)[] edges)
             : this(edges.Select(e => (e.from, e.to, 1f)).ToArray())
         {

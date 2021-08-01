@@ -47,7 +47,7 @@ namespace SCGraphTheory.Search.Classic
                 path.Add(search.Visited[node].Edge);
             }
 
-            path.Reverse(); // PERFORMANCE: probably better to use a linked list and continuously add to the front of it
+            path.Reverse(); // TODO-PERFORMANCE: probably better to use a linked list and continuously add to the front of it. Test me.
             return path;
         }
 
