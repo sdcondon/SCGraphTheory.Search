@@ -96,7 +96,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Node n
                 && Equals(edgesPrototype.Index, n.edgesPrototype.Index)
-                && Equals(Coordinates, n.Coordinates);
+                && Coordinates.Equals(n.Coordinates);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
@@ -129,8 +129,8 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Edge e
                 && Equals(Index, e.Index)
-                && Equals(FromCoords, e.FromCoords)
-                && Equals(Delta, e.Delta);
+                && FromCoords.Equals(e.FromCoords)
+                && Delta.Equals(e.Delta);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
