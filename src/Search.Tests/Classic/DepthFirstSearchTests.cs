@@ -20,6 +20,11 @@ namespace SCGraphTheory.Search.Classic
                 targetId: 1,
                 expectedSteps: Array.Empty<(int, int)>()),
             MakeBasicTestCase(
+                graph: new LinqGraph((1, 1)),
+                sourceId: 1,
+                targetId: -1,
+                expectedSteps: Array.Empty<(int, int)>()),
+            MakeBasicTestCase(
                 graph: new LinqGraph((1, 2), (2, 3), (1, 4), (4, 5)),
                 sourceId: 1,
                 targetId: 5,

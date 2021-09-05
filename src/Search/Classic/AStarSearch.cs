@@ -83,10 +83,11 @@ namespace SCGraphTheory.Search.Classic
             foreach (var edge in node.Edges)
             {
                 node = edge.To;
-                var totalCostToNodeViaEdge = bestCostToNode + getEdgeCost(edge);
 
+                var totalCostToNodeViaEdge = bestCostToNode + getEdgeCost(edge);
                 var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
                 var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
+
                 if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
                 {
                     // Node has not been added to the frontier - add it
