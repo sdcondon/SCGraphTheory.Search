@@ -27,4 +27,8 @@
     <None Include="SCGraphTheoryIcon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="LowLevel\" />
+  </ItemGroup>
+
 </Project>

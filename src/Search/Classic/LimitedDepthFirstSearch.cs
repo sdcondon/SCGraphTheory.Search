@@ -16,7 +16,7 @@ namespace SCGraphTheory.Search.Classic
         private readonly int depthLimit;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly Stack<(TNode node, TEdge edge, int depth)> frontier = new Stack<(TNode, TEdge, int)>();
+        private readonly Stack<(TEdge edge, int depth)> frontier = new Stack<(TEdge, int)>();
 
         private readonly HashSet<TNode> cutoffNodes = new HashSet<TNode>();
 
@@ -39,8 +39,7 @@ namespace SCGraphTheory.Search.Classic
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            frontier.Push((source, default, 0));
-            NextStep();
+            UpdateFrontier(source, default, 0);
         }
 
         /// <summary>
@@ -92,28 +91,33 @@ namespace SCGraphTheory.Search.Classic
             }
 
             var next = frontier.Pop();
-            visited[next.node] = new KnownEdgeInfo<TEdge>(next.edge, false);
+            UpdateFrontier(next.edge.To, next.edge, next.depth);
+        }
 
-            if (isTarget(next.node))
+        private void UpdateFrontier(TNode node, TEdge edge, int depth)
+        {
+            visited[node] = new KnownEdgeInfo<TEdge>(edge, false);
+
+            if (isTarget(node))
             {
-                Target = next.node;
+                Target = node;
                 State = States.Completed;
                 return;
             }
 
-            foreach (var edge in next.node.Edges)
+            foreach (var nextEdge in node.Edges)
             {
-                if (!visited.ContainsKey(edge.To))
+                if (!visited.ContainsKey(nextEdge.To))
                 {
-                    if (next.depth < depthLimit)
+                    if (depth < depthLimit)
                     {
-                        frontier.Push((edge.To, edge, next.depth + 1));
-                        visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, true);
-                        cutoffNodes.Remove(edge.To);
+                        frontier.Push((nextEdge, depth + 1));
+                        visited[nextEdge.To] = new KnownEdgeInfo<TEdge>(nextEdge, true);
+                        cutoffNodes.Remove(nextEdge.To);
                     }
                     else
                     {
-                        cutoffNodes.Add(edge.To);
+                        cutoffNodes.Add(nextEdge.To);
                     }
                 }
             }

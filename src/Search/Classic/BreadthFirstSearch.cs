@@ -15,7 +15,7 @@ namespace SCGraphTheory.Search.Classic
         private readonly Predicate<TNode> isTarget;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly Queue<(TNode node, TEdge edge)> frontier = new Queue<(TNode, TEdge)>();
+        private readonly Queue<TEdge> frontier = new Queue<TEdge>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BreadthFirstSearch{TNode, TEdge}"/> class.
@@ -34,8 +34,7 @@ namespace SCGraphTheory.Search.Classic
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            frontier.Enqueue((source, default));
-            NextStep();
+            UpdateFrontier(source, default);
         }
 
         /// <inheritdoc />
@@ -55,22 +54,27 @@ namespace SCGraphTheory.Search.Classic
                 throw new InvalidOperationException("Search is concluded");
             }
 
-            var next = frontier.Dequeue();
-            visited[next.node] = new KnownEdgeInfo<TEdge>(next.edge, false);
+            var edge = frontier.Dequeue();
+            UpdateFrontier(edge.To, edge);
+        }
 
-            if (isTarget(next.node))
+        private void UpdateFrontier(TNode node, TEdge edge)
+        {
+            visited[node] = new KnownEdgeInfo<TEdge>(edge, false);
+
+            if (isTarget(node))
             {
-                Target = next.node;
+                Target = node;
                 IsConcluded = true;
                 return;
             }
 
-            foreach (var edge in next.node.Edges)
+            foreach (var nextEdge in node.Edges)
             {
-                if (!visited.ContainsKey(edge.To))
+                if (!visited.ContainsKey(nextEdge.To))
                 {
-                    frontier.Enqueue((edge.To, edge));
-                    visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, true);
+                    frontier.Enqueue(nextEdge);
+                    visited[nextEdge.To] = new KnownEdgeInfo<TEdge>(nextEdge, true);
                 }
             }
 
