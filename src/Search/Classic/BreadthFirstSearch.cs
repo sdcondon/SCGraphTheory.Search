@@ -32,9 +32,10 @@ namespace SCGraphTheory.Search.Classic
 
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
 
-            // Initialize the frontier with the source node and immediately discover it.
+            // Initialize the search tree with the source node and immediately visit it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            Visit(source, default);
+            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            Visit(source);
         }
 
         /// <inheritdoc />
@@ -55,13 +56,12 @@ namespace SCGraphTheory.Search.Classic
             }
 
             var edge = frontier.Dequeue();
-            Visit(edge.To, edge);
+            visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, false);
+            Visit(edge.To);
         }
 
-        private void Visit(TNode node, TEdge discoveredViaEdge)
+        private void Visit(TNode node)
         {
-            visited[node] = new KnownEdgeInfo<TEdge>(discoveredViaEdge, false);
-
             if (isTarget(node))
             {
                 Target = node;
