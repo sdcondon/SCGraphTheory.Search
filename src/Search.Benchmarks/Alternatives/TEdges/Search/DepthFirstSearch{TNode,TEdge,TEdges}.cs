@@ -9,6 +9,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
+    /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph being search.</typeparam>
     public class DepthFirstSearch<TNode, TEdge, TEdges> : ISearch<TNode, TEdge, TEdges>
         where TNode : INode<TNode, TEdge, TEdges>
         where TEdge : IEdge<TNode, TEdge, TEdges>
@@ -17,7 +18,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
         private readonly Predicate<TNode> isTarget;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly Stack<(TNode node, TEdge edge)> frontier = new Stack<(TNode, TEdge)>();
+        private readonly Stack<TEdge> frontier = new Stack<TEdge>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DepthFirstSearch{TNode, TEdge, TEdges}"/> class.
@@ -34,10 +35,10 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
 
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
 
-            // Initialize the frontier with the source node and immediately discover it.
+            // Initialize the search tree with the source node and immediately visit it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            frontier.Push((source, default));
-            NextStep();
+            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            Visit(source);
         }
 
         /// <inheritdoc />
@@ -57,22 +58,26 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
                 throw new InvalidOperationException("Search is concluded");
             }
 
-            var next = frontier.Pop();
-            visited[next.node] = new KnownEdgeInfo<TEdge>(next.edge, false);
+            var edge = frontier.Pop();
+            visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, false);
+            Visit(edge.To);
+        }
 
-            if (isTarget(next.node))
+        private void Visit(TNode node)
+        {
+            if (isTarget(node))
             {
-                Target = next.node;
+                Target = node;
                 IsConcluded = true;
                 return;
             }
 
-            foreach (var edge in next.node.Edges)
+            foreach (var nextEdge in node.Edges)
             {
-                if (!visited.ContainsKey(edge.To))
+                if (!visited.ContainsKey(nextEdge.To))
                 {
-                    frontier.Push((edge.To, edge));
-                    visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, true);
+                    frontier.Push(nextEdge);
+                    visited[nextEdge.To] = new KnownEdgeInfo<TEdge>(nextEdge, true);
                 }
             }
 

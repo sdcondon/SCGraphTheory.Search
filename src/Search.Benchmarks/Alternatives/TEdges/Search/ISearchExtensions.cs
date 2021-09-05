@@ -13,6 +13,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
         /// </summary>
         /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
         /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
+        /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph being search.</typeparam>
         /// <param name="search">The search to be completed.</param>
         public static void Complete<TNode, TEdge, TEdges>(this ISearch<TNode, TEdge, TEdges> search)
             where TNode : INode<TNode, TEdge, TEdges>
@@ -30,6 +31,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
         /// </summary>
         /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
         /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
+        /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph being search.</typeparam>
         /// <param name="search">The search to examine.</param>
         /// <returns>For the given search, an enumeration of the edges comprising the path from the source node to the target - or null if the target was not found.</returns>
         public static IEnumerable<TEdge> PathToTarget<TNode, TEdge, TEdges>(this ISearch<TNode, TEdge, TEdges> search)
@@ -58,6 +60,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
         /// </summary>
         /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
         /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
+        /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph being search.</typeparam>
         /// <param name="search">The search to examine.</param>
         /// <returns>An enumeration of all edges visited by the search.</returns>
         public static IEnumerable<TEdge> VisitedEdges<TNode, TEdge, TEdges>(this ISearch<TNode, TEdge, TEdges> search)

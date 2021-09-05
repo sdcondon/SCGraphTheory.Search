@@ -10,6 +10,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
+    /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph being search.</typeparam>
     public class AStarSearch<TNode, TEdge, TEdges> : ISearch<TNode, TEdge, TEdges>
         where TNode : INode<TNode, TEdge, TEdges>
         where TEdge : IEdge<TNode, TEdge, TEdges>
@@ -45,10 +46,10 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
             this.getEdgeCost = getEdgeCost ?? throw new ArgumentNullException(nameof(getEdgeCost));
             this.getEstimatedCostToTarget = getEstimatedCostToTarget ?? throw new ArgumentNullException(nameof(getEstimatedCostToTarget));
 
-            // Initialize the frontier with the source node and immediately discover it.
+            // Initialize the search tree with the source node and immediately visit it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            UpdateFrontier(source, default, 0);
-            NextStep();
+            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            Visit(source, 0f);
         }
 
         /// <inheritdoc />
@@ -70,7 +71,11 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
 
             var node = frontier.Dequeue(out var frontierInfo);
             visited[node] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdge, false);
+            Visit(node, frontierInfo.bestCostToNode);
+        }
 
+        private void Visit(TNode node, float bestCostToNode)
+        {
             if (isTarget(node))
             {
                 Target = node;
@@ -80,31 +85,30 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
 
             foreach (var edge in node.Edges)
             {
-                UpdateFrontier(edge.To, edge, frontierInfo.bestCostToNode + getEdgeCost(edge));
+                node = edge.To;
+
+                var totalCostToNodeViaEdge = bestCostToNode + getEdgeCost(edge);
+                var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
+                var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
+
+                if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
+                {
+                    // Node has not been added to the frontier - add it
+                    frontier.Enqueue(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                    visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
+                }
+                else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCostToNode)
+                {
+                    // Node is already on the frontier, but the cost via this edge
+                    // is cheaper than has been found previously - increase its priority
+                    frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                    visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
+                }
             }
 
             if (frontier.Count == 0)
             {
                 IsConcluded = true;
-            }
-        }
-
-        private void UpdateFrontier(TNode node, TEdge edge, float totalCostToNodeViaEdge)
-        {
-            var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
-            var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
-            if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
-            {
-                // Node has not been added to the frontier - add it
-                frontier.Enqueue(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
-                visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
-            }
-            else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCostToNode)
-            {
-                // Node is already on the frontier, but the cost via this edge
-                // is cheaper than has been found previously - increase its priority
-                frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
-                visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
             }
         }
 

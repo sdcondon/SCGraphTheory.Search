@@ -37,9 +37,10 @@ namespace SCGraphTheory.Search.Classic
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.depthLimit = depthLimit;
 
-            // Initialize the frontier with the source node and immediately discover it.
+            // Initialize the search tree with the source node and immediately visit it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            UpdateFrontier(source, default, 0);
+            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            Visit(source, 0);
         }
 
         /// <summary>
@@ -91,13 +92,12 @@ namespace SCGraphTheory.Search.Classic
             }
 
             var next = frontier.Pop();
-            UpdateFrontier(next.edge.To, next.edge, next.depth);
+            visited[next.edge.To] = new KnownEdgeInfo<TEdge>(next.edge, false);
+            Visit(next.edge.To, next.depth);
         }
 
-        private void UpdateFrontier(TNode node, TEdge edge, int depth)
+        private void Visit(TNode node, int depth)
         {
-            visited[node] = new KnownEdgeInfo<TEdge>(edge, false);
-
             if (isTarget(node))
             {
                 Target = node;

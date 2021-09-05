@@ -8,7 +8,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
-    /// <typeparam name="TEdges">The type of the node edges collection of the graph being search.</typeparam>
+    /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph being search.</typeparam>
     public interface ISearch<TNode, TEdge, TEdges>
         where TNode : INode<TNode, TEdge, TEdges>
         where TEdge : IEdge<TNode, TEdge, TEdges>
