@@ -34,7 +34,7 @@ namespace SCGraphTheory.Search.Classic
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            UpdateFrontier(source, default);
+            Visit(source, default);
         }
 
         /// <inheritdoc />
@@ -55,12 +55,12 @@ namespace SCGraphTheory.Search.Classic
             }
 
             var edge = frontier.Dequeue();
-            UpdateFrontier(edge.To, edge);
+            Visit(edge.To, edge);
         }
 
-        private void UpdateFrontier(TNode node, TEdge edge)
+        private void Visit(TNode node, TEdge discoveredViaEdge)
         {
-            visited[node] = new KnownEdgeInfo<TEdge>(edge, false);
+            visited[node] = new KnownEdgeInfo<TEdge>(discoveredViaEdge, false);
 
             if (isTarget(node))
             {
