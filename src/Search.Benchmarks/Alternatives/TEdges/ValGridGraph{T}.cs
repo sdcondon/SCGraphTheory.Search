@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
+namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
 {
     /// <summary>
     /// Graph implementation for a square grid (with associated values), where the nodes, edges and edge collections are all structs.

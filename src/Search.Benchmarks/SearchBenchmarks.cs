@@ -1,10 +1,12 @@
 ﻿#pragma warning disable SA1600 // Elements should be documented
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using SCGraphTheory.Search.Benchmarks.Alternatives.TEdges;
+using SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search;
 using SCGraphTheory.Search.Classic;
 using System;
 using System.Reflection;
-using AltValGridGraph = SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph.ValGridGraph<float>;
+using AltValGridGraph = SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.ValGridGraph<float>;
 using RefGridGraph = SCGraphTheory.Search.TestGraphs.GridGraph<float>;
 using ValGridGraph = SCGraphTheory.Search.TestGraphs.ValGridGraph<float>;
 
@@ -63,7 +65,7 @@ namespace SCGraphTheory.Search.Benchmarks
         [BenchmarkCategory("EdgeEnumeration", nameof(AltValGridGraph))]
         public int AltValGraphEdgeEnumerator()
         {
-            var node = (AlternativeImplementations.IAltGraph.INode<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>)altValGraph[0, 0];
+            var node = (INode<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>)altValGraph[0, 0];
             int i = 0;
             foreach (var edge in node.Edges)
             {
@@ -71,19 +73,6 @@ namespace SCGraphTheory.Search.Benchmarks
             }
 
             return i;
-        }
-
-        [Benchmark]
-        [BenchmarkCategory("BFS", nameof(AltValGridGraph))]
-        public void AltValBFS()
-        {
-            var search = new AlternativeImplementations.IAltGraph.BreadthFirstSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
-            source: altValGraph[0, 0],
-            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1));
-            while (!search.IsConcluded)
-            {
-                search.NextStep();
-            }
         }
 
         [Benchmark]
@@ -115,19 +104,31 @@ namespace SCGraphTheory.Search.Benchmarks
             getEstimatedCostToTarget: n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
 
         [Benchmark]
+        [BenchmarkCategory("BFS", nameof(AltValGridGraph))]
+        public void AltValBFS() => new BreadthFirstSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+            source: altValGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
+
+        [Benchmark]
+        [BenchmarkCategory("DFS", nameof(AltValGridGraph))]
+        public void AltValDFS() => new DepthFirstSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+            source: altValGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1)).Complete();
+
+        [Benchmark]
+        [BenchmarkCategory("Dijkstra", nameof(AltValGridGraph))]
+        public void AltValDijkstra() => new DijkstraSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+            source: altValGraph[0, 0],
+            isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1),
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();
+
+        [Benchmark]
         [BenchmarkCategory("A*", nameof(AltValGridGraph))]
-        public void AltValAStar()
-        {
-            var search = new AlternativeImplementations.IAltGraph.AStarSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+        public void AltValAStar() => new AStarSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
             source: altValGraph[0, 0],
             isTarget: n => n.Coordinates == (SIZE - 1, SIZE - 1),
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
-            getEstimatedCostToTarget: n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates));
-            while (!search.IsConcluded)
-            {
-                search.NextStep();
-            }
-        }
+            getEstimatedCostToTarget: n => EuclideanDistance((SIZE - 1, SIZE - 1), n.Coordinates)).Complete();
 
         [Benchmark]
         [BenchmarkCategory("BFS", nameof(RefGridGraph))]

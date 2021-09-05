@@ -1,16 +1,16 @@
-﻿using SCGraphTheory.Search.Classic;
-using SCGraphTheory.Search.Utility;
+﻿using SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search.Utility;
+using SCGraphTheory.Search.Classic;
 using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
+namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
 {
     /// <summary>
     /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the A* algorithm.
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
-    public class AStarSearch<TNode, TEdge, TEdges>
+    public class AStarSearch<TNode, TEdge, TEdges> : ISearch<TNode, TEdge, TEdges>
         where TNode : INode<TNode, TEdge, TEdges>
         where TEdge : IEdge<TNode, TEdge, TEdges>
         where TEdges : IReadOnlyCollection<TEdge>

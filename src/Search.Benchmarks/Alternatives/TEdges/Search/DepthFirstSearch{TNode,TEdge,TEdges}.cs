@@ -2,14 +2,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
+namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
 {
     /// <summary>
-    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the breadth-first search algorithm.
+    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the depth-first search algorithm.
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
-    public class BreadthFirstSearch<TNode, TEdge, TEdges>
+    public class DepthFirstSearch<TNode, TEdge, TEdges> : ISearch<TNode, TEdge, TEdges>
         where TNode : INode<TNode, TEdge, TEdges>
         where TEdge : IEdge<TNode, TEdge, TEdges>
         where TEdges : IReadOnlyCollection<TEdge>
@@ -17,14 +17,14 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
         private readonly Predicate<TNode> isTarget;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly Queue<(TNode node, TEdge edge)> frontier = new Queue<(TNode, TEdge)>();
+        private readonly Stack<(TNode node, TEdge edge)> frontier = new Stack<(TNode, TEdge)>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BreadthFirstSearch{TNode, TEdge, TEdges}"/> class.
+        /// Initializes a new instance of the <see cref="DepthFirstSearch{TNode, TEdge, TEdges}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from.</param>
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
-        public BreadthFirstSearch(TNode source, Predicate<TNode> isTarget)
+        public DepthFirstSearch(TNode source, Predicate<TNode> isTarget)
         {
             // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
             if (source == null)
@@ -36,7 +36,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
 
             // Initialize the frontier with the source node and immediately discover it.
             // The caller having to do a NextStep to discover it is unintuitive.
-            frontier.Enqueue((source, default));
+            frontier.Push((source, default));
             NextStep();
         }
 
@@ -44,7 +44,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
         public bool IsConcluded { get; private set; } = false;
 
         /// <inheritdoc />
-        public TNode Target { get; private set; } = default;
+        public TNode Target { get; private set; }
 
         /// <inheritdoc />
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited => visited;
@@ -57,7 +57,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
                 throw new InvalidOperationException("Search is concluded");
             }
 
-            var next = frontier.Dequeue();
+            var next = frontier.Pop();
             visited[next.node] = new KnownEdgeInfo<TEdge>(next.edge, false);
 
             if (isTarget(next.node))
@@ -71,7 +71,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeImplementations.IAltGraph
             {
                 if (!visited.ContainsKey(edge.To))
                 {
-                    frontier.Enqueue((edge.To, edge));
+                    frontier.Push((edge.To, edge));
                     visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, true);
                 }
             }
