@@ -6,7 +6,7 @@ Graph search algorithms that work against any graph type implementing the interf
 
 ## Classic search algorithms
 
-The `Classic` namespace contains implementations of the breadth-first, depth-first (including limited and iterative deepening variants), Dijkstra, and A-star search algorithms, all conforming to a common interface - [ISearch<TNode,TEdge>](/src/Search/Classic/ISearch{TNode,TEdge}.cs). They should be fairly intuitive to use. Here are some example instantiations:
+The `Classic` namespace contains (single-source) implementations of the breadth-first, depth-first (including limited and iterative deepening variants), Dijkstra, and A-star search algorithms, all conforming to a common interface - [ISearch<TNode,TEdge>](/src/Search/Classic/ISearch{TNode,TEdge}.cs). They should be fairly intuitive to use. Here are some example instantiations:
 
 ```csharp
 var breadthFirst = new BreadthFirstSearch<MyNodeType, MyEdgeType>(
