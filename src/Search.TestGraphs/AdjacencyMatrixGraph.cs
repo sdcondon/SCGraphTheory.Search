@@ -30,7 +30,7 @@ namespace SCGraphTheory.Search.TestGraphs
             // shuffling stuff up if caller-supplied node IDs have any gaps - just
             // make a bigger matrix than we actually need.
             var nodeIndices = edges.SelectMany(e => new[] { e.from, e.to }).Distinct();
-            nodes = new Node[nodeIndices.Last() + 1];
+            nodes = new Node[nodeIndices.Max() + 1];
             foreach (var nodeIndex in nodeIndices)
             {
                 nodes[nodeIndex] = new Node(this, nodeIndex);
