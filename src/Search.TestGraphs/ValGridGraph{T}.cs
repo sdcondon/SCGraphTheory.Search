@@ -17,24 +17,24 @@ namespace SCGraphTheory.Search.TestGraphs
     /// </remarks>
     public class ValGridGraph<T> : IGraph<ValGridGraph<T>.Node, ValGridGraph<T>.Edge>
     {
-        private readonly T[,] index;
+        private readonly T[,] values;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValGridGraph{T}"/> class.
         /// </summary>
         /// <param name="size">The size of the graph.</param>
-        public ValGridGraph((int X, int Y) size) => index = new T[size.X, size.Y];
+        public ValGridGraph((int X, int Y) size) => values = new T[size.X, size.Y];
 
         /// <inheritdoc />
         public IEnumerable<Node> Nodes
         {
             get
             {
-                for (int x = index.GetLowerBound(0); x <= index.GetUpperBound(0); x++)
+                for (int x = values.GetLowerBound(0); x <= values.GetUpperBound(0); x++)
                 {
-                    for (int y = index.GetLowerBound(1); y <= index.GetUpperBound(1); y++)
+                    for (int y = values.GetLowerBound(1); y <= values.GetUpperBound(1); y++)
                     {
-                        yield return new Node(index, (x, y));
+                        yield return new Node(values, (x, y));
                     }
                 }
             }
@@ -60,22 +60,22 @@ namespace SCGraphTheory.Search.TestGraphs
         /// </summary>
         /// <param name="x">The x-ordinate of the node to retrieve.</param>
         /// <param name="y">The y-ordinate of the node to retrieve.</param>
-        public Node this[int x, int y] => new Node(index, (x, y));
+        public Node this[int x, int y] => new Node(values, (x, y));
 
         /// <summary>
         /// Node structure for <see cref="ValGridGraph{T}"/>.
         /// </summary>
-        public struct Node : INode<Node, Edge>
+        public struct Node : INode<Node, Edge>, IEquatable<Node>
         {
-            private readonly T[,] index;
+            private readonly T[,] values;
             private readonly (int X, int Y) coordinates;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Node"/> struct.
             /// </summary>
-            /// <param name="index">The index of node values to use when getting or setting node value.</param>
+            /// <param name="values">The index of node values to use when getting or setting node value.</param>
             /// <param name="coordinates">The coordinates of the node.</param>
-            internal Node(T[,] index, (int X, int Y) coordinates) => (this.index, this.coordinates) = (index, coordinates);
+            internal Node(T[,] values, (int X, int Y) coordinates) => (this.values, this.coordinates) = (values, coordinates);
 
             /// <summary>
             /// Gets the coordinates of the node.
@@ -87,60 +87,62 @@ namespace SCGraphTheory.Search.TestGraphs
             /// </summary>
             public T Value
             {
-                get => index[coordinates.X, coordinates.Y];
-                set => index[coordinates.X, coordinates.Y] = value;
+                get => values[coordinates.X, coordinates.Y];
+                set => values[coordinates.X, coordinates.Y] = value;
             }
 
             /// <summary>
             /// Gets the collection of edges that are outbound from this node.
             /// </summary>
-            public EdgeCollection Edges => new EdgeCollection(index, coordinates);
+            public EdgeCollection Edges => new EdgeCollection(values, coordinates);
 
             /// <inheritdoc />
-            IReadOnlyCollection<Edge> INode<Node, Edge>.Edges => new EdgeCollection(index, coordinates);
+            IReadOnlyCollection<Edge> INode<Node, Edge>.Edges => new EdgeCollection(values, coordinates);
 
             /// <inheritdoc />
-            public override bool Equals(object obj) => obj is Node n
-                && Equals(index, n.index)
-                && coordinates.Equals(n.Coordinates);
+            public override bool Equals(object obj) => obj is Node node && Equals(node);
 
             /// <inheritdoc />
-            public override int GetHashCode() => HashCode.Combine(
-                index,
-                coordinates);
+            public bool Equals(Node other) => Equals(values, other.values) && coordinates.Equals(other.Coordinates);
+
+            /// <inheritdoc />
+            public override int GetHashCode() => HashCode.Combine(values, coordinates);
         }
 
         /// <summary>
         /// Edge structure for <see cref="ValGridGraph{T}"/>.
         /// </summary>
-        public struct Edge : IEdge<Node, Edge>
+        public struct Edge : IEdge<Node, Edge>, IEquatable<Edge>
         {
-            private readonly T[,] index;
+            private readonly T[,] values;
             private readonly (int X, int Y) fromCoords;
             private readonly (sbyte X, sbyte Y) delta;
 
-            internal Edge(T[,] index, (int X, int Y) fromCoords, (sbyte X, sbyte Y) d)
+            internal Edge(T[,] values, (int X, int Y) fromCoords, (sbyte X, sbyte Y) d)
             {
-                this.index = index;
+                this.values = values;
                 this.fromCoords = fromCoords;
                 this.delta = d;
             }
 
             /// <inheritdoc />
-            public Node From => new Node(index, fromCoords);
+            public Node From => new Node(values, fromCoords);
 
             /// <inheritdoc />
-            public Node To => new Node(index, (fromCoords.X + delta.X, fromCoords.Y + delta.Y));
+            public Node To => new Node(values, (fromCoords.X + delta.X, fromCoords.Y + delta.Y));
 
             /// <inheritdoc />
             public override bool Equals(object obj) => obj is Edge e
-                && Equals(index, e.index)
-                && fromCoords.Equals(e.fromCoords)
-                && delta.Equals(e.delta);
+                && Equals(e);
+
+            /// <inheritdoc />
+            public bool Equals(Edge other) => Equals(values, other.values)
+                && fromCoords.Equals(other.fromCoords)
+                && delta.Equals(other.delta);
 
             /// <inheritdoc />
             public override int GetHashCode() => HashCode.Combine(
-                index,
+                values,
                 fromCoords,
                 delta);
         }
@@ -148,42 +150,52 @@ namespace SCGraphTheory.Search.TestGraphs
         // NB: Used via its interface in search algorithms, so presumably will be getting boxed :(
         public struct EdgeCollection : IReadOnlyCollection<Edge>
         {
-            private readonly T[,] index;
+            private readonly T[,] values;
             private readonly (int X, int Y) coordinates;
 
-            internal EdgeCollection(T[,] index, (int X, int Y) coordinates) => (this.index, this.coordinates) = (index, coordinates);
+            internal EdgeCollection(T[,] values, (int X, int Y) coordinates) => (this.values, this.coordinates) = (values, coordinates);
 
+            /// <inheritdoc />
             public int Count => this.Count();
 
-            public EdgeEnumerator GetEnumerator() => new EdgeEnumerator(index, coordinates);
+            public EdgeEnumerator GetEnumerator() => new EdgeEnumerator(values, coordinates);
 
-            IEnumerator<Edge> IEnumerable<Edge>.GetEnumerator() => new EdgeEnumerator(index, coordinates);
+            /// <inheritdoc />
+            IEnumerator<Edge> IEnumerable<Edge>.GetEnumerator() => new EdgeEnumerator(values, coordinates);
 
-            IEnumerator IEnumerable.GetEnumerator() => new EdgeEnumerator(index, coordinates);
+            /// <inheritdoc />
+            IEnumerator IEnumerable.GetEnumerator() => new EdgeEnumerator(values, coordinates);
         }
 
         public struct EdgeEnumerator : IEnumerator<Edge>
         {
-            private readonly T[,] index;
+            private readonly T[,] values;
             private readonly (int X, int Y) coordinates;
             private (sbyte X, sbyte Y) currentDelta;
 
-            internal EdgeEnumerator(T[,] index, (int X, int Y) coordinates)
+            internal EdgeEnumerator(T[,] values, (int X, int Y) coordinates)
             {
-                this.index = index;
+                this.values = values;
                 this.coordinates = coordinates;
                 this.currentDelta = (-2, -1);
             }
 
-            // NB: A bug here - getting Current before MoveNext gives a wrong edge instead of throwing.
-            public Edge Current => new Edge(index, coordinates, currentDelta);
+            /// <inheritdoc />
+            /// <remarks>
+            /// NB: Bugs here - getting Current before MoveNext gives a wrong edge instead of throwing.
+            /// Is also wrong if we've reached end of enumeration.
+            /// </remarks>
+            public Edge Current => new Edge(values, coordinates, currentDelta);
 
-            object IEnumerator.Current => new Edge(index, coordinates, currentDelta);
+            /// <inheritdoc />
+            object IEnumerator.Current => new Edge(values, coordinates, currentDelta);
 
+            /// <inheritdoc />
             public void Dispose()
             {
             }
 
+            /// <inheritdoc />
             public bool MoveNext()
             {
                 do
@@ -200,15 +212,16 @@ namespace SCGraphTheory.Search.TestGraphs
                     }
                 }
                 while (
-                    coordinates.X + currentDelta.X < index.GetLowerBound(0)
-                    || coordinates.X + currentDelta.X > index.GetUpperBound(0)
-                    || coordinates.Y + currentDelta.Y < index.GetLowerBound(1)
-                    || coordinates.Y + currentDelta.Y > index.GetUpperBound(1)
+                    coordinates.X + currentDelta.X < values.GetLowerBound(0)
+                    || coordinates.X + currentDelta.X > values.GetUpperBound(0)
+                    || coordinates.Y + currentDelta.Y < values.GetLowerBound(1)
+                    || coordinates.Y + currentDelta.Y > values.GetUpperBound(1)
                     || currentDelta == (0, 0));
 
                 return true;
             }
 
+            /// <inheritdoc />
             public void Reset() => currentDelta = (-2, -1);
         }
     }

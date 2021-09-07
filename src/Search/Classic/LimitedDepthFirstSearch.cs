@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SCGraphTheory.Search.Classic
 {
@@ -36,6 +37,8 @@ namespace SCGraphTheory.Search.Classic
 
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.depthLimit = depthLimit;
+
+            Visited = new ReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>>(visited);
 
             // Initialize the search tree with the source node and immediately visit it.
             // The caller having to do a NextStep to discover it is unintuitive.
@@ -81,7 +84,7 @@ namespace SCGraphTheory.Search.Classic
         public TNode Target { get; private set; }
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited => visited;
+        public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
         /// <inheritdoc />
         public void NextStep()

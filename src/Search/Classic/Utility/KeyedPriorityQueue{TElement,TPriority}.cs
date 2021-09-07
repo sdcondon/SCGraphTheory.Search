@@ -177,15 +177,16 @@ namespace SCGraphTheory.Search.Utility
             while (i != -1)
             {
                 var dominatingIndex = -1;
-                var dominating = entry;
+                ref var dominating = ref entry;
 
+                // TODO-PERFORMANCE: Does this *really* need to be a loop? Performance test this at some point..
                 for (int childIndex = 2 * i + 1; childIndex - 2 * i <= 2 && childIndex < Count; childIndex++)
                 {
                     ref var child = ref heap[childIndex];
                     if (priorityComparer.Compare(child.priority, dominating.priority) > 0)
                     {
                         dominatingIndex = childIndex;
-                        dominating = child;
+                        dominating = ref child;
                     }
                 }
 
