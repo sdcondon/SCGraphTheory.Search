@@ -10,7 +10,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
     /// <typeparam name="TEdges">The type of the outbound edges collection of each node of the graph.</typeparam>
     /// <remarks>
     /// This interface exists only to facilitate avoidance of boxing by consumers when <see cref="TEdges"/> is a value type. While the resulting performance boost won't be
-    /// massive, it may be desirable in some cases. The vast majority of graph implementations can simply implement <see cref="ISearch{TNode, TEdge}"/> and ignore this.
+    /// massive, it may be desirable in some cases. The vast majority of graph implementations can simply implement <see cref="IGraph{TNode, TEdge}"/> and ignore this.
     /// </remarks>
     public interface IGraph<out TNode, out TEdge, out TEdges>
         where TNode : INode<TNode, TEdge, TEdges>

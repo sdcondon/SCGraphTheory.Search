@@ -24,9 +24,9 @@ var dijkstra = new DijkstraSearch<MyNodeType, MyEdgeType>(
 
 var aStar = new AStarSearch<MyNodeType, MyEdgeType>(
     source: myGraph.MyNodeIndex[0, 0],
-    isTarget: n => n == mySpecificTargetNode,
+    isTarget: n => n.Coords == targetCoords,
     getEdgeCost: e => e.MyEdgeCost,
-    getEstimatedCostToTarget: n => EuclideanDistance(n.Coords, mySpecificTargetNode.Coords));
+    getEstimatedCostToTarget: n => EuclideanDistance(n.Coords, targetCoords));
 ```
 
 Searches are executed step-by-step via the `NextStep()` method of the [ISearch<TNode,TEdge>](/src/Search/Classic/ISearch{TNode,TEdge}.cs) interface. This (as opposed to having to execute a search all the way to completion) is to maximise the flexibility with which potentially expensive searches can be executed. A `Complete()` extension method is defined though; which continuously calls `NextStep()` until the search completes.
@@ -41,11 +41,11 @@ The `Local` namespace contains implementations of the (steepest-ascent) hill cli
 ```csharp
 var hillClimb = new HillClimb<MyNodeType, MyEdgeType>(
     source: mySpecificSourceNode,
-    getUtility: n => n == n.MyUtilityProp);
+    getUtility: n => n.MyUtilityProp);
 
 var simulatedAnnealing = new SimulatedAnnealing<MyNodeType, MyEdgeType>(
     source: mySpecificSourceNode,
-    getUtility: n => n == n.MyUtilityProp,
+    getUtility: n => n.MyUtilityProp,
     annealingSchedule: t => Math.Max(1 - (.01f * t), 0));
 ```
 

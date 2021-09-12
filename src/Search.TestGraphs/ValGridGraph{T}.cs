@@ -200,12 +200,10 @@ namespace SCGraphTheory.Search.TestGraphs
             {
                 do
                 {
-                    currentDelta.X++;
-                    if (currentDelta.X > 1)
+                    if (++currentDelta.X > 1)
                     {
                         currentDelta.X = -1;
-                        currentDelta.Y++;
-                        if (currentDelta.Y > 1)
+                        if (++currentDelta.Y > 1)
                         {
                             return false;
                         }
