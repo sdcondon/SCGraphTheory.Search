@@ -1,7 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FlUnit;
 using SCGraphTheory.Search.TestGraphs;
+using Shouldly;
 using System;
-using System.Collections.Generic;
 
 namespace SCGraphTheory.Search.Local
 {
@@ -11,20 +11,15 @@ namespace SCGraphTheory.Search.Local
     /// of implementation changes.
     /// <para/>
     /// We could make the test stochastic instead - repeat it, and mark as a pass once it hits an acceptable pass rate. But not worth it. This'll do.
-    /// </summary>
-    [TestClass]
-    public class SimulatedAnnealingTests
+    /// </remarks>
+    public static class SimulatedAnnealingTests
     {
-        public static IEnumerable<object[]> GetBasicTestCases()
-        {
-            static object[] MakeBasicTestCase(GridGraph<int> graph, (int X, int Y) source, (int X, int Y) expectedEnd)
-            {
-                return new object[] { graph, source, expectedEnd };
-            }
+        private record TestCase(GridGraph<int> graph, (int X, int Y) source, (int X, int Y) expectedEnd);
 
-            return new object[][]
+        public static Test SearchBehaviour => TestThat
+            .GivenEachOf(() => new[]
             {
-                MakeBasicTestCase(
+                new TestCase(
                     graph: new GridGraph<int>(new[,]
                     {
                         { 0, 0, 0 },
@@ -33,7 +28,7 @@ namespace SCGraphTheory.Search.Local
                     }),
                     source: (1, 1),
                     expectedEnd: (1, 1)),
-                MakeBasicTestCase(
+                new TestCase(
                     graph: new GridGraph<int>(new[,]
                     {
                         { 1, 0, 1 },
@@ -42,26 +37,21 @@ namespace SCGraphTheory.Search.Local
                     }),
                     source: (0, 0),
                     expectedEnd: (2, 2)),
-            };
-        }
-
-        [DataTestMethod]
-        [DynamicData(nameof(GetBasicTestCases), DynamicDataSourceType.Method)]
-        public void BasicTests(GridGraph<int> graph, (int X, int Y) source, (int X, int Y) expectedEnd)
-        {
-            var search = new SimulatedAnnealing<GridGraph<int>.Node, GridGraph<int>.Edge>(
-                source: graph[source.X, source.Y],
-                getUtility: n => n.Value,
-                annealingSchedule: t => Math.Max(1 - (.01f * t), 0));
-
-            Assert.AreEqual(source, search.Current.Coordinates);
-
-            while (!search.IsConcluded)
+            })
+            .When(tc =>
             {
-                search.NextStep();
-            }
+                var search = new SimulatedAnnealing<GridGraph<int>.Node, GridGraph<int>.Edge>(
+                    source: tc.graph[tc.source.X, tc.source.Y],
+                    getUtility: n => n.Value,
+                    annealingSchedule: t => Math.Max(1 - (.01f * t), 0));
 
-            Assert.AreEqual(expectedEnd, search.Current.Coordinates, "NB: testing a stochastic algorithm - the occasional failure is to be expected.");
-        }
+                while (!search.IsConcluded)
+                {
+                    search.NextStep();
+                }
+
+                return search;
+            })
+            .Then((tc, search) => search.Current.Coordinates.ShouldBe(tc.expectedEnd, "NB: testing a stochastic algorithm - the occasional failure is to be expected."));
     }
 }

@@ -1,23 +1,18 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FlUnit;
 using SCGraphTheory.Search.TestGraphs;
-using System;
+using Shouldly;
 using System.Collections.Generic;
 
 namespace SCGraphTheory.Search.Local
 {
-    [TestClass]
-    public class HillClimbTests
+    public static class HillClimbTests
     {
-        public static IEnumerable<object[]> GetBasicTestCases()
-        {
-            static object[] MakeBasicTestCase(GridGraph<int> graph, (int X, int Y) source, (int X, int Y)[] expectedSteps)
-            {
-                return new object[] { graph, source, expectedSteps };
-            }
+        private record TestCase(GridGraph<int> graph, (int X, int Y) source, (int from, int to)[] expectedSteps);
 
-            return new object[][]
+        public static Test SearchBehaviour => TestThat
+            .GivenEachOf(() => new[]
             {
-                MakeBasicTestCase(
+                new TestCase(
                     graph: new GridGraph<int>(new[,]
                     {
                         { 0, 1, 1 },
@@ -26,7 +21,7 @@ namespace SCGraphTheory.Search.Local
                     }),
                     source: (1, 1),
                     expectedSteps: new[] { (1, 1) }),
-                MakeBasicTestCase(
+                new TestCase(
                     graph: new GridGraph<int>(new[,]
                     {
                         { 2, 1, 1 },
@@ -35,27 +30,22 @@ namespace SCGraphTheory.Search.Local
                     }),
                     source: (1, 1),
                     expectedSteps: new[] { (0, 0), (0, 0) }),
-            };
-        }
-
-        [DataTestMethod]
-        [DynamicData(nameof(GetBasicTestCases), DynamicDataSourceType.Method)]
-        public void BasicTests(GridGraph<int> graph, (int X, int Y) source, (int X, int Y)[] expectedSteps)
-        {
-            var search = new HillClimb<GridGraph<int>.Node, GridGraph<int>.Edge, int>(
-                source: graph[source.X, source.Y],
-                getUtility: n => n.Value);
-
-            Assert.AreEqual(source, search.Current.Coordinates);
-
-            for (int i = 0; i < expectedSteps.Length; i++)
+            })
+            .When(tc =>
             {
-                Assert.IsTrue(search.IsMoving);
-                search.NextStep();
-                Assert.AreEqual(expectedSteps[i], search.Current.Coordinates);
-            }
+                var search = new HillClimb<GridGraph<int>.Node, GridGraph<int>.Edge, int>(
+                    source: tc.graph[tc.source.X, tc.source.Y],
+                    getUtility: n => n.Value);
 
-            Assert.IsFalse(search.IsMoving);
-        }
+                var steps = new List<(int, int)>();
+                while (search.IsMoving)
+                {
+                    search.NextStep();
+                    steps.Add(search.Current.Coordinates);
+                }
+
+                return steps.ToArray();
+            })
+            .Then((tc, steps) => steps.ShouldBe(tc.expectedSteps));
     }
 }
