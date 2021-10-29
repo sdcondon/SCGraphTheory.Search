@@ -1,3 +1,5 @@
+![SCGraphTheory Icon](src/Search/SCGraphTheoryIcon.png)
+
 # SCGraphTheory.Search
 
 [![NuGet version (SCGraphTheory.Search)](https://img.shields.io/nuget/v/SCGraphTheory.Search.svg?style=flat-square)](https://www.nuget.org/packages/SCGraphTheory.Search/)
