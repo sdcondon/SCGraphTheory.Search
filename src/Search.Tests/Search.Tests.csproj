@@ -25,12 +25,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="FlUnit" Version="0.11.0" />
-    <PackageReference Include="FlUnit.VS.TestAdapter" Version="0.11.0">
+    <PackageReference Include="FlUnit" Version="0.12.0" />
+    <PackageReference Include="FlUnit.VS.TestAdapter" Version="0.12.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
   </ItemGroup>
 

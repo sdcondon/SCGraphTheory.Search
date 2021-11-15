@@ -63,7 +63,7 @@ namespace SCGraphTheory.Search.Classic
 
                 return new { search, searchSteps };
             })
-            .Then((tc, r) => r.searchSteps.ShouldBe(tc.expectedSteps))
+            .ThenReturns((tc, r) => r.searchSteps.ShouldBe(tc.expectedSteps))
             .And((tc, r) => r.search.State.ShouldBe(tc.expectedEndState))
             .And((tc, r) => r.search.Target.ShouldBeSameAs(tc.graph.Nodes.SingleOrDefault(n => n.Id == tc.targetId)));
     }
