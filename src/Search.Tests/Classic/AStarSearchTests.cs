@@ -1,6 +1,6 @@
-﻿using FlUnit;
+﻿using FluentAssertions;
+using FlUnit;
 using SCGraphTheory.Search.TestGraphs;
-using Shouldly;
 using System;
 using System.Linq;
 
@@ -13,9 +13,6 @@ namespace SCGraphTheory.Search.Classic
         public static Test SearchBehaviour => TestThat
             .GivenEachOf(() => new[]
             {
-                // NB: we expect the source node to be added to the search tree in the ctor, so that the first
-                // step traverses an edge, or the search is immediately complete. This is (admittedly somewhat subjectively)
-                // more intuitive behaviour than the first step just adding the source node to the search tree.
                 new TestCase(
                     graph: new LinqGraph((1, 2, 1)),
                     sourceId: 1,
@@ -44,7 +41,7 @@ namespace SCGraphTheory.Search.Classic
 
                 return new { search, searchSteps };
             })
-            .ThenReturns((tc, r) => r.searchSteps.ShouldBe(tc.expectedSteps))
-            .And((tc, r) => r.search.Target.ShouldBeSameAs(tc.graph.Nodes.SingleOrDefault(n => n.Id == tc.targetId)));
+            .ThenReturns((tc, r) => r.searchSteps.Should().BeEquivalentTo(tc.expectedSteps))
+            .And((tc, r) => r.search.Target.Should().Be(tc.graph.Nodes.SingleOrDefault(n => n.Id == tc.targetId)));
     }
 }

@@ -1,6 +1,6 @@
-﻿using FlUnit;
+﻿using FluentAssertions;
+using FlUnit;
 using SCGraphTheory.Search.TestGraphs;
-using Shouldly;
 using System.Collections.Generic;
 
 namespace SCGraphTheory.Search.Local
@@ -46,6 +46,6 @@ namespace SCGraphTheory.Search.Local
 
                 return steps.ToArray();
             })
-            .ThenReturns((tc, steps) => steps.ShouldBe(tc.expectedSteps));
+            .ThenReturns((tc, steps) => steps.Should().BeEquivalentTo(tc.expectedSteps));
     }
 }

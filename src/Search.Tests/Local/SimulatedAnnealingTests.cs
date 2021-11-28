@@ -1,6 +1,6 @@
-﻿using FlUnit;
+﻿using FluentAssertions;
+using FlUnit;
 using SCGraphTheory.Search.TestGraphs;
-using Shouldly;
 using System;
 
 namespace SCGraphTheory.Search.Local
@@ -52,6 +52,6 @@ namespace SCGraphTheory.Search.Local
 
                 return search;
             })
-            .ThenReturns((tc, search) => search.Current.Coordinates.ShouldBe(tc.expectedEnd, "NB: testing a stochastic algorithm - the occasional failure is to be expected."));
+            .ThenReturns((tc, search) => search.Current.Coordinates.Should().Be(tc.expectedEnd, "NB: testing a stochastic algorithm - the occasional failure is to be expected."));
     }
 }
