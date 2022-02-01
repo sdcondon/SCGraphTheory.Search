@@ -46,6 +46,7 @@ namespace SCGraphTheory.Search.Local
 
                 return steps.ToArray();
             })
-            .ThenReturns((tc, steps) => steps.Should().BeEquivalentTo(tc.expectedSteps));
+            .ThenReturns()
+            .And((tc, steps) => steps.Should().BeEquivalentTo(tc.expectedSteps));
     }
 }
