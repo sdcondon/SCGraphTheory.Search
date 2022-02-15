@@ -53,6 +53,6 @@ namespace SCGraphTheory.Search.Local
                 return search;
             })
             .ThenReturns()
-            .And((tc, search) => search.Current.Coordinates.Should().Be(tc.expectedEnd, "NB: testing a stochastic algorithm - the occasional failure is to be expected."));
+            .And((tc, search) => search.Current.Coordinates.Should().Be(tc.expectedEnd, "*most* of the time it should find the global maximum (but note this is a stochastic algorithm - the occasional failure is to be expected)"));
     }
 }
