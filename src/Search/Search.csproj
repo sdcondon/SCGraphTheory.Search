@@ -7,7 +7,7 @@
     <Description>Graph search algorithms that work against any graph type implementing the interfaces defined in SCGraphTheory.Abstractions.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageTags>graphs graph-theory a* dijkstra depth-first breadth-first</PackageTags>
+    <PackageTags>graph theory search a* dijkstra depth-first breadth-first</PackageTags>
     <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
     <PackageIcon>SCGraphTheoryIcon.png</PackageIcon>
