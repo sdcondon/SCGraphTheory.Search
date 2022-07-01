@@ -57,7 +57,6 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             private StateNode(State state)
             {
                 State = state;
-                Edges = state.GetAvailableActions().Select(a => ActionEdge.Get(this, a)).ToList().AsReadOnly();
             }
 
             /// <inheritdoc />
@@ -69,7 +68,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             /// <summary>
             /// Gets the (concretely-typed) collection of edges that are outbound from this node.
             /// </summary>
-            public IReadOnlyCollection<ActionEdge> Edges { get; }
+            public IReadOnlyCollection<ActionEdge> Edges => State.GetAvailableActions().Select(a => ActionEdge.Get(this, a)).ToList().AsReadOnly();
 
             /// <summary>
             /// Gets the node that corresponds to a given state.
@@ -94,7 +93,6 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             {
                 State = state;
                 Action = action;
-                Edges = state.GetPossibleOutcomes(action).Select(s => OutcomeEdge.Get(this, s)).ToList().AsReadOnly();
             }
 
             /// <inheritdoc />
@@ -111,7 +109,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             /// <summary>
             /// Gets the (concretely-typed) collection of edges that are outbound from this node.
             /// </summary>
-            public IReadOnlyCollection<OutcomeEdge> Edges { get; }
+            public IReadOnlyCollection<OutcomeEdge> Edges => State.GetPossibleOutcomes(Action).Select(s => OutcomeEdge.Get(this, s)).ToList().AsReadOnly();
 
             /// <summary>
             /// Gets the node that corresponds to a given state and action.
