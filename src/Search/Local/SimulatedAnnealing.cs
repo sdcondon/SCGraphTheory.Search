@@ -62,6 +62,7 @@ namespace SCGraphTheory.Search.Local
         {
             // ERROR HANDLING: Could perhaps catch OverflowException and wrap in an InvalidOperationException("Max step count reached.", e) for a better error,
             // but its really too much of an edge case to worry about.
+            // Alternatively, probably better to throw only if the schedule gives a non-zero temperature for max int..
             var temp = annealingSchedule(stepsCarriedOut++);
 
             var edge = Current.Edges.Skip(random.Next(Current.Edges.Count)).First();
