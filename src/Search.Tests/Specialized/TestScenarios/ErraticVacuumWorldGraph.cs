@@ -7,7 +7,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 {
     /// <summary>
     /// A graph representation of the "erratic vacuum world" scenario from §4.3 of "Artifical Intelligence: A Modern Approach".
-    /// This is an example of an "and-or tree". It also serves as an example of a graceful way to implement a graph that includes
+    /// This is an example of an "and-or graph". It also serves as an example of a graceful way to implement a graph that includes
     /// multiple node and edge types.
     /// </summary>
     public class ErraticVacuumWorldGraph
@@ -48,7 +48,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
         /// <summary>
         /// Represents a given state and offers outbound edges that represent possible actions.
-        /// This is an "or" node in the and-or tree parlance.
+        /// This is an "or" node in the and-or graph parlance.
         /// </summary>
         public class StateNode : INode
         {
@@ -83,7 +83,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
         /// <summary>
         /// Represents a given action from a given state and offers outbound edges that represent possible outcomes.
-        /// This is an "and" node in the and-or tree parlance.
+        /// This is an "and" node in the and-or graph parlance.
         /// </summary>
         public class ActionNode : INode
         {
@@ -205,7 +205,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             INode IEdge<INode, IEdge>.From => From;
 
             /// <inheritdoc />
-            INode IEdge<INode, IEdge>.To => From;
+            INode IEdge<INode, IEdge>.To => To;
 
             /// <summary>
             /// Gets the edge that corresponds to a given outcome of a given action from a given state.
