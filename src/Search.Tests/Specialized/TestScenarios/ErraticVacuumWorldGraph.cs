@@ -171,7 +171,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             /// <param name="from">The state node that the edge connects from.</param>
             /// <param name="action">The action being carried out.</param>
             /// <returns>The edge that corresponds to the given action from the given state.</returns>
-            public static ActionEdge Get(StateNode from, Actions action) => Cache.GetOrAdd((from.State, action), t => new ActionEdge(from, ActionNode.Get(from.State, action)));
+            public static ActionEdge Get(StateNode from, Actions action) => Cache.GetOrAdd((from.State, action), t => new ActionEdge(from, ActionNode.Get(t.state, t.action)));
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
         /// </summary>
         public class OutcomeEdge : IEdge
         {
-            private static readonly ConcurrentDictionary<(State, Actions, State), OutcomeEdge> Cache = new ();
+            private static readonly ConcurrentDictionary<(State, Actions, State outcome), OutcomeEdge> Cache = new ();
 
             private OutcomeEdge(ActionNode from, StateNode to)
             {
@@ -218,7 +218,7 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
             /// <param name="from">The action node that the edge connects from.</param>
             /// <param name="outcome">The outcome of the action.</param>
             /// <returns>The edge that corresponds to the given outcome of the given action from the given state.</returns>
-            public static OutcomeEdge Get(ActionNode from, State outcome) => Cache.GetOrAdd((from.State, from.Action, outcome), new OutcomeEdge(from, StateNode.Get(outcome)));
+            public static OutcomeEdge Get(ActionNode from, State outcome) => Cache.GetOrAdd((from.State, from.Action, outcome), t => new OutcomeEdge(from, StateNode.Get(t.outcome)));
         }
 
         /// <summary>
