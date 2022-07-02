@@ -193,6 +193,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs
             /// <inheritdoc />
             public bool MoveNext()
             {
+                // TODO-PERFORMANCE: make this more efficient
                 do
                 {
                     currentDelta.X++;
