@@ -9,23 +9,21 @@ namespace SCGraphTheory.Search.Specialized
 {
     public static class AndOrSearchTests
     {
-        public static Test ErraticVaccumWorld_Recursive => TestThat
-            .Given(() => new
+        public static Test ErraticVaccumWorld_FromAIaMA => TestThat
+            .When(() =>
             {
-                InitialState = new State(
+                var initialState = new State(
                     VacuumPosition: VacuumPositions.Left,
                     IsCurrentLocationDirty: true,
-                    IsOtherLocationDirty: true),
-            })
-            .When(g =>
-            {
-                return AndOrSearch_FromAIaMA.Execute<INode, IEdge>(
-                    GetStateNode(g.InitialState),
+                    IsOtherLocationDirty: true);
+
+                return AndOrDFS_FromAIaMA.Execute<INode, IEdge>(
+                    GetStateNode(initialState),
                     n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
             })
             .ThenReturns()
-            .And((_, o) => o.Succeeded.Should().BeTrue())
-            .And((g, o) => o.Plan.Flatten(GetStateNode(g.InitialState)).ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<State, Actions>
+            .And((o) => o.Succeeded.Should().BeTrue())
+            .And((o) => o.Plan.Flatten().ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<State, Actions>
             {
                 [new (VacuumPositions.Left, true, true)] = Actions.Suck,
                 [new (VacuumPositions.Left, false, true)] = Actions.Right,
