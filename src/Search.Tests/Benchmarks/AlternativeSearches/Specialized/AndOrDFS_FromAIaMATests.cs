@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach.ErraticVacuumWorldGraph;
 
-namespace SCGraphTheory.Search.Specialized
+namespace SCGraphTheory.Search.AlternativeSearches.Specialized
 {
     public static class AndOrDFS_FromAIaMATests
     {
@@ -54,7 +54,7 @@ namespace SCGraphTheory.Search.Specialized
             {
                 ["P"] = new[] { "Q", "R" }, // P because Q and R
                 ["Q"] = new[] { "U" }, // Q because U
-                //// ..and U and R because they are the target nodes
+                //// ..and U and R because they are the known truths (i.e. the target nodes)
             }));
     }
 }

@@ -58,7 +58,7 @@ namespace SCGraphTheory.Search.Specialized
             {
                 ["P"] = new[] { "Q", "R" }, // P because Q and R
                 ["Q"] = new[] { "U" }, // Q because U
-                //// ..and U and R because they are the target nodes
+                //// ..and U and R because they are the known truths (i.e. the target nodes)
             }));
     }
 }
