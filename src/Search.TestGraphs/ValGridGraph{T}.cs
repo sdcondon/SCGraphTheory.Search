@@ -198,7 +198,8 @@ namespace SCGraphTheory.Search.TestGraphs
             /// <inheritdoc />
             public bool MoveNext()
             {
-                // TODO: make this more efficient
+                // TODO-PERFORMANCE: make this more efficient - don't need most of the checks on
+                // any given invocation
                 do
                 {
                     if (++currentDelta.X > 1)
