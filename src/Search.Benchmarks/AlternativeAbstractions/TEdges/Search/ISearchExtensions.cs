@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
+namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Search
 {
     /// <summary>
     /// Extension methods for the <see cref="ISearch{TNode, TEdge}"/> interface.

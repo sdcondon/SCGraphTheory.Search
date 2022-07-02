@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Specialized.TestScenarios
+namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
 {
     /// <summary>
     /// A graph representation of the "erratic vacuum world" scenario from §4.3 of "Artifical Intelligence: A Modern Approach".
@@ -48,7 +48,10 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
         /// <summary>
         /// Represents a given state and offers outbound edges that represent possible actions.
-        /// This is an "or" node in the and-or graph parlance.
+        /// <para/>
+        /// Note the explicit interface implementation here for Edges - so that we can give the
+        /// concretely-typed version of the edges collection the same name, which keeps things nice
+        /// and simple for consumers.
         /// </summary>
         public class StateNode : INode
         {
@@ -83,7 +86,12 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
         /// <summary>
         /// Represents a given action from a given state and offers outbound edges that represent possible outcomes.
-        /// This is an "and" node in the and-or graph parlance.
+        /// In the standard and-or graph representation, this node type actually represents a set of edges conjoined
+        /// with an arc.
+        /// <para/>
+        /// Note the explicit interface implementation here for Edges - so that we can give the
+        /// concretely-typed version of the edges collection the same name, which keeps things nice
+        /// and simple for consumers.
         /// </summary>
         public class ActionNode : INode
         {
@@ -125,6 +133,10 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
         /// <summary>
         /// Represents a given action from a given state. Connects from a <see cref="StateNode"/> to an <see cref="ActionNode"/>.
+        /// <para/>
+        /// Note the explicit interface implementation here for From and To - so that we can give the
+        /// concretely-typed version of these collection the same names, which keeps things nice
+        /// and simple for consumers.
         /// </summary>
         public class ActionEdge : IEdge
         {
@@ -132,10 +144,10 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
             private ActionEdge(StateNode from, ActionNode to)
             {
-                State = from.State;
-                Action = to.Action;
                 From = from;
                 To = to;
+                State = from.State;
+                Action = to.Action;
             }
 
             /// <inheritdoc />
@@ -174,6 +186,10 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
 
         /// <summary>
         /// Represents the outcome of an action from a given state. Connects from an <see cref="ActionNode"/> to a <see cref="StateNode"/>.
+        /// <para/>
+        /// Note the explicit interface implementation here for From and To - so that we can give the
+        /// concretely-typed version of these collection the same names, which keeps things nice
+        /// and simple for consumers.
         /// </summary>
         public class OutcomeEdge : IEdge
         {
@@ -290,13 +306,13 @@ namespace SCGraphTheory.Search.Specialized.TestScenarios
                 else if (action == Actions.Left)
                 {
                     // Always moves:
-                    // NB: a production version of this would probably want to check the current location.
+                    // NB: a production version of this would probably want to check the current location - because its public
                     yield return this with { VacuumPosition = VacuumPositions.Left, IsCurrentLocationDirty = IsOtherLocationDirty, IsOtherLocationDirty = IsCurrentLocationDirty };
                 }
                 else if (action == Actions.Right)
                 {
                     // Always moves:
-                    // NB: a production version of this would probably want to check the current location.
+                    // NB: a production version of this would probably want to check the current location - because its public
                     yield return this with { VacuumPosition = VacuumPositions.Right, IsCurrentLocationDirty = IsOtherLocationDirty, IsOtherLocationDirty = IsCurrentLocationDirty };
                 }
             }

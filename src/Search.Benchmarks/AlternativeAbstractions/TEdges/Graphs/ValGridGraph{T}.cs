@@ -1,9 +1,10 @@
-﻿using System;
+﻿using SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
+namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs
 {
     /// <summary>
     /// Graph implementation for a square grid (with associated values), where the nodes, edges and edge collections are all structs.
@@ -117,7 +118,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
             {
                 this.values = values;
                 this.fromCoords = fromCoords;
-                this.delta = d;
+                delta = d;
             }
 
             /// <inheritdoc />
@@ -172,7 +173,7 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
             {
                 this.values = values;
                 this.coordinates = coordinates;
-                this.currentDelta = (-2, -1);
+                currentDelta = (-2, -1);
             }
 
             /// <inheritdoc />

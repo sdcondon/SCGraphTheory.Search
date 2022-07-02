@@ -1,7 +1,8 @@
-﻿using SCGraphTheory.Search.Classic;
+﻿using SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges;
+using SCGraphTheory.Search.Classic;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
+namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Search
 {
     /// <summary>
     /// Interface for algorithms that search a graph for a target node.

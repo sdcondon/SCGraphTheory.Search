@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.RecursiveSearches
+namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
 {
     /// <summary>
-    /// Represents a search of an and-or tree.
+    /// Represents a search of an and-or tree. Implemented as close as possible to the way it is introduced in
+    /// "AI: A Modern Approach", for reference purposes. NB makes the assumption that "or" nodes (i.e. regular nodes
+    /// in the usual and-or graph representation) and "and" nodes (that actually represent a set of edges conjoined by an
+    /// arc in the usual representation) strictly alternate in the searched graph.
     /// </summary>
-    public static class AndOrSearch
+    public static class AndOrSearch_FromAIaMA
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AndOrSearch{TNode, TEdge}"/> class.
@@ -96,9 +99,9 @@ namespace SCGraphTheory.Search.Benchmarks.Alternatives.RecursiveSearches
             public IReadOnlyDictionary<TNode, Plan<TNode, TEdge>> Then { get; }
 
             /// <summary>
-            /// Each node will only occur at most once in the entire heirarchy of plans, so we can flatten to a single dictionary if that's easier to work with.
+            /// Each node will occur at most once in the entire heirarchy of plans, so we can flatten the plan out to a single
+            /// dictionary if that's easier to work with (notably, assert on).
             /// </summary>
-            /// <returns></returns>
             public IReadOnlyDictionary<TNode, TEdge> Flatten(TNode rootNode)
             {
                 var flattened = new Dictionary<TNode, TEdge>();

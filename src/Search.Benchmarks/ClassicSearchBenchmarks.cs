@@ -1,12 +1,9 @@
 ﻿#pragma warning disable SA1600 // Elements should be documented
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
-using SCGraphTheory.Search.Benchmarks.Alternatives.TEdges;
-using SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search;
+using SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Search;
 using SCGraphTheory.Search.Classic;
 using System;
-using System.Reflection;
-using AltValGridGraph = SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.ValGridGraph<float>;
+using AltValGridGraph = SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs.ValGridGraph<float>;
 using RefGridGraph = SCGraphTheory.Search.TestGraphs.GridGraph<float>;
 using ValGridGraph = SCGraphTheory.Search.TestGraphs.ValGridGraph<float>;
 
@@ -14,7 +11,7 @@ namespace SCGraphTheory.Search.Benchmarks
 {
     [MemoryDiagnoser]
     [InProcess]
-    public class SearchBenchmarks
+    public class ClassicSearchBenchmarks
     {
         private const int SIZE = 20;
 
@@ -22,57 +19,11 @@ namespace SCGraphTheory.Search.Benchmarks
         private readonly ValGridGraph valGraph;
         private readonly RefGridGraph refGraph;
 
-        public SearchBenchmarks()
+        public ClassicSearchBenchmarks()
         {
             altValGraph = new AltValGridGraph((SIZE, SIZE));
             valGraph = new ValGridGraph((SIZE, SIZE));
             refGraph = new RefGridGraph((SIZE, SIZE), (_, _) => true);
-        }
-
-        /// <summary>
-        /// Application entry point.
-        /// </summary>
-        /// <param name="args">Command line arguments.</param>
-        public static void Main(string[] args)
-        {
-            // See https://benchmarkdotnet.org/articles/guides/console-args.html (or run app with --help)
-            BenchmarkSwitcher.FromAssembly(Assembly.GetExecutingAssembly()).Run(args);
-        }
-
-        [Benchmark]
-        [BenchmarkCategory("Constructors", nameof(ValGridGraph))]
-        public ValGridGraph MakeValGraph() => new ValGridGraph((SIZE, SIZE));
-
-        [Benchmark]
-        [BenchmarkCategory("Constructors", nameof(RefGridGraph))]
-        public RefGridGraph MakeRefGraph() => new RefGridGraph((SIZE, SIZE), (_, _) => true);
-
-        [Benchmark]
-        [BenchmarkCategory("EdgeEnumeration", nameof(ValGridGraph))]
-        public int ValGraphEdgeEnumerator()
-        {
-            var node = (INode<ValGridGraph.Node, ValGridGraph.Edge>)valGraph[0, 0];
-            int i = 0;
-            foreach (var edge in node.Edges)
-            {
-                i++;
-            }
-
-            return i;
-        }
-
-        [Benchmark]
-        [BenchmarkCategory("EdgeEnumeration", nameof(AltValGridGraph))]
-        public int AltValGraphEdgeEnumerator()
-        {
-            var node = (INode<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>)altValGraph[0, 0];
-            int i = 0;
-            foreach (var edge in node.Edges)
-            {
-                i++;
-            }
-
-            return i;
         }
 
         [Benchmark]

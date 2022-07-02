@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search.Utility
+namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Search.Utility
 {
     /// <summary>
     /// Max priority queue implementation that uses a binary heap. Supports priority increases.

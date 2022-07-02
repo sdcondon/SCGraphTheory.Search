@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges
+namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges
 {
     /// <summary>
     /// Interface for types representing an edge in a <see cref="IGraph{TNode, TEdge}"/>.

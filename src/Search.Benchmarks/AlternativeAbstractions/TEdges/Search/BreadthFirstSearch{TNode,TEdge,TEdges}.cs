@@ -1,8 +1,9 @@
-﻿using SCGraphTheory.Search.Classic;
+﻿using SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges;
+using SCGraphTheory.Search.Classic;
 using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.Alternatives.TEdges.Search
+namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Search
 {
     /// <summary>
     /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the breadth-first search algorithm.

@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using FlUnit;
-using SCGraphTheory.Search.Benchmarks.Alternatives.RecursiveSearches;
+using SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized;
 using System.Collections.Generic;
 using System.Linq;
-using static SCGraphTheory.Search.Specialized.TestScenarios.ErraticVacuumWorldGraph;
+using static SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach.ErraticVacuumWorldGraph;
 
 namespace SCGraphTheory.Search.Specialized
 {
@@ -19,7 +19,7 @@ namespace SCGraphTheory.Search.Specialized
             })
             .When(g =>
             {
-                return AndOrSearch.Execute<INode, IEdge>(
+                return AndOrSearch_FromAIaMA.Execute<INode, IEdge>(
                     GetStateNode(g.InitialState),
                     n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
             })
