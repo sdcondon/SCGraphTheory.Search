@@ -7,8 +7,34 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
     /// Represents a depth-first search of an and-or graph. Implemented as close as possible to the way it is introduced in §4.3.2 of
     /// "Artificial Intelligence: A Modern Approach", for reference purposes.
     /// </summary>
-    public static class AndOrDFS_FromAIaMA
+    /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
+    /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
+    public class AndOrDFS<TNode, TEdge>
+        where TNode : INode<TNode, TEdge>
+        where TEdge : IEdge<TNode, TEdge>
     {
+        private readonly TNode source;
+        private readonly Predicate<TNode> isTarget;
+        ////private readonly Predicate<TEdge> isAndEdgeCollection;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AndOrDFS{TNode, TEdge}"/> class.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from. Is assumed to be an "or" node.</param>
+        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
+        public AndOrDFS(TNode source, Predicate<TNode> isTarget/*, Predicate<TEdge> isAndEdgeCollection*/)
+        {
+            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            this.source = source;
+            this.isTarget = isTarget;
+            ////this.isAndEdgeCollection = isAndEdgeCollection;
+        }
+
         /// <summary>
         /// Executes a depth-first search on an and-or graph.
         /// <para/>
@@ -18,60 +44,44 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
         /// consist of only a single edge. Obviously, this is an easy enough assumption to get rid of, but the point of this implementation
         /// is to be as close as possible to the source material, and to form a baseline.
         /// </summary>
-        /// <param name="source">The node to initiate the search from. Is assumed to be an "or" node.</param>
-        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
-        /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
-        /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
         /// <returns>The outcome of the search.</returns>
-        public static Outcome<TNode, TEdge> Execute<TNode, TEdge>(TNode source, Predicate<TNode> isTarget)
-            where TNode : INode<TNode, TEdge>
-            where TEdge : IEdge<TNode, TEdge>
+        public Outcome Execute()
         {
-            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            return VisitOrNode<TNode, TEdge>(source, isTarget, Path<TNode>.Empty);
+            return VisitOrNode(source, Path.Empty);
         }
 
-        private static Outcome<TNode, TEdge> VisitOrNode<TNode, TEdge>(TNode orNode, Predicate<TNode> isTarget, Path<TNode> path)
-            where TNode : INode<TNode, TEdge>
-            where TEdge : IEdge<TNode, TEdge>
+        private Outcome VisitOrNode(TNode orNode, Path path)
         {
             if (isTarget(orNode))
             {
-                return new Outcome<TNode, TEdge>(true);
+                return new Outcome(true);
             }
 
             if (path.Contains(orNode))
             {
-                return new Outcome<TNode, TEdge>(false);
+                return new Outcome(false);
             }
 
             foreach (var edge in orNode.Edges)
             {
-                var then = VisitAndNode<TNode, TEdge>(edge.To, isTarget, path.Prepend(orNode));
+                var then = VisitAndNode(edge.To, path.Prepend(orNode));
                 if (then != null)
                 {
-                    return new Outcome<TNode, TEdge>(new Plan<TNode, TEdge>(edge, then));
+                    return new Outcome(new Plan(edge, then));
                 }
             }
 
-            return new Outcome<TNode, TEdge>(false);
+            return new Outcome(false);
         }
 
         // Visits a node that actually represents a set of conjoined edges of a "real" node (assuming the usual representation of and-or graphs).
-        private static IReadOnlyDictionary<TNode, Plan<TNode, TEdge>> VisitAndNode<TNode, TEdge>(TNode andNode, Predicate<TNode> isTarget, Path<TNode> path)
-            where TNode : INode<TNode, TEdge>
-            where TEdge : IEdge<TNode, TEdge>
+        private IReadOnlyDictionary<TNode, Plan> VisitAndNode(TNode andNode, Path path)
         {
-            var plansByNode = new Dictionary<TNode, Plan<TNode, TEdge>>();
+            var plansByNode = new Dictionary<TNode, Plan>();
 
             foreach (var edge in andNode.Edges)
             {
-                var outcome = VisitOrNode<TNode, TEdge>(edge.To, isTarget, path);
+                var outcome = VisitOrNode(edge.To, path);
 
                 if (!outcome.Succeeded)
                 {
@@ -85,25 +95,21 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
         }
 
         /// <summary>
-        /// Container for the outcome of a <see cref="AndOrDFS_FromAIaMA"/> search.
+        /// Container for the outcome of a <see cref="AndOrDFS{TNode, TEdge}"/> search.
         /// </summary>
-        /// <typeparam name="TNode">The node type of the graph searched.</typeparam>
-        /// <typeparam name="TEdge">The edge type of the graph searched.</typeparam>
-        public class Outcome<TNode, TEdge>
-            where TNode : INode<TNode, TEdge>
-            where TEdge : IEdge<TNode, TEdge>
+        public class Outcome
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="Outcome{TNode, TEdge}"/> class that either indicates failure, or success with an empty plan (because a target node has been reached).
+            /// Initializes a new instance of the <see cref="Outcome"/> class that either indicates failure, or success with an empty plan (because a target node has been reached).
             /// </summary>
             /// <param name="succeeded">A value indicating whether the outcome is a success.</param>
-            public Outcome(bool succeeded) => Plan = succeeded ? Plan<TNode, TEdge>.Empty : null;
+            public Outcome(bool succeeded) => Plan = succeeded ? Plan.Empty : null;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="Outcome{TNode, TEdge}"/> class that indicates success.
+            /// Initializes a new instance of the <see cref="Outcome"/> class that indicates success.
             /// </summary>
             /// <param name="plan">The plan for ultimately reaching only target nodes.</param>
-            public Outcome(Plan<TNode, TEdge> plan) => Plan = plan ?? throw new ArgumentNullException(nameof(plan));
+            public Outcome(Plan plan) => Plan = plan ?? throw new ArgumentNullException(nameof(plan));
 
             /// <summary>
             /// Gets a value indicating whether the search succeeded in creating a plan.
@@ -113,26 +119,28 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             /// <summary>
             /// Gets the plan for reaching the target node or nodes.
             /// </summary>
-            public Plan<TNode, TEdge> Plan { get; }
+            public Plan Plan { get; }
         }
 
         /// <summary>
-        /// Container for a plan (or sub-plan) created by a <see cref="AndOrDFS_FromAIaMA"/> search.
+        /// Container for a plan (or sub-plan) created by a <see cref="AndOrDFS{TNode, TEdge}"/> search.
         /// </summary>
-        /// <typeparam name="TNode">The node type of the graph searched.</typeparam>
-        /// <typeparam name="TEdge">The edge type of the graph searched.</typeparam>
-        public class Plan<TNode, TEdge>
-            where TNode : INode<TNode, TEdge>
-            where TEdge : IEdge<TNode, TEdge>
+        public class Plan
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="Plan{TNode, TEdge}"/> class.
+            /// Initializes a new instance of the <see cref="Plan"/> class.
             /// </summary>
             /// <param name="first">The edge to follow immediately.</param>
             /// <param name="then">The plan to adhere to after following the edge, keyed by which node we are currently at.</param>
-            public Plan(TEdge first, IReadOnlyDictionary<TNode, Plan<TNode, TEdge>> then)
+            public Plan(TEdge first, IReadOnlyDictionary<TNode, Plan> then)
             {
-                First = first ?? throw new ArgumentNullException(nameof(first));
+                // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+                if (first == null)
+                {
+                    throw new ArgumentNullException(nameof(first));
+                }
+
+                First = first;
                 Then = then ?? throw new ArgumentNullException(nameof(then));
             }
 
@@ -141,7 +149,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             /// <summary>
             /// Gets an "empty" plan - that indicates that a target node has been reached.
             /// </summary>
-            public static Plan<TNode, TEdge> Empty { get; } = new Plan<TNode, TEdge>();
+            public static Plan Empty { get; } = new Plan();
 
             /// <summary>
             /// Gets the edge to follow immediately.
@@ -151,7 +159,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             /// <summary>
             /// Gets the plan to adhere to after following the edge, keyed by the current node.
             /// </summary>
-            public IReadOnlyDictionary<TNode, Plan<TNode, TEdge>> Then { get; }
+            public IReadOnlyDictionary<TNode, Plan> Then { get; }
 
             /// <summary>
             /// Flattens the plan out into a single mapping from the current node to the edge that should be followed to ultimately reach only target nodes.
@@ -164,7 +172,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             {
                 var flattened = new Dictionary<TNode, TEdge>();
 
-                void Visit(Plan<TNode, TEdge> plan)
+                void Visit(Plan plan)
                 {
                     if (plan.First != null)
                     {
@@ -182,17 +190,17 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             }
         }
 
-        private class Path<TNode>
+        private class Path
         {
-            private Path(TNode first, Path<TNode> rest) => (First, Rest) = (first, rest);
+            private Path(TNode first, Path rest) => (First, Rest) = (first, rest);
 
-            public static Path<TNode> Empty { get; } = new Path<TNode>(default, null);
+            public static Path Empty { get; } = new Path(default, null);
 
             public TNode First { get; }
 
-            public Path<TNode> Rest { get; }
+            public Path Rest { get; }
 
-            public Path<TNode> Prepend(TNode node) => new Path<TNode>(node, this);
+            public Path Prepend(TNode node) => new Path(node, this);
 
             public bool Contains(TNode node) => (First?.Equals(node) ?? false) || (Rest?.Contains(node) ?? false);
         }

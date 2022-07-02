@@ -10,7 +10,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
     /// This is an example of an "and-or graph". It also serves as an example of a graceful way to implement a graph that includes
     /// multiple node and edge types.
     /// </summary>
-    public class ErraticVacuumWorldGraph
+    public static class ErraticVacuumWorldGraph
     {
         /// <summary>
         /// Interface for nodes of an <see cref="ErraticVacuumWorldGraph"/>.
@@ -95,7 +95,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
         /// </summary>
         public class ActionNode : INode
         {
-            private static readonly ConcurrentDictionary<(State state, Actions action), ActionNode> ActionNodeCache = new ();
+            private static readonly ConcurrentDictionary<(State state, Actions action), ActionNode> Cache = new ();
 
             private ActionNode(State state, Actions action)
             {
@@ -128,7 +128,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
             /// <param name="state">The state to get the corresponding node for.</param>
             /// <param name="action">The action to get the corresponding node for.</param>
             /// <returns>The node that corresponds to the given state and action.</returns>
-            public static ActionNode Get(State state, Actions action) => ActionNodeCache.GetOrAdd((state, action), t => new ActionNode(t.state, t.action));
+            public static ActionNode Get(State state, Actions action) => Cache.GetOrAdd((state, action), t => new ActionNode(t.state, t.action));
         }
 
         /// <summary>
@@ -146,15 +146,13 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
             {
                 From = from;
                 To = to;
-                State = from.State;
-                Action = to.Action;
             }
 
             /// <inheritdoc />
-            public State State { get; }
+            public State State => From.State;
 
             /// <inheritdoc />
-            public Actions Action { get; }
+            public Actions Action => To.Action;
 
             /// <summary>
             /// Gets the (concretely-typed) node that this edge connects from.
@@ -202,10 +200,10 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
             }
 
             /// <inheritdoc />
-            public State State { get; }
+            public State State => From.State;
 
             /// <inheritdoc />
-            public Actions Action { get; }
+            public Actions Action => From.Action;
 
             /// <summary>
             /// Gets the (concretely-typed) node that this edge connects from.

@@ -8,7 +8,7 @@ using static SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
 
 namespace SCGraphTheory.Search.Specialized
 {
-    public static class AndOrDFSTests
+    public static class AndOrDFS_FromAIaMATests
     {
         public static Test ErraticVaccumWorld => TestThat
             .When(() =>
@@ -18,11 +18,9 @@ namespace SCGraphTheory.Search.Specialized
                     IsCurrentLocationDirty: true,
                     IsOtherLocationDirty: true);
 
-                var search = new AndOrDFS<INode, IEdge>(
+                return AndOrDFS_FromAIaMA.Execute<INode, IEdge>(
                     GetStateNode(initialState),
                     n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
-
-                return search.Execute();
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
@@ -46,11 +44,9 @@ namespace SCGraphTheory.Search.Specialized
 
                 var knownTruths = new[] { "U", "R" };
 
-                var search = new AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
+                return AndOrDFS_FromAIaMA.Execute<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
                     graph.GetSymbolNode("P"),
                     n => knownTruths.Contains(n.Symbol));
-
-                return search.Execute();
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
