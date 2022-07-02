@@ -135,7 +135,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
         /// Represents a given action from a given state. Connects from a <see cref="StateNode"/> to an <see cref="ActionNode"/>.
         /// <para/>
         /// Note the explicit interface implementation here for From and To - so that we can give the
-        /// concretely-typed version of these collection the same names, which keeps things nice
+        /// concretely-typed version of these properties the same names, which keeps things nice
         /// and simple for consumers.
         /// </summary>
         public class ActionEdge : IEdge
@@ -188,7 +188,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
         /// Represents the outcome of an action from a given state. Connects from an <see cref="ActionNode"/> to a <see cref="StateNode"/>.
         /// <para/>
         /// Note the explicit interface implementation here for From and To - so that we can give the
-        /// concretely-typed version of these collection the same names, which keeps things nice
+        /// concretely-typed version of these properties the same names, which keeps things nice
         /// and simple for consumers.
         /// </summary>
         public class OutcomeEdge : IEdge

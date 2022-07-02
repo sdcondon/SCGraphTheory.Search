@@ -22,7 +22,7 @@ namespace SCGraphTheory.Search.Classic
         TNode Target { get; }
 
         /// <summary>
-        /// Gets the search tree (or forest). Each visited node is present as a key. The associated value is the edge used to discover it (or <see langword="default"/> for the source node).
+        /// Gets the search tree (or forest). Each visited node is present as a key. The associated value is information about the edge used to discover it (or <see langword="default"/> for the source node).
         /// </summary>
         IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 

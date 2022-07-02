@@ -7,7 +7,7 @@ using static SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
 
 namespace SCGraphTheory.Search.Specialized
 {
-    public static class AndOrSearchTests
+    public static class AndOrDFSTests
     {
         public static Test ErraticVaccumWorld_FromAIaMA => TestThat
             .When(() =>
