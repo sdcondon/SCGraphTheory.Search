@@ -4,7 +4,6 @@ using SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized;
 using SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach;
 using System.Collections.Generic;
 using System.Linq;
-using static SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach.ErraticVacuumWorldGraph;
 
 namespace SCGraphTheory.Search.AlternativeSearches.Specialized
 {
@@ -13,22 +12,22 @@ namespace SCGraphTheory.Search.AlternativeSearches.Specialized
         public static Test ErraticVaccumWorld => TestThat
             .When(() =>
             {
-                var initialState = new State(
-                    VacuumPosition: VacuumPositions.Left,
+                var initialState = new ErraticVacuumWorldGraph.State(
+                    VacuumPosition: ErraticVacuumWorldGraph.VacuumPositions.Left,
                     IsCurrentLocationDirty: true,
                     IsOtherLocationDirty: true);
 
-                return AndOrDFS_FromAIaMA.Execute<INode, IEdge>(
-                    GetStateNode(initialState),
+                return AndOrDFS_FromAIaMA.Execute<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
+                    ErraticVacuumWorldGraph.GetStateNode(initialState),
                     n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
-            .And((o) => o.Plan.Flatten().ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<State, Actions>
+            .And((o) => o.Tree.Flatten().ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<ErraticVacuumWorldGraph.State, ErraticVacuumWorldGraph.Actions>
             {
-                [new (VacuumPositions.Left, true, true)] = Actions.Suck,
-                [new (VacuumPositions.Left, false, true)] = Actions.Right,
-                [new (VacuumPositions.Right, true, false)] = Actions.Suck,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Left, true, true)] = ErraticVacuumWorldGraph.Actions.Suck,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Left, false, true)] = ErraticVacuumWorldGraph.Actions.Right,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Right, true, false)] = ErraticVacuumWorldGraph.Actions.Suck,
             }));
 
         public static Test PropositionalLogicGraph => TestThat
@@ -50,7 +49,7 @@ namespace SCGraphTheory.Search.AlternativeSearches.Specialized
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
-            .And((o) => o.Plan.Flatten().ToDictionary(kvp => kvp.Key.Symbol, kvp => kvp.Value.Clause.AntecedentSymbols).Should().BeEquivalentTo(new Dictionary<string, IEnumerable<string>>
+            .And((o) => o.Tree.Flatten().ToDictionary(kvp => kvp.Key.Symbol, kvp => kvp.Value.Clause.AntecedentSymbols).Should().BeEquivalentTo(new Dictionary<string, IEnumerable<string>>
             {
                 ["P"] = new[] { "Q", "R" }, // P because Q and R
                 ["Q"] = new[] { "U" }, // Q because U

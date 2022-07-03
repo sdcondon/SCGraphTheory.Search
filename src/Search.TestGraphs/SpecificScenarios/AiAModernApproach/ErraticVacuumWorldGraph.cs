@@ -56,10 +56,14 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
         public class StateNode : INode
         {
             private static readonly ConcurrentDictionary<State, StateNode> Cache = new ();
+            private readonly Lazy<IReadOnlyCollection<ActionEdge>> lazyEdges;
 
             private StateNode(State state)
             {
                 State = state;
+
+                // NB: edges collection has to be lazy to avoid infinite recursion upon construction - ultimately because the graph has loops.
+                lazyEdges = new (() => State.GetAvailableActions().Select(a => ActionEdge.Get(this, a)).ToList().AsReadOnly());
             }
 
             /// <inheritdoc />
@@ -71,7 +75,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
             /// <summary>
             /// Gets the (concretely-typed) collection of edges that are outbound from this node.
             /// </summary>
-            public IReadOnlyCollection<ActionEdge> Edges => State.GetAvailableActions().Select(a => ActionEdge.Get(this, a)).ToList().AsReadOnly();
+            public IReadOnlyCollection<ActionEdge> Edges => lazyEdges.Value;
 
             /// <summary>
             /// Gets the node that corresponds to a given state.
@@ -96,11 +100,15 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
         public class ActionNode : INode
         {
             private static readonly ConcurrentDictionary<(State state, Actions action), ActionNode> Cache = new ();
+            private readonly Lazy<IReadOnlyCollection<OutcomeEdge>> lazyEdges;
 
             private ActionNode(State state, Actions action)
             {
                 State = state;
                 Action = action;
+
+                // NB: edges collection has to be lazy to avoid infinite recursion upon construction - ultimately because the graph has loops.
+                lazyEdges = new (() => State.GetPossibleOutcomes(Action).Select(s => OutcomeEdge.Get(this, s)).ToList().AsReadOnly());
             }
 
             /// <inheritdoc />
@@ -117,7 +125,7 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
             /// <summary>
             /// Gets the (concretely-typed) collection of edges that are outbound from this node.
             /// </summary>
-            public IReadOnlyCollection<OutcomeEdge> Edges => State.GetPossibleOutcomes(Action).Select(s => OutcomeEdge.Get(this, s)).ToList().AsReadOnly();
+            public IReadOnlyCollection<OutcomeEdge> Edges => lazyEdges.Value;
 
             /// <summary>
             /// Gets the node that corresponds to a given state and action.

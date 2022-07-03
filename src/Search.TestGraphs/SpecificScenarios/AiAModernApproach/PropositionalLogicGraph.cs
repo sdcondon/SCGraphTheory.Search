@@ -5,9 +5,8 @@ using System.Linq;
 namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
 {
     /// <summary>
-    /// And-or graph representation of a set of definite clauses (i.e. statements of the form P₁ ∧ P₂ ∧ .. ∧ Pₙ ⇒ Q)
-    /// of propositional logic. Backward chaining inference can be carried out by searching this graph with the target nodes
-    /// being those whose symbols are of the propositions that are known to be true.
+    /// And-or graph representation of a set of definite clauses of propositional logic (i.e. statements of the form P₁ ∧ P₂ ∧ .. ∧ Pₙ ⇒ Q).
+    /// Backward chaining inference can be carried out by searching this graph with the target nodes being those whose symbols are of the propositions that are known to be true.
     /// </summary>
     public class PropositionalLogicGraph
     {
@@ -141,6 +140,9 @@ namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
             /// <inheritdoc />
             IReadOnlyCollection<IEdge> INode<INode, IEdge>.Edges => Edges;
 
+            /// <summary>
+            /// Gets the clause that this node corresponds to.
+            /// </summary>
             public DefiniteClause Clause { get; }
 
             /// <inheritdoc />

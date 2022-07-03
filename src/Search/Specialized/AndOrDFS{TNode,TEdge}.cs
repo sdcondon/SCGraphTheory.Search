@@ -21,7 +21,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
         /// Initializes a new instance of the <see cref="AndOrDFS{TNode, TEdge}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from. Is assumed to be an "or" node.</param>
-        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
+        /// <param name="isTarget">A predicate for identifying the target node(s) of the search.</param>
         public AndOrDFS(TNode source, Predicate<TNode> isTarget/*, Predicate<TEdge> isAndEdgeCollection*/)
         {
             // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
@@ -67,17 +67,34 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
                 var then = VisitAndNode(edge.To, path.Prepend(orNode));
                 if (then != null)
                 {
-                    return new Outcome(new Plan(edge, then));
+                    return new Outcome(new Tree(edge, then));
                 }
+
+                ////if (isAndEdgeCollection(edge))
+                ////{
+                ////    var then = VisitAndNode(edge.To, path.Prepend(orNode));
+                ////    if (then != null)
+                ////    {
+                ////        return new Outcome(new Plan(edge, then));
+                ////    }
+                ////}
+                ////else
+                ////{
+                ////    var outcome = VisitOrNode(edge.To, path);
+                ////    if (outcome.Succeeded)
+                ////    {
+                ////        return ...?
+                ////    }
+                ////}
             }
 
             return new Outcome(false);
         }
 
         // Visits a node that actually represents a set of conjoined edges of a "real" node (assuming the usual representation of and-or graphs).
-        private IReadOnlyDictionary<TNode, Plan> VisitAndNode(TNode andNode, Path path)
+        private IReadOnlyDictionary<TNode, Tree> VisitAndNode(TNode andNode, Path path)
         {
-            var plansByNode = new Dictionary<TNode, Plan>();
+            var subTreesByNode = new Dictionary<TNode, Tree>();
 
             foreach (var edge in andNode.Edges)
             {
@@ -88,10 +105,10 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
                     return null;
                 }
 
-                plansByNode[edge.To] = outcome.Plan;
+                subTreesByNode[edge.To] = outcome.Tree;
             }
 
-            return plansByNode;
+            return subTreesByNode;
         }
 
         /// <summary>
@@ -100,39 +117,39 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
         public class Outcome
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="Outcome"/> class that either indicates failure, or success with an empty plan (because a target node has been reached).
+            /// Initializes a new instance of the <see cref="Outcome"/> class that either indicates failure, or success with an empty tree (because a target node has been reached).
             /// </summary>
             /// <param name="succeeded">A value indicating whether the outcome is a success.</param>
-            public Outcome(bool succeeded) => Plan = succeeded ? Plan.Empty : null;
+            internal Outcome(bool succeeded) => Tree = succeeded ? Tree.Empty : null;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Outcome"/> class that indicates success.
             /// </summary>
-            /// <param name="plan">The plan for ultimately reaching only target nodes.</param>
-            public Outcome(Plan plan) => Plan = plan ?? throw new ArgumentNullException(nameof(plan));
+            /// <param name="tree">The search tree - the leaves of which include only target nodes.</param>
+            internal Outcome(Tree tree) => Tree = tree ?? throw new ArgumentNullException(nameof(tree));
 
             /// <summary>
-            /// Gets a value indicating whether the search succeeded in creating a plan.
+            /// Gets a value indicating whether the search succeeded in creating a tree.
             /// </summary>
-            public bool Succeeded => Plan != null;
+            public bool Succeeded => Tree != null;
 
             /// <summary>
-            /// Gets the plan for reaching the target node or nodes.
+            /// Gets the search tree - the leaves of which include only target nodes.
             /// </summary>
-            public Plan Plan { get; }
+            public Tree Tree { get; }
         }
 
         /// <summary>
-        /// Container for a plan (or sub-plan) created by a <see cref="AndOrDFS{TNode, TEdge}"/> search.
+        /// Container for a tree (or sub-tree) created by a <see cref="AndOrDFS{TNode, TEdge}"/> search.
         /// </summary>
-        public class Plan
+        public class Tree
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="Plan"/> class.
+            /// Initializes a new instance of the <see cref="Tree"/> class.
             /// </summary>
             /// <param name="first">The edge to follow immediately.</param>
-            /// <param name="then">The plan to adhere to after following the edge, keyed by which node we are currently at.</param>
-            public Plan(TEdge first, IReadOnlyDictionary<TNode, Plan> then)
+            /// <param name="subTreesByRootNode">The sub-trees that follow the first edge, keyed by node that they connect from. There will be more than one if the first edge actually represents a set of more than one coinjoined ("and") edges.</param>
+            public Tree(TEdge first, IReadOnlyDictionary<TNode, Tree> subTreesByRootNode)
             {
                 // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
                 if (first == null)
@@ -141,15 +158,15 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
                 }
 
                 First = first;
-                Then = then ?? throw new ArgumentNullException(nameof(then));
+                SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
-            private Plan() => (First, Then) = (default, null);
+            private Tree() => (First, SubTrees) = (default, null);
 
             /// <summary>
-            /// Gets an "empty" plan - that indicates that a target node has been reached.
+            /// Gets an empty tree - that indicates that a target node has been reached.
             /// </summary>
-            public static Plan Empty { get; } = new Plan();
+            public static Tree Empty { get; } = new Tree();
 
             /// <summary>
             /// Gets the edge to follow immediately.
@@ -157,27 +174,27 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             public TEdge First { get; }
 
             /// <summary>
-            /// Gets the plan to adhere to after following the edge, keyed by the current node.
+            /// Gets the sub-trees that follow the first edge, keyed by node that they connect from. There will be more than one if the first edge actually represents a set of more than one coinjoined ("and") edges.
             /// </summary>
-            public IReadOnlyDictionary<TNode, Plan> Then { get; }
+            public IReadOnlyDictionary<TNode, Tree> SubTrees { get; }
 
             /// <summary>
-            /// Flattens the plan out into a single mapping from the current node to the edge that should be followed to ultimately reach only target nodes.
-            /// Intended to make plans easier to work with in certain situations (e.g. assertions in tests...).
+            /// Flattens the tree out into a single mapping from the current node to the edge that should be followed to ultimately reach only target nodes.
+            /// Intended to make trees easier to work with in certain situations (e.g. assertions in tests).
             /// <para/>
-            /// Each node will occur at most once in the entire heirarchy of plans, so we can always safely do this.
+            /// Each node will occur at most once in the entire tree, so we can always safely do this.
             /// </summary>
-            /// <returns>A mapping from the current node to the edge that should be followed to ultimately reach a target node or nodes.</returns>
+            /// <returns>A mapping from the current node to the edge that should be followed to ultimately reach only target nodes.</returns>
             public IReadOnlyDictionary<TNode, TEdge> Flatten()
             {
                 var flattened = new Dictionary<TNode, TEdge>();
 
-                void Visit(Plan plan)
+                void Visit(Tree tree)
                 {
-                    if (plan.First != null)
+                    if (tree.First != null)
                     {
-                        flattened[plan.First.From] = plan.First;
-                        foreach (var subPlan in plan.Then.Values)
+                        flattened[tree.First.From] = tree.First;
+                        foreach (var subPlan in tree.SubTrees.Values)
                         {
                             Visit(subPlan);
                         }
