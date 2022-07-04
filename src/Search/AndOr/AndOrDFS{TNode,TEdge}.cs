@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
+namespace SCGraphTheory.Search.AndOr
 {
     /// <summary>
-    /// Represents a depth-first search of an and-or graph. Implemented as close as possible to the way it is introduced in §4.3.2 of
-    /// "Artificial Intelligence: A Modern Approach", for reference purposes.
+    /// Implementation of a depth-first search of an and-or graph.
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
@@ -70,7 +69,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
                     return new Outcome(new Tree(edge, then));
                 }
 
-                ////if (isAndEdgeCollection(edge))
+                ////if (isAndEdgeCollection == null || isAndEdgeCollection(edge))
                 ////{
                 ////    var then = VisitAndNode(edge.To, path.Prepend(orNode));
                 ////    if (then != null)
@@ -147,21 +146,21 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             /// <summary>
             /// Initializes a new instance of the <see cref="Tree"/> class.
             /// </summary>
-            /// <param name="first">The edge to follow immediately.</param>
-            /// <param name="subTreesByRootNode">The sub-trees that follow the first edge, keyed by node that they connect from. There will be more than one if the first edge actually represents a set of more than one coinjoined ("and") edges.</param>
-            public Tree(TEdge first, IReadOnlyDictionary<TNode, Tree> subTreesByRootNode)
+            /// <param name="root">The root edge of the tree.</param>
+            /// <param name="subTreesByRootNode">The sub-trees that follow the root edge, keyed by node that they connect from. There will be more than one if the root edge actually represents a set of more than one coinjoined ("and") edges.</param>
+            internal Tree(TEdge root, IReadOnlyDictionary<TNode, Tree> subTreesByRootNode)
             {
                 // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
-                if (first == null)
+                if (root == null)
                 {
-                    throw new ArgumentNullException(nameof(first));
+                    throw new ArgumentNullException(nameof(root));
                 }
 
-                First = first;
+                Root = root;
                 SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
-            private Tree() => (First, SubTrees) = (default, null);
+            private Tree() => (Root, SubTrees) = (default, null);
 
             /// <summary>
             /// Gets an empty tree - that indicates that a target node has been reached.
@@ -169,12 +168,12 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             public static Tree Empty { get; } = new Tree();
 
             /// <summary>
-            /// Gets the edge to follow immediately.
+            /// Gets the root edge of the tree.
             /// </summary>
-            public TEdge First { get; }
+            public TEdge Root { get; }
 
             /// <summary>
-            /// Gets the sub-trees that follow the first edge, keyed by node that they connect from. There will be more than one if the first edge actually represents a set of more than one coinjoined ("and") edges.
+            /// Gets the sub-trees that follow the root edge, keyed by node that they connect from. There will be more than one if the root edge actually represents a set of more than one coinjoined ("and") edges.
             /// </summary>
             public IReadOnlyDictionary<TNode, Tree> SubTrees { get; }
 
@@ -191,9 +190,10 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
 
                 void Visit(Tree tree)
                 {
-                    if (tree.First != null)
+                    // !tree.Equals(Tree.Empty) might be clearer..?
+                    if (tree.Root != null)
                     {
-                        flattened[tree.First.From] = tree.First;
+                        flattened[tree.Root.From] = tree.Root;
                         foreach (var subPlan in tree.SubTrees.Values)
                         {
                             Visit(subPlan);

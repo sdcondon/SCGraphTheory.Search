@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
-    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the limited depth-first search algorithm.
+    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the iterative deepening depth-first search algorithm.
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>

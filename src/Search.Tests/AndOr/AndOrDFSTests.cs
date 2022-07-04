@@ -5,7 +5,7 @@ using SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Specialized
+namespace SCGraphTheory.Search.AndOr
 {
     public static class AndOrDFSTests
     {

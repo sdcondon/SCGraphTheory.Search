@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
+namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
 {
     /// <summary>
-    /// Contains logic for depth-first search of an and-or graph. Implemented as close as possible to the way it is introduced in §4.3.2 of
+    /// Implementation of a depth-first search of an and-or graph. Implemented as close as possible to the way it is introduced in §4.3.2 of
     /// "Artificial Intelligence: A Modern Approach", for reference purposes.
     /// </summary>
     public static class AndOrDFS_FromAIaMA
@@ -128,15 +128,15 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             /// <summary>
             /// Initializes a new instance of the <see cref="Tree{TNode, TEdge}"/> class.
             /// </summary>
-            /// <param name="first">The edge to follow immediately.</param>
-            /// <param name="subTreesByRootNode">The sub-trees that follow the first edge, keyed by node that they connect from. There will be more than one if the first edge actually represents a set of more than one coinjoined ("and") edges.</param>
-            public Tree(TEdge first, IReadOnlyDictionary<TNode, Tree<TNode, TEdge>> subTreesByRootNode)
+            /// <param name="root">The root edge of the tree.</param>
+            /// <param name="subTreesByRootNode">The sub-trees that follow the root edge, keyed by node that they connect from. There will be more than one if the root edge actually represents a set of more than one coinjoined ("and") edges.</param>
+            internal Tree(TEdge root, IReadOnlyDictionary<TNode, Tree<TNode, TEdge>> subTreesByRootNode)
             {
-                First = first ?? throw new ArgumentNullException(nameof(first));
+                Root = root ?? throw new ArgumentNullException(nameof(root));
                 SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
-            private Tree() => (First, SubTrees) = (default, null);
+            private Tree() => (Root, SubTrees) = (default, null);
 
             /// <summary>
             /// Gets an empty tree - that indicates that a target node has been reached.
@@ -144,12 +144,12 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
             public static Tree<TNode, TEdge> Empty { get; } = new Tree<TNode, TEdge>();
 
             /// <summary>
-            /// Gets the edge to follow immediately.
+            /// Gets the root edge of the tree.
             /// </summary>
-            public TEdge First { get; }
+            public TEdge Root { get; }
 
             /// <summary>
-            /// Gets the sub-trees that follow the first edge, keyed by node that they connect from. There will be more than one if the first edge actually represents a set of more than one coinjoined ("and") edges.
+            /// Gets the sub-trees that follow the root edge, keyed by node that they connect from. There will be more than one if the root edge actually represents a set of more than one coinjoined ("and") edges.
             /// </summary>
             public IReadOnlyDictionary<TNode, Tree<TNode, TEdge>> SubTrees { get; }
 
@@ -166,9 +166,10 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.Specialized
 
                 void Visit(Tree<TNode, TEdge> tree)
                 {
-                    if (tree.First != null)
+                    // !tree.Equals(Tree.Empty) might be clearer..?
+                    if (tree.Root != null)
                     {
-                        flattened[tree.First.From] = tree.First;
+                        flattened[tree.Root.From] = tree.Root;
                         foreach (var subPlan in tree.SubTrees.Values)
                         {
                             Visit(subPlan);
