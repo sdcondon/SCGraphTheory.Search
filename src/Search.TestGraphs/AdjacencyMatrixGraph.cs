@@ -1,15 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SCGraphTheory.Search.TestGraphs
 {
     /// <summary>
     /// A very simple (immutable) graph implementation using adjacency matrix representation. Haven't even bothered to add facility for attached data.
-    /// </summary>
-    /// <remarks>
+    /// <para/>
     /// Motivation: Just because I was curious to know what an adjacency matrix implementation using the SCGraphTheory abstractions could look like.
-    /// </remarks>
+    /// </summary>
     public class AdjacencyMatrixGraph : IGraph<AdjacencyMatrixGraph.Node, AdjacencyMatrixGraph.Edge>
     {
         // NB: nodes arguably unneeded - could make Node a struct (though would prob want to make edge collection struct at the same time - and will be boxed by search algs..)
@@ -113,6 +113,7 @@ namespace SCGraphTheory.Search.TestGraphs
             public EdgeCollection(AdjacencyMatrixGraph graph, Node node) => (this.graph, this.node) = (graph, node);
 
             /// <inheritdoc />
+            [SuppressMessage("Performance", "CA1829:Use Length/Count property instead of Count() when available", Justification = "False positive. This IS the Count implementation, so using Count would cause infinite recursion.")]
             public int Count => this.Count();
 
             /// <inheritdoc />
