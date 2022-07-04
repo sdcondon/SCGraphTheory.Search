@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
+namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
 {
     /// <summary>
     /// And-or graph representation of a set of definite clauses of propositional logic (i.e. statements of the form P₁ ∧ P₂ ∧ .. ∧ Pₙ ⇒ Q).

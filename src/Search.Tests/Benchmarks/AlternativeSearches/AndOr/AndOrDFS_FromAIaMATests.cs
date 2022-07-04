@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using FlUnit;
-using SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach;
+using SCGraphTheory.Search.TestGraphs.Specialized.AndOr;
 using System.Collections.Generic;
 using System.Linq;
 

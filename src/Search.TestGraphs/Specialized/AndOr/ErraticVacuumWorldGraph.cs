@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SCGraphTheory.Search.TestGraphs.SpecificScenarios.AiAModernApproach
+namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
 {
     /// <summary>
     /// A graph representation of the "erratic vacuum world" scenario from §4.3 of "Artifical Intelligence: A Modern Approach".
