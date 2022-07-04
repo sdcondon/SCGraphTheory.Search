@@ -32,18 +32,20 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
         public static Test PropositionalLogicGraph => TestThat
             .When(() =>
             {
-                var graph = new PropositionalLogicGraph(new PropositionalLogicGraph.DefiniteClause[]
-                {
-                    new (new[] { "Q", "R" }, "P"), // P if Q and R
-                    new (new[] { "S" }, "P"), // P if S
-                    new (new[] { "T" }, "Q"), // Q if T
-                    new (new[] { "U" }, "Q"), // Q if U
-                });
+                var graph = new PropositionalLogicGraph(
+                    new PropositionalLogicGraph.DefiniteClause[]
+                    {
+                        new (new[] { "Q", "R" }, "P"), // P if Q and R
+                        new (new[] { "S" }, "P"), // P if S
+                        new (new[] { "T" }, "Q"), // Q if T
+                        new (new[] { "U" }, "Q"), // Q if U
+                    },
+                    false);
 
                 var knownTruths = new[] { "U", "R" };
 
                 return AndOrDFS_FromAIaMA.Execute<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
-                    graph.GetSymbolNode("P"),
+                    graph.GetPropositionNode("P"),
                     n => knownTruths.Contains(n.Symbol));
             })
             .ThenReturns()

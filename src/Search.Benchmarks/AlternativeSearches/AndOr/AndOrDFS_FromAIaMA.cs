@@ -52,10 +52,10 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
 
             foreach (var edge in orNode.Edges)
             {
-                var then = VisitAndNode<TNode, TEdge>(edge.To, isTarget, path.Prepend(orNode));
-                if (then != null)
+                var subTrees = VisitAndNode<TNode, TEdge>(edge.To, isTarget, path.Prepend(orNode));
+                if (subTrees != null)
                 {
-                    return new Outcome<TNode, TEdge>(new Tree<TNode, TEdge>(edge, then));
+                    return new Outcome<TNode, TEdge>(new Tree<TNode, TEdge>(edge, subTrees));
                 }
             }
 
@@ -67,7 +67,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
             where TNode : INode<TNode, TEdge>
             where TEdge : IEdge<TNode, TEdge>
         {
-            var subTreesByNode = new Dictionary<TNode, Tree<TNode, TEdge>>();
+            var subTrees = new Dictionary<TNode, Tree<TNode, TEdge>>();
 
             foreach (var edge in andNode.Edges)
             {
@@ -78,10 +78,10 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
                     return null;
                 }
 
-                subTreesByNode[edge.To] = outcome.Tree;
+                subTrees[edge.To] = outcome.Tree;
             }
 
-            return subTreesByNode;
+            return subTrees;
         }
 
         /// <summary>
@@ -136,6 +136,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
                 SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
+            // TODO-BUG: We are fine with default structs in the Execute method, but if default is a valid edge then this logic is potentially a (minor) problem..
             private Tree() => (Root, SubTrees) = (default, null);
 
             /// <summary>

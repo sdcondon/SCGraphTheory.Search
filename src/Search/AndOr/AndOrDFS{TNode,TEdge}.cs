@@ -14,14 +14,15 @@ namespace SCGraphTheory.Search.AndOr
     {
         private readonly TNode source;
         private readonly Predicate<TNode> isTarget;
-        ////private readonly Predicate<TEdge> isAndEdgeCollection;
+        private readonly Predicate<TEdge> isAndEdgeCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AndOrDFS{TNode, TEdge}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from. Is assumed to be an "or" node.</param>
         /// <param name="isTarget">A predicate for identifying the target node(s) of the search.</param>
-        public AndOrDFS(TNode source, Predicate<TNode> isTarget/*, Predicate<TEdge> isAndEdgeCollection*/)
+        /// <param name="isAndEdgeCollection">A predicate for identifying edges that actually represent a conjoined set of "and" edges (that are the outbound edges from the node this edge connects to).</param>
+        public AndOrDFS(TNode source, Predicate<TNode> isTarget, Predicate<TEdge> isAndEdgeCollection)
         {
             // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
             if (source == null)
@@ -31,7 +32,7 @@ namespace SCGraphTheory.Search.AndOr
 
             this.source = source;
             this.isTarget = isTarget;
-            ////this.isAndEdgeCollection = isAndEdgeCollection;
+            this.isAndEdgeCollection = isAndEdgeCollection;
         }
 
         /// <summary>
@@ -63,28 +64,23 @@ namespace SCGraphTheory.Search.AndOr
 
             foreach (var edge in orNode.Edges)
             {
-                var then = VisitAndNode(edge.To, path.Prepend(orNode));
-                if (then != null)
+                if (isAndEdgeCollection == null || isAndEdgeCollection(edge))
                 {
-                    return new Outcome(new Tree(edge, then));
+                    var subTrees = VisitAndNode(edge.To, path.Prepend(orNode));
+                    if (subTrees != null)
+                    {
+                        return new Outcome(new Tree(edge, subTrees));
+                    }
                 }
-
-                ////if (isAndEdgeCollection == null || isAndEdgeCollection(edge))
-                ////{
-                ////    var then = VisitAndNode(edge.To, path.Prepend(orNode));
-                ////    if (then != null)
-                ////    {
-                ////        return new Outcome(new Plan(edge, then));
-                ////    }
-                ////}
-                ////else
-                ////{
-                ////    var outcome = VisitOrNode(edge.To, path);
-                ////    if (outcome.Succeeded)
-                ////    {
-                ////        return ...?
-                ////    }
-                ////}
+                else
+                {
+                    var outcome = VisitOrNode(edge.To, path);
+                    if (outcome.Succeeded)
+                    {
+                        // NB: null-coalescence needed because edge.To might be a target node.
+                        return new Outcome(new Tree(edge, outcome.Tree.SubTrees ?? new Dictionary<TNode, Tree>()));
+                    }
+                }
             }
 
             return new Outcome(false);
@@ -93,7 +89,7 @@ namespace SCGraphTheory.Search.AndOr
         // Visits a node that actually represents a set of conjoined edges of a "real" node (assuming the usual representation of and-or graphs).
         private IReadOnlyDictionary<TNode, Tree> VisitAndNode(TNode andNode, Path path)
         {
-            var subTreesByNode = new Dictionary<TNode, Tree>();
+            var subTrees = new Dictionary<TNode, Tree>();
 
             foreach (var edge in andNode.Edges)
             {
@@ -104,10 +100,10 @@ namespace SCGraphTheory.Search.AndOr
                     return null;
                 }
 
-                subTreesByNode[edge.To] = outcome.Tree;
+                subTrees[edge.To] = outcome.Tree;
             }
 
-            return subTreesByNode;
+            return subTrees;
         }
 
         /// <summary>
@@ -160,6 +156,7 @@ namespace SCGraphTheory.Search.AndOr
                 SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
+            // TODO-BUG: We are fine with default structs in the search ctor, but if default is a valid edge then this logic is potentially a (minor) problem..
             private Tree() => (Root, SubTrees) = (default, null);
 
             /// <summary>

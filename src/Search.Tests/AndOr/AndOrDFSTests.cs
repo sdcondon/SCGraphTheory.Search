@@ -18,7 +18,8 @@ namespace SCGraphTheory.Search.AndOr
 
                 var search = new AndOrDFS<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
                     ErraticVacuumWorldGraph.GetStateNode(initialState),
-                    n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
+                    n => !n.State.IsLeftDirty && !n.State.IsRightDirty,
+                    e => e is ErraticVacuumWorldGraph.ActionEdge);
 
                 return search.Execute();
             })
@@ -34,19 +35,22 @@ namespace SCGraphTheory.Search.AndOr
         public static Test PropositionalLogic => TestThat
             .When(() =>
             {
-                var graph = new PropositionalLogicGraph(new PropositionalLogicGraph.DefiniteClause[]
-                {
-                    new (new[] { "Q", "R" }, "P"), // P if Q and R
-                    new (new[] { "S" }, "P"), // P if S
-                    new (new[] { "T" }, "Q"), // Q if T
-                    new (new[] { "U" }, "Q"), // Q if U
-                });
+                var graph = new PropositionalLogicGraph(
+                    new PropositionalLogicGraph.DefiniteClause[]
+                    {
+                        new (new[] { "Q", "R" }, "P"), // P if Q and R
+                        new (new[] { "S" }, "P"), // P if S
+                        new (new[] { "T" }, "Q"), // Q if T
+                        new (new[] { "U" }, "Q"), // Q if U
+                    },
+                    true);
 
                 var knownTruths = new[] { "U", "R" };
 
                 var search = new AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
-                    graph.GetSymbolNode("P"),
-                    n => knownTruths.Contains(n.Symbol));
+                    graph.GetPropositionNode("P"),
+                    n => knownTruths.Contains(n.Symbol),
+                    e => e is PropositionalLogicGraph.ClauseEdge);
 
                 return search.Execute();
             })
