@@ -50,13 +50,36 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
                 return new Outcome<TNode, TEdge>(false);
             }
 
+            path = path.Prepend(orNode);
+
             foreach (var edge in orNode.Edges)
             {
-                var subTrees = VisitAndNode<TNode, TEdge>(edge.To, isTarget, path.Prepend(orNode));
+                var subTrees = VisitAndNode<TNode, TEdge>(edge.To, isTarget, path);
                 if (subTrees != null)
                 {
                     return new Outcome<TNode, TEdge>(new Tree<TNode, TEdge>(edge, subTrees));
                 }
+
+                ////foreach (var edge in orNode.Edges)
+                ////{
+                ////    if (isAndEdgeCollection(edge))
+                ////    {
+                ////        var subTrees = VisitAndNode(edge.To, path.Prepend(orNode));
+                ////        if (subTrees != null)
+                ////        {
+                ////            return new Outcome(new Tree(edge, subTrees));
+                ////        }
+                ////    }
+                ////    else
+                ////    {
+                ////        var outcome = VisitOrNode(edge.To, path);
+                ////        if (outcome.Succeeded)
+                ////        {
+                ////            // NB: null-coalescence needed because edge.To might be a target node.
+                ////            return new Outcome(new Tree(edge, outcome.Tree.SubTrees ?? new Dictionary<TNode, Tree>()));
+                ////        }
+                ////    }
+                ////}
             }
 
             return new Outcome<TNode, TEdge>(false);

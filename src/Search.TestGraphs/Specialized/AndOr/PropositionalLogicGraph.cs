@@ -125,7 +125,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         }
 
         /// <summary>
-        /// Represents a given clause and offers outbound edges that represent the antecedent propositions of that clause.
+        /// Represents a given clause and offers outbound edges that to nodes that represent the antecedent propositions of that clause.
         /// In the standard and-or graph representation, this node type actually represents a set of edges conjoined with an arc.
         /// <para/>
         /// Note the explicit interface implementation here for Edges - so that we can give the
@@ -172,7 +172,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         }
 
         /// <summary>
-        /// Represents the relationship between a consequent symbol and an antecedent clause.
+        /// Represents the relationship between a consequent proposition and a clause.
         /// In the standard and-or graph representation, this edge type actually represents a set of edges conjoined with an arc.
         /// Connects from a <see cref="PropositionNode"/> to an <see cref="ClauseNode"/>.
         /// <para/>
