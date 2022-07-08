@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SCGraphTheory.Search.AndOr
 {
     /// <summary>
-    /// Implementation of a depth-first search of an and-or graph.
+    /// (Recursive) implementation of a depth-first search of an and-or graph.
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
@@ -21,7 +22,7 @@ namespace SCGraphTheory.Search.AndOr
         /// </summary>
         /// <param name="source">The node to initiate the search from. Is assumed to be an "or" node.</param>
         /// <param name="isTarget">A predicate for identifying the target node(s) of the search.</param>
-        /// <param name="isAndEdgeCollection">A predicate for identifying edges that actually represent a conjoined set of "and" edges (that are the outbound edges from the node this edge connects to).</param>
+        /// <param name="isAndEdgeCollection">A predicate for identifying edges that actually represent a conjoined set of "and" edges in the usual and-or graph representation. The actual edges are taken to be the outbound edges from the node this edge connects to.</param>
         public AndOrDFS(TNode source, Predicate<TNode> isTarget, Predicate<TEdge> isAndEdgeCollection)
         {
             // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
@@ -36,22 +37,36 @@ namespace SCGraphTheory.Search.AndOr
         }
 
         /// <summary>
-        /// Executes a depth-first search on an and-or graph.
-        /// <para/>
-        /// NB: Makes the assumption that "or" nodes (i.e. regular nodes in the usual and-or graph representation) and "and" nodes
-        /// (that actually represent a set of edges conjoined by an arc in the usual representation - the outbound edges of which
-        /// are the actual edges) strictly alternate in the searched graph. This assumption is made even for sets of conjoined edges that
-        /// consist of only a single edge. Obviously, this is an easy enough assumption to get rid of, but the point of this implementation
-        /// is to be as close as possible to the source material, and to form a baseline.
+        /// Gets a value indicating whether the search is concluded (irrespective of whether it was successful or not).
         /// </summary>
-        /// <returns>The outcome of the search.</returns>
-        public Outcome Execute()
+        public bool IsConcluded { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the search has succeeded in creating a tree.
+        /// </summary>
+        public bool Succeeded => Result != null;
+
+        /// <summary>
+        /// Gets the search tree - the leaves of which include only target nodes.
+        /// </summary>
+        public Tree Result { get; private set; }
+
+        /// <summary>
+        /// Executes the search to completion.
+        /// </summary>
+        /// <param name="ct">the cancellation token to respect while executing the search.</param>
+        public void Complete(CancellationToken ct)
         {
-            return VisitOrNode(source, Path.Empty);
+            var outcome = VisitOrNode(source, Path.Empty, ct);
+
+            IsConcluded = true;
+            Result = outcome.Result;
         }
 
-        private Outcome VisitOrNode(TNode orNode, Path path)
+        private Outcome VisitOrNode(TNode orNode, Path path, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             if (isTarget(orNode))
             {
                 return new Outcome(true);
@@ -62,11 +77,13 @@ namespace SCGraphTheory.Search.AndOr
                 return new Outcome(false);
             }
 
+            path = path.Prepend(orNode);
+
             foreach (var edge in orNode.Edges)
             {
-                if (isAndEdgeCollection == null || isAndEdgeCollection(edge))
+                if (isAndEdgeCollection(edge))
                 {
-                    var subTrees = VisitAndNode(edge.To, path.Prepend(orNode));
+                    var subTrees = VisitAndNode(edge.To, path, ct);
                     if (subTrees != null)
                     {
                         return new Outcome(new Tree(edge, subTrees));
@@ -74,11 +91,11 @@ namespace SCGraphTheory.Search.AndOr
                 }
                 else
                 {
-                    var outcome = VisitOrNode(edge.To, path);
+                    var outcome = VisitOrNode(edge.To, path, ct);
                     if (outcome.Succeeded)
                     {
                         // NB: null-coalescence needed because edge.To might be a target node.
-                        return new Outcome(new Tree(edge, outcome.Tree.SubTrees ?? new Dictionary<TNode, Tree>()));
+                        return new Outcome(new Tree(edge, outcome.Result.SubTrees ?? new Dictionary<TNode, Tree>()));
                     }
                 }
             }
@@ -87,55 +104,55 @@ namespace SCGraphTheory.Search.AndOr
         }
 
         // Visits a node that actually represents a set of conjoined edges of a "real" node (assuming the usual representation of and-or graphs).
-        private IReadOnlyDictionary<TNode, Tree> VisitAndNode(TNode andNode, Path path)
+        private IReadOnlyDictionary<TNode, Tree> VisitAndNode(TNode andNode, Path path, CancellationToken ct)
         {
             var subTrees = new Dictionary<TNode, Tree>();
 
             foreach (var edge in andNode.Edges)
             {
-                var outcome = VisitOrNode(edge.To, path);
+                var outcome = VisitOrNode(edge.To, path, ct);
 
                 if (!outcome.Succeeded)
                 {
                     return null;
                 }
 
-                subTrees[edge.To] = outcome.Tree;
+                subTrees[edge.To] = outcome.Result;
             }
 
             return subTrees;
         }
 
         /// <summary>
-        /// Container for the outcome of a <see cref="AndOrDFS{TNode, TEdge}"/> search.
+        /// Container for the outcome of a <see cref="AndOrDFS{TNode,TEdge}"/> search. Just a friendly struct wrapped around an optional <see cref="Tree"/>.
         /// </summary>
-        public class Outcome
+        private struct Outcome
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="Outcome"/> class that either indicates failure, or success with an empty tree (because a target node has been reached).
+            /// Initializes a new instance of the <see cref="Outcome"/> struct that either indicates failure, or success with an empty tree (because a target node has been reached).
             /// </summary>
             /// <param name="succeeded">A value indicating whether the outcome is a success.</param>
-            internal Outcome(bool succeeded) => Tree = succeeded ? Tree.Empty : null;
+            public Outcome(bool succeeded) => Result = succeeded ? Tree.Empty : null;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="Outcome"/> class that indicates success.
+            /// Initializes a new instance of the <see cref="Outcome"/> struct that indicates success.
             /// </summary>
-            /// <param name="tree">The search tree - the leaves of which include only target nodes.</param>
-            internal Outcome(Tree tree) => Tree = tree ?? throw new ArgumentNullException(nameof(tree));
+            /// <param name="result">The search tree - the leaves of which include only target nodes.</param>
+            public Outcome(Tree result) => Result = result ?? throw new ArgumentNullException(nameof(result));
 
             /// <summary>
             /// Gets a value indicating whether the search succeeded in creating a tree.
             /// </summary>
-            public bool Succeeded => Tree != null;
+            public bool Succeeded => Result != null;
 
             /// <summary>
             /// Gets the search tree - the leaves of which include only target nodes.
             /// </summary>
-            public Tree Tree { get; }
+            public Tree Result { get; }
         }
 
         /// <summary>
-        /// Container for a tree (or sub-tree) created by a <see cref="AndOrDFS{TNode, TEdge}"/> search.
+        /// Container for a tree (or sub-tree) created by a <see cref="AndOrDFS{TNode,TEdge}"/> search.
         /// </summary>
         public class Tree
         {
@@ -146,7 +163,6 @@ namespace SCGraphTheory.Search.AndOr
             /// <param name="subTreesByRootNode">The sub-trees that follow the root edge, keyed by node that they connect from. There will be more than one if the root edge actually represents a set of more than one coinjoined ("and") edges.</param>
             internal Tree(TEdge root, IReadOnlyDictionary<TNode, Tree> subTreesByRootNode)
             {
-                // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
                 if (root == null)
                 {
                     throw new ArgumentNullException(nameof(root));
@@ -156,7 +172,7 @@ namespace SCGraphTheory.Search.AndOr
                 SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
-            // TODO-BUG: We are fine with default structs in the search ctor, but if default is a valid edge then this logic is potentially a (minor) problem..
+            // TODO-BUG: We are fine with default structs in the Execute method, but if default is a valid edge then this logic is potentially a (minor) problem..
             private Tree() => (Root, SubTrees) = (default, null);
 
             /// <summary>
@@ -187,7 +203,7 @@ namespace SCGraphTheory.Search.AndOr
 
                 void Visit(Tree tree)
                 {
-                    // !tree.Equals(Tree.Empty) might be clearer..?
+                    // BUG: struct edges a problem. !tree.Equals(Tree.Empty) might be nice?
                     if (tree.Root != null)
                     {
                         flattened[tree.Root.From] = tree.Root;

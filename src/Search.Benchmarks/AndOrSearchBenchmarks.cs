@@ -5,6 +5,7 @@ using SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr;
 using SCGraphTheory.Search.TestGraphs.Specialized.AndOr;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace SCGraphTheory.Search.Benchmarks
 {
@@ -39,27 +40,41 @@ namespace SCGraphTheory.Search.Benchmarks
 
         [Benchmark]
         [BenchmarkCategory(nameof(AndOrDFS<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>), nameof(ErraticVacuumWorldGraph))]
-        public AndOrDFS<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>.Outcome AndOrDFS_ErraticVacuumWorld() => new AndOrDFS<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
+        public void Prod_DFS_ErraticVacuumWorld() => new AndOrDFS<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
             source: ErraticVacuumWorldGraph.GetStateNode(initialState),
             isTarget: n => !n.State.IsLeftDirty && !n.State.IsRightDirty,
-            e => e is ErraticVacuumWorldGraph.ActionEdge).Execute();
+            e => e is ErraticVacuumWorldGraph.ActionEdge).Complete(CancellationToken.None);
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>), nameof(ErraticVacuumWorldGraph))]
+        public void Prod_DFS_PLGraph() => new AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
+            source: propositionalLogicGraph.GetPropositionNode("P"),
+            isTarget: n => knownTruths.Contains(n.Symbol),
+            e => e is PropositionalLogicGraph.ClauseEdge).Complete(CancellationToken.None);
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(AndOrDFS<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>), nameof(ErraticVacuumWorldGraph))]
+        public void Steppable_DFS_ErraticVacuumWorld() => new AndOrDFS_Steppable<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
+            source: ErraticVacuumWorldGraph.GetStateNode(initialState),
+            isTarget: n => !n.State.IsLeftDirty && !n.State.IsRightDirty,
+            e => e is ErraticVacuumWorldGraph.ActionEdge).Complete();
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>), nameof(ErraticVacuumWorldGraph))]
+        public void Steppable_DFS_PLGraph() => new AndOrDFS_Steppable<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
+            source: propositionalLogicGraph.GetPropositionNode("P"),
+            isTarget: n => knownTruths.Contains(n.Symbol),
+            e => e is PropositionalLogicGraph.ClauseEdge).Complete();
 
         [Benchmark]
         [BenchmarkCategory(nameof(AndOrDFS_FromAIaMA), nameof(ErraticVacuumWorldGraph))]
-        public AndOrDFS_FromAIaMA.Outcome<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge> AltAndOrDFS_ErraticVacuumWorld() => AndOrDFS_FromAIaMA.Execute<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
+        public AndOrDFS_FromAIaMA.Outcome<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge> AIaMA_DFS_ErraticVacuumWorld() => AndOrDFS_FromAIaMA.Execute<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
             source: ErraticVacuumWorldGraph.GetStateNode(initialState),
             isTarget: n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
 
         [Benchmark]
-        [BenchmarkCategory(nameof(AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>), nameof(ErraticVacuumWorldGraph))]
-        public AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>.Outcome AndOrDFS_PLGraph() => new AndOrDFS<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
-            source: propositionalLogicGraph.GetPropositionNode("P"),
-            isTarget: n => knownTruths.Contains(n.Symbol),
-            e => e is PropositionalLogicGraph.ClauseEdge).Execute();
-
-        [Benchmark]
         [BenchmarkCategory(nameof(AndOrDFS_FromAIaMA), nameof(PropositionalLogicGraph))]
-        public AndOrDFS_FromAIaMA.Outcome<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge> AltAndOrDFS_PLGraph() => AndOrDFS_FromAIaMA.Execute<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
+        public AndOrDFS_FromAIaMA.Outcome<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge> AIaMA_DFS_PLGraph() => AndOrDFS_FromAIaMA.Execute<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
             source: propositionalLogicGraph.GetPropositionNode("P"),
             isTarget: n => knownTruths.Contains(n.Symbol));
     }

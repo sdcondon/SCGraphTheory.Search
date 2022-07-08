@@ -64,7 +64,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
                 ////{
                 ////    if (isAndEdgeCollection(edge))
                 ////    {
-                ////        var subTrees = VisitAndNode(edge.To, path.Prepend(orNode));
+                ////        var subTrees = VisitAndNode(edge.To, path);
                 ////        if (subTrees != null)
                 ////        {
                 ////            return new Outcome(new Tree(edge, subTrees));
@@ -101,7 +101,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
                     return null;
                 }
 
-                subTrees[edge.To] = outcome.Tree;
+                subTrees[edge.To] = outcome.Result;
             }
 
             return subTrees;
@@ -120,23 +120,23 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
             /// Initializes a new instance of the <see cref="Outcome{TNode, TEdge}"/> class that either indicates failure, or success with an empty tree (because a target node has been reached).
             /// </summary>
             /// <param name="succeeded">A value indicating whether the outcome is a success.</param>
-            internal Outcome(bool succeeded) => Tree = succeeded ? Tree<TNode, TEdge>.Empty : null;
+            internal Outcome(bool succeeded) => Result = succeeded ? Tree<TNode, TEdge>.Empty : null;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Outcome{TNode, TEdge}"/> class that indicates success.
             /// </summary>
-            /// <param name="tree">The search tree - the leaves of which include only target nodes.</param>
-            internal Outcome(Tree<TNode, TEdge> tree) => Tree = tree ?? throw new ArgumentNullException(nameof(tree));
+            /// <param name="result">The search tree - the leaves of which include only target nodes.</param>
+            internal Outcome(Tree<TNode, TEdge> result) => Result = result ?? throw new ArgumentNullException(nameof(result));
 
             /// <summary>
             /// Gets a value indicating whether the search succeeded in creating a tree.
             /// </summary>
-            public bool Succeeded => Tree != null;
+            public bool Succeeded => Result != null;
 
             /// <summary>
             /// Gets the search tree - the leaves of which include only target nodes.
             /// </summary>
-            public Tree<TNode, TEdge> Tree { get; }
+            public Tree<TNode, TEdge> Result { get; }
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
 
                 void Visit(Tree<TNode, TEdge> tree)
                 {
-                    // !tree.Equals(Tree.Empty) might be clearer..?
+                    // BUG: struct edges a problem. !tree.Equals(Tree.Empty) might be nice?
                     if (tree.Root != null)
                     {
                         flattened[tree.Root.From] = tree.Root;

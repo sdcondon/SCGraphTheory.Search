@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
@@ -70,6 +71,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         /// <summary>
         /// Represents a particular proposition and offers outbound edges that represent clauses (or propositions, if collapseSingleAntecedentClauses is true) that are sufficient for this proposition.
         /// </summary>
+        [DebuggerDisplay("{Symbol}")]
         public class PropositionNode : INode
         {
             private readonly PropositionalLogicGraph graph;
@@ -131,6 +133,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         /// Note the explicit interface implementation here for Edges - so that we can give the
         /// concretely-typed version of the edges collection the same name, which keeps things nice and simple for consumers.
         /// </summary>
+        [DebuggerDisplay("{Clause}")]
         public class ClauseNode : INode
         {
             private readonly PropositionalLogicGraph graph;
@@ -180,6 +183,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         /// concretely-typed version of these properties the same names, which keeps things nice
         /// and simple for consumers.
         /// </summary>
+        [DebuggerDisplay("From: {From}, To: {To}")]
         public class ClauseEdge : IEdge
         {
             private ClauseEdge(PropositionNode from, ClauseNode to)
@@ -226,6 +230,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         /// Note the explicit interface implementation here for the To property - so that we can give the
         /// concretely-typed version of this property the same name, which keeps things nice and simple for consumers.
         /// </summary>
+        [DebuggerDisplay("From: {From}, To: {To}")]
         public class PropositionEdge : IEdge
         {
             private PropositionEdge(INode from, DefiniteClause clause, PropositionNode to)
@@ -262,6 +267,9 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         }
 
         // TODO: equality to take into account antecedentsymbol elements.. suspect caching aint working properly at the mo as a result.
-        public record DefiniteClause(IEnumerable<string> AntecedentSymbols, string ConsequentSymbol);
+        public record DefiniteClause(IEnumerable<string> AntecedentSymbols, string ConsequentSymbol)
+        {
+            public override string ToString() => $"{string.Join(" ∧ ", AntecedentSymbols)} ⇒ {ConsequentSymbol}";
+        }
     }
 }

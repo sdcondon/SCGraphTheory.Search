@@ -3,6 +3,7 @@ using FlUnit;
 using SCGraphTheory.Search.TestGraphs.Specialized.AndOr;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace SCGraphTheory.Search.AndOr
 {
@@ -21,18 +22,24 @@ namespace SCGraphTheory.Search.AndOr
                     n => !n.State.IsLeftDirty && !n.State.IsRightDirty,
                     e => e is ErraticVacuumWorldGraph.ActionEdge);
 
-                return search.Execute();
+                search.Complete(CancellationToken.None);
+
+                return new
+                {
+                    search.Succeeded,
+                    search.Result,
+                };
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
-            .And((o) => o.Tree.Flatten().ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<ErraticVacuumWorldGraph.State, ErraticVacuumWorldGraph.Actions>
+            .And((o) => o.Result.Flatten().ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<ErraticVacuumWorldGraph.State, ErraticVacuumWorldGraph.Actions>
             {
                 [new (ErraticVacuumWorldGraph.VacuumPositions.Left, true, true)] = ErraticVacuumWorldGraph.Actions.Suck,
                 [new (ErraticVacuumWorldGraph.VacuumPositions.Left, false, true)] = ErraticVacuumWorldGraph.Actions.Right,
                 [new (ErraticVacuumWorldGraph.VacuumPositions.Right, true, false)] = ErraticVacuumWorldGraph.Actions.Suck,
             }));
 
-        public static Test PropositionalLogic => TestThat
+        public static Test PropositionalLogicGraph => TestThat
             .When(() =>
             {
                 var graph = new PropositionalLogicGraph(
@@ -43,7 +50,7 @@ namespace SCGraphTheory.Search.AndOr
                         new (new[] { "T" }, "Q"), // Q if T
                         new (new[] { "U" }, "Q"), // Q if U
                     },
-                    true);
+                    false);
 
                 var knownTruths = new[] { "U", "R" };
 
@@ -52,11 +59,17 @@ namespace SCGraphTheory.Search.AndOr
                     n => knownTruths.Contains(n.Symbol),
                     e => e is PropositionalLogicGraph.ClauseEdge);
 
-                return search.Execute();
+                search.Complete(CancellationToken.None);
+
+                return new
+                {
+                    search.Succeeded,
+                    search.Result,
+                };
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
-            .And((o) => o.Tree.Flatten().ToDictionary(kvp => kvp.Key.Symbol, kvp => kvp.Value.Clause.AntecedentSymbols).Should().BeEquivalentTo(new Dictionary<string, IEnumerable<string>>
+            .And((o) => o.Result.Flatten().ToDictionary(kvp => kvp.Key.Symbol, kvp => kvp.Value.Clause.AntecedentSymbols).Should().BeEquivalentTo(new Dictionary<string, IEnumerable<string>>
             {
                 ["P"] = new[] { "Q", "R" }, // P because Q and R
                 ["Q"] = new[] { "U" }, // Q because U

@@ -1,12 +1,13 @@
 ﻿using FluentAssertions;
 using FlUnit;
+using SCGraphTheory.Search.AndOr;
 using SCGraphTheory.Search.TestGraphs.Specialized.AndOr;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
 {
-    public static class AndOrDFS_FromAIaMATests
+    public static class AndOrDFS_SteppableTests
     {
         public static Test ErraticVaccumWorld => TestThat
             .When(() =>
@@ -16,20 +17,32 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
                     IsCurrentLocationDirty: true,
                     IsOtherLocationDirty: true);
 
-                return AndOrDFS_FromAIaMA.Execute<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
+                var search = new AndOrDFS_Steppable<ErraticVacuumWorldGraph.INode, ErraticVacuumWorldGraph.IEdge>(
                     ErraticVacuumWorldGraph.GetStateNode(initialState),
-                    n => !n.State.IsLeftDirty && !n.State.IsRightDirty);
+                    n => !n.State.IsLeftDirty && !n.State.IsRightDirty,
+                    e => e is ErraticVacuumWorldGraph.ActionEdge);
+
+                search.Complete();
+
+                return new
+                {
+                    search.Succeeded,
+                    search.Result,
+                };
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
             .And((o) => o.Result.Flatten().ToDictionary(kvp => kvp.Key.State, kvp => kvp.Value.Action).Should().BeEquivalentTo(new Dictionary<ErraticVacuumWorldGraph.State, ErraticVacuumWorldGraph.Actions>
             {
-                [new (ErraticVacuumWorldGraph.VacuumPositions.Left, true, true)] = ErraticVacuumWorldGraph.Actions.Suck,
-                [new (ErraticVacuumWorldGraph.VacuumPositions.Left, false, true)] = ErraticVacuumWorldGraph.Actions.Right,
-                [new (ErraticVacuumWorldGraph.VacuumPositions.Right, true, false)] = ErraticVacuumWorldGraph.Actions.Suck,
+                // NB: not the best solution, obviously - this is a (stack-using) depth-first search..
+                // Moves dominate because they are the edges AFTER (so added after, so popped before) the suck action.
+                [new(ErraticVacuumWorldGraph.VacuumPositions.Left, true, true)] = ErraticVacuumWorldGraph.Actions.Right,
+                [new(ErraticVacuumWorldGraph.VacuumPositions.Right, true, true)] = ErraticVacuumWorldGraph.Actions.Suck,
+                [new(ErraticVacuumWorldGraph.VacuumPositions.Right, false, true)] = ErraticVacuumWorldGraph.Actions.Left,
+                [new(ErraticVacuumWorldGraph.VacuumPositions.Left, true, false)] = ErraticVacuumWorldGraph.Actions.Suck,
             }));
 
-        public static Test PropositionalLogicGraph => TestThat
+        public static Test PropositionalLogic => TestThat
             .When(() =>
             {
                 var graph = new PropositionalLogicGraph(
@@ -44,9 +57,18 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
 
                 var knownTruths = new[] { "U", "R" };
 
-                return AndOrDFS_FromAIaMA.Execute<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
+                var search = new AndOrDFS_Steppable<PropositionalLogicGraph.INode, PropositionalLogicGraph.IEdge>(
                     graph.GetPropositionNode("P"),
-                    n => knownTruths.Contains(n.Symbol));
+                    n => knownTruths.Contains(n.Symbol),
+                    e => e is PropositionalLogicGraph.ClauseEdge);
+
+                search.Complete();
+
+                return new
+                {
+                    search.Succeeded,
+                    search.Result,
+                };
             })
             .ThenReturns()
             .And((o) => o.Succeeded.Should().BeTrue())
