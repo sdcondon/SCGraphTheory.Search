@@ -171,7 +171,6 @@ namespace SCGraphTheory.Search.AndOr
                 SubTrees = subTreesByRootNode ?? throw new ArgumentNullException(nameof(subTreesByRootNode));
             }
 
-            // TODO-BUG: We are fine with default structs in the Execute method, but if default is a valid edge then this logic is potentially a (minor) problem..
             private Tree() => (Root, SubTrees) = (default, null);
 
             /// <summary>
@@ -202,8 +201,7 @@ namespace SCGraphTheory.Search.AndOr
 
                 void Visit(Tree tree)
                 {
-                    // BUG: struct edges a problem. !tree.Equals(Tree.Empty) might be nice?
-                    if (tree.Root != null)
+                    if (!tree.Equals(Tree.Empty))
                     {
                         flattened[tree.Root.From] = tree.Root;
                         foreach (var subPlan in tree.SubTrees.Values)
