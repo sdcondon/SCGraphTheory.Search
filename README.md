@@ -65,6 +65,6 @@ See the [Specialized.AndOr namespace](/src/Search.TestGraphs/Specialized/AndOr) 
 ```csharp
 var andOrDFS = new AndOrDFS<MyBaseNodeType, MyBaseEdgeType>(
     source: mySourceNode,
-    isTarget: n => n.IsTargetNode,
+    isTarget: IsTargetNode,
     isAndEdgeCollection: e => e is MyConjoinedEdgeCollectionType);
 ```
