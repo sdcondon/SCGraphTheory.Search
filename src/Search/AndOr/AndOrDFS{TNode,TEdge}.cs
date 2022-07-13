@@ -94,8 +94,7 @@ namespace SCGraphTheory.Search.AndOr
                     var outcome = VisitOrNode(edge.To, path, ct);
                     if (outcome.Succeeded)
                     {
-                        // NB: null-coalescence needed because edge.To might be a target node.
-                        return new Outcome(new Tree(edge, outcome.Result.SubTrees ?? new Dictionary<TNode, Tree>()));
+                        return new Outcome(new Tree(edge, new Dictionary<TNode, Tree>() { [edge.To] = outcome.Result }));
                     }
                 }
             }
