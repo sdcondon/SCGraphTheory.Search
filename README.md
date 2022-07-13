@@ -57,7 +57,7 @@ Like the `Classic` searches, the local searches are executed step-by-step via a 
 ## And-or search algorithms _[v2.3 onwards]_
 
 The `AndOr` namespace contains implementations (well, just a DFS for now) of search algorithms for "and-or" graphs.
-The overall approach taken here is that a delegate is used to identify edges that actually represent a set of conjoined "and" edges (all of which must lead to a target node in a search solution).
+The overall approach taken here is that a delegate is used to identify edges that actually represent a set of conjoined "and" edges (_all_ of which must ultimately lead to a target node in a search solution).
 The actual edges are represented by the outbound edges of the node that the collection edge connects to.
 Another way of looking at this is that we divide our graph into "or" nodes and "and" nodes.
 See the [Specialized.AndOr namespace](/src/Search.TestGraphs/Specialized/AndOr) in the test graphs project for a couple of and-or graph examples.
