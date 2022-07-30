@@ -55,7 +55,7 @@ namespace SCGraphTheory.Search.AndOr
         /// Executes the search to completion.
         /// </summary>
         /// <param name="ct">the cancellation token to respect while executing the search.</param>
-        public void Complete(CancellationToken ct)
+        public void Complete(CancellationToken ct = default)
         {
             var outcome = VisitOrNode(source, Path.Empty, ct);
 

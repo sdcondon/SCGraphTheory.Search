@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
@@ -220,7 +221,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             /// <param name="graph">The graph containing the edge to retrieve.</param>
             /// <param name="from">The symbol node that the edge connects from.</param>
             /// <param name="clause">The antecedent clause.</param>
-            /// <returns>The edge that represents the relationship between a consequent symbol and an antecedent clause</returns>
+            /// <returns>The edge that represents the relationship between a consequent symbol and an antecedent clause.</returns>
             internal static ClauseEdge Get(PropositionalLogicGraph graph, PropositionNode from, DefiniteClause clause) => graph.clauseEdgeCache.GetOrAdd(clause, t => new ClauseEdge(from, ClauseNode.Get(graph, clause)));
         }
 
@@ -261,14 +262,16 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             /// Would have been fine just to create new short-lived instances as the graph is navigated - esp given that this is just for test use - but couldn't bring myself to do it.
             /// </summary>
             /// <param name="graph">The graph containing the edge to retrieve.</param>
-            /// <param name="from">The action node that the edge connects from.</param>
+            /// <param name="from">The node that the edge connects from.</param>
             /// <returns>The edge that corresponds to the given outcome of the given action from the given state.</returns>
             internal static PropositionEdge Get(PropositionalLogicGraph graph, INode from, DefiniteClause clause, string symbol) => graph.propositionEdgeCache.GetOrAdd((clause, symbol), t => new PropositionEdge(from, clause, PropositionNode.Get(graph, t.Item2)));
         }
 
         // TODO: equality to take into account antecedentsymbol elements.. suspect caching aint working properly at the mo as a result.
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "False positive. Is a record.")]
         public record DefiniteClause(IEnumerable<string> AntecedentSymbols, string ConsequentSymbol)
         {
+            /// <inheritdoc />
             public override string ToString() => $"{string.Join(" ∧ ", AntecedentSymbols)} ⇒ {ConsequentSymbol}";
         }
     }
