@@ -2,16 +2,16 @@
   <PropertyGroup>
     <Authors>Simon Condon</Authors>
     <Company />
-    <Product>Graph Theory</Product>
+    <Product>SCGraphTheory</Product>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/sdcondon/SCGraphTheory.Search/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>See https://github.com/sdcondon/SCGraphTheory.Search/releases.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>2020-2021 Simon Condon</Copyright>
+    <Copyright>2020-2022 Simon Condon</Copyright>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <Version>1.0.0</Version>
+    <Version>0.0.0-localbuild+localbuild</Version>
   </PropertyGroup>
 </Project>

@@ -11,6 +11,7 @@
     <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
     <PackageIcon>SCGraphTheoryIcon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <DocumentationFile>SCGraphTheory.Search.xml</DocumentationFile>
   </PropertyGroup>
@@ -25,6 +26,7 @@
 
   <ItemGroup>
     <None Include="SCGraphTheoryIcon.png" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
