@@ -128,14 +128,14 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             public IReadOnlyCollection<OutcomeEdge> Edges => lazyEdges.Value;
 
             /// <summary>
-            /// Gets the node that corresponds to a given state and action.
+            /// Gets the node that corresponds to a given action from a given state.
             /// <para/>
             /// NB: Constructor access is restricted to allow for enforcement of caching.
             /// Would have been fine just to create new short-lived instances as the graph is navigated - esp given that this is just for test use - but couldn't bring myself to do it.
             /// </summary>
             /// <param name="state">The state to get the corresponding node for.</param>
             /// <param name="action">The action to get the corresponding node for.</param>
-            /// <returns>The node that corresponds to the given state and action.</returns>
+            /// <returns>The node that corresponds to the given action from the given state.</returns>
             public static ActionNode Get(State state, Actions action) => Cache.GetOrAdd((state, action), t => new ActionNode(t.state, t.action));
         }
 
@@ -191,7 +191,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
         }
 
         /// <summary>
-        /// Represents the outcome of an action from a given state. Connects from an <see cref="ActionNode"/> to a <see cref="StateNode"/>.
+        /// Represents a possible outcome of a given action from a given state. Connects from an <see cref="ActionNode"/> to a <see cref="StateNode"/>.
         /// <para/>
         /// Note the explicit interface implementation here for From and To - so that we can give the
         /// concretely-typed version of these properties the same names, which keeps things nice
