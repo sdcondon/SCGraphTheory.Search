@@ -109,7 +109,6 @@ namespace SCGraphTheory.Search.AndOr
                     search.Succeeded,
                     search.Result,
                 };
-
             })
             .ThenReturns()
             .And((_, o) => o.Succeeded.Should().BeTrue())

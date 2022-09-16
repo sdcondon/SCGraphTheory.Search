@@ -36,10 +36,10 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr
             {
                 // NB: not the best solution, obviously - this is a (stack-using) depth-first search..
                 // Moves dominate because they are the edges AFTER (so added after, so popped before) the suck action.
-                [new(ErraticVacuumWorldGraph.VacuumPositions.Left, true, true)] = ErraticVacuumWorldGraph.Actions.Right,
-                [new(ErraticVacuumWorldGraph.VacuumPositions.Right, true, true)] = ErraticVacuumWorldGraph.Actions.Suck,
-                [new(ErraticVacuumWorldGraph.VacuumPositions.Right, false, true)] = ErraticVacuumWorldGraph.Actions.Left,
-                [new(ErraticVacuumWorldGraph.VacuumPositions.Left, true, false)] = ErraticVacuumWorldGraph.Actions.Suck,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Left, true, true)] = ErraticVacuumWorldGraph.Actions.Right,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Right, true, true)] = ErraticVacuumWorldGraph.Actions.Suck,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Right, false, true)] = ErraticVacuumWorldGraph.Actions.Left,
+                [new (ErraticVacuumWorldGraph.VacuumPositions.Left, true, false)] = ErraticVacuumWorldGraph.Actions.Suck,
             }));
 
         public static Test PropositionalLogic => TestThat
