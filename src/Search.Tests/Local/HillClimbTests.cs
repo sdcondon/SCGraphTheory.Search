@@ -7,13 +7,13 @@ namespace SCGraphTheory.Search.Local
 {
     public static class HillClimbTests
     {
-        private record TestCase(GridGraph<int> graph, (int X, int Y) source, (int from, int to)[] expectedSteps);
+        private record TestCase(ALGridGraph<int> graph, (int X, int Y) source, (int from, int to)[] expectedSteps);
 
         public static Test SearchBehaviour => TestThat
             .GivenEachOf(() => new[]
             {
                 new TestCase(
-                    graph: new GridGraph<int>(new[,]
+                    graph: new ALGridGraph<int>(new[,]
                     {
                         { 0, 1, 1 },
                         { 1, 2, 1 },
@@ -22,7 +22,7 @@ namespace SCGraphTheory.Search.Local
                     source: (1, 1),
                     expectedSteps: new[] { (1, 1) }),
                 new TestCase(
-                    graph: new GridGraph<int>(new[,]
+                    graph: new ALGridGraph<int>(new[,]
                     {
                         { 2, 1, 1 },
                         { 1, 0, 1 },
@@ -33,7 +33,7 @@ namespace SCGraphTheory.Search.Local
             })
             .When(tc =>
             {
-                var search = new HillClimb<GridGraph<int>.Node, GridGraph<int>.Edge, int>(
+                var search = new HillClimb<ALGridGraph<int>.Node, ALGridGraph<int>.Edge, int>(
                     source: tc.graph[tc.source.X, tc.source.Y],
                     getUtility: n => n.Value);
 

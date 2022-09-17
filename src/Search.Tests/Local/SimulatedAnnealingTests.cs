@@ -14,13 +14,13 @@ namespace SCGraphTheory.Search.Local
     /// </remarks>
     public static class SimulatedAnnealingTests
     {
-        private record TestCase(GridGraph<int> graph, (int X, int Y) source, (int X, int Y) expectedEnd);
+        private record TestCase(ALGridGraph<int> graph, (int X, int Y) source, (int X, int Y) expectedEnd);
 
         public static Test SearchBehaviour => TestThat
             .GivenEachOf(() => new[]
             {
                 new TestCase(
-                    graph: new GridGraph<int>(new[,]
+                    graph: new ALGridGraph<int>(new[,]
                     {
                         { 0, 0, 0 },
                         { 0, 1, 0 },
@@ -29,7 +29,7 @@ namespace SCGraphTheory.Search.Local
                     source: (1, 1),
                     expectedEnd: (1, 1)),
                 new TestCase(
-                    graph: new GridGraph<int>(new[,]
+                    graph: new ALGridGraph<int>(new[,]
                     {
                         { 1, 0, 1 },
                         { 0, 0, 2 },
@@ -40,7 +40,7 @@ namespace SCGraphTheory.Search.Local
             })
             .When(tc =>
             {
-                var search = new SimulatedAnnealing<GridGraph<int>.Node, GridGraph<int>.Edge>(
+                var search = new SimulatedAnnealing<ALGridGraph<int>.Node, ALGridGraph<int>.Edge>(
                     source: tc.graph[tc.source.X, tc.source.Y],
                     getUtility: n => n.Value,
                     annealingSchedule: t => Math.Max(1 - (.01f * t), 0));

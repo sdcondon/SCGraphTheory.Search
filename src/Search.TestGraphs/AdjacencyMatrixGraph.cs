@@ -26,6 +26,7 @@ namespace SCGraphTheory.Search.TestGraphs
         /// </remarks>
         public AdjacencyMatrixGraph(params (int from, int to)[] edges)
         {
+            // Set up node index:
             // NB: To keep things super simple, we don't even bother being clever about
             // shuffling stuff up if caller-supplied node IDs have any gaps - just
             // make a bigger matrix than we actually need.
@@ -36,6 +37,7 @@ namespace SCGraphTheory.Search.TestGraphs
                 nodes[nodeIndex] = new Node(this, nodeIndex);
             }
 
+            // Set up adjacency matrix:
             adjacencies = new bool[nodes.Length, nodes.Length];
             foreach (var (from, to) in edges)
             {

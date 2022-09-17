@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using WorldGraph = SCGraphTheory.Search.TestGraphs.GridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
+using WorldGraph = SCGraphTheory.Search.TestGraphs.ALGridGraph<SCGraphTheory.Search.Visualizer.World.Terrain>;
 
 namespace SCGraphTheory.Search.Visualizer
 {

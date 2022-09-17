@@ -2,7 +2,7 @@
 using BenchmarkDotNet.Attributes;
 using SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges;
 using AltValGridGraph = SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs.ValGridGraph<float>;
-using RefGridGraph = SCGraphTheory.Search.TestGraphs.GridGraph<float>;
+using RefGridGraph = SCGraphTheory.Search.TestGraphs.ALGridGraph<float>;
 using ValGridGraph = SCGraphTheory.Search.TestGraphs.ValGridGraph<float>;
 
 namespace SCGraphTheory.Search.Benchmarks

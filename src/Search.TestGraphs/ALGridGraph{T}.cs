@@ -9,18 +9,18 @@ namespace SCGraphTheory.Search.TestGraphs
     /// Graph implementation that wraps a <see cref="SCGraphTheory.AdjacencyList.Graph{TNode, TEdge}"/> and represents a square grid of values, using a delegate to determine which adjacencies are navigable.
     /// </summary>
     /// <typeparam name="T">The type of value associated with each node.</typeparam>
-    public class GridGraph<T> : IGraph<GridGraph<T>.Node, GridGraph<T>.Edge>
+    public class ALGridGraph<T> : IGraph<ALGridGraph<T>.Node, ALGridGraph<T>.Edge>
     {
         private readonly Graph<Node, Edge> innerGraph;
         private readonly Node[,] nodeIndex;
         private readonly Func<T, T, bool> adjacencyIsNavigable;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class initialized with the default value for each node.
+        /// Initializes a new instance of the <see cref="ALGridGraph{T}"/> class initialized with the default value for each node.
         /// </summary>
         /// <param name="size">The size of the grid.</param>
         /// <param name="adjacencyIsNavigable">A predicate to determine whether a given adjacency is navigable (i.e. a given edge exists), based on the value of the adjacent nodes.</param>
-        public GridGraph((int X, int Y) size, Func<T, T, bool> adjacencyIsNavigable)
+        public ALGridGraph((int X, int Y) size, Func<T, T, bool> adjacencyIsNavigable)
         {
             innerGraph = new Graph<Node, Edge>();
             nodeIndex = new Node[size.X, size.Y];
@@ -44,20 +44,20 @@ namespace SCGraphTheory.Search.TestGraphs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class initialized with the default value for each node, and with all adjacencies navigable.
+        /// Initializes a new instance of the <see cref="ALGridGraph{T}"/> class initialized with the default value for each node, and with all adjacencies navigable.
         /// </summary>
         /// <param name="size">The size of the grid.</param>
-        public GridGraph((int X, int Y) size)
+        public ALGridGraph((int X, int Y) size)
             : this(size, (_, _) => true)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class.
+        /// Initializes a new instance of the <see cref="ALGridGraph{T}"/> class.
         /// </summary>
         /// <param name="values">The node values for the grid.</param>
         /// <param name="adjacencyIsNavigable">A predicate to determine whether a given adjacency is navigable (i.e. a given edge exists), based on the value of the adjacent nodes.</param>
-        public GridGraph(T[,] values, Func<T, T, bool> adjacencyIsNavigable)
+        public ALGridGraph(T[,] values, Func<T, T, bool> adjacencyIsNavigable)
             : this((values.GetLength(0), values.GetLength(1)), adjacencyIsNavigable)
         {
             for (int x = 0; x < values.GetLength(0); x++)
@@ -70,10 +70,10 @@ namespace SCGraphTheory.Search.TestGraphs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GridGraph{T}"/> class with all adjacencies navigable.
+        /// Initializes a new instance of the <see cref="ALGridGraph{T}"/> class with all adjacencies navigable.
         /// </summary>
         /// <param name="values">The node values for the grid.</param>
-        public GridGraph(T[,] values)
+        public ALGridGraph(T[,] values)
             : this(values, (_, _) => true)
         {
         }
@@ -123,11 +123,11 @@ namespace SCGraphTheory.Search.TestGraphs
         }
 
         /// <summary>
-        /// Node class for <see cref="GridGraph{T}"/>.
+        /// Node class for <see cref="ALGridGraph{T}"/>.
         /// </summary>
         public class Node : NodeBase<Node, Edge>
         {
-            private readonly GridGraph<T> graph;
+            private readonly ALGridGraph<T> graph;
             private T value;
 
             /// <summary>
@@ -136,7 +136,7 @@ namespace SCGraphTheory.Search.TestGraphs
             /// <param name="graph">The graph that the node lies within.</param>
             /// <param name="coordinates">The coordinates of the node.</param>
             /// <param name="value">The vaue of the node.</param>
-            internal Node(GridGraph<T> graph, (int X, int Y) coordinates, T value) => (this.graph, Coordinates, this.value) = (graph, coordinates, value);
+            internal Node(ALGridGraph<T> graph, (int X, int Y) coordinates, T value) => (this.graph, Coordinates, this.value) = (graph, coordinates, value);
 
             /// <summary>
             /// Gets the coordinates of the node.
@@ -158,7 +158,7 @@ namespace SCGraphTheory.Search.TestGraphs
         }
 
         /// <summary>
-        /// Edge class for <see cref="GridGraph{T}"/>.
+        /// Edge class for <see cref="ALGridGraph{T}"/>.
         /// </summary>
         public class Edge : UndirectedEdgeBase<Node, Edge>
         {
