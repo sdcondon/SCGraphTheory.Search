@@ -43,5 +43,30 @@ namespace SCGraphTheory.Search.Classic
             .ThenReturns()
             .And((tc, r) => r.searchSteps.Should().BeEquivalentTo(tc.expectedSteps))
             .And((tc, r) => r.search.Target.Should().Be(tc.graph.Nodes.SingleOrDefault(n => n.Id == tc.targetId)));
+
+
+        private record InfiniteCostTestCase(LinqGraph graph, int sourceId, int targetId);
+
+        public static Test InfiniteCostBehaviour => TestThat
+                .GivenEachOf(() => new[]
+                {
+                    new InfiniteCostTestCase(
+                        graph: new LinqGraph((1, 2, float.PositiveInfinity)),
+                        sourceId: 1,
+                        targetId: 2)
+                })
+                .When(tc =>
+                {
+                    var search = new DijkstraSearch<LinqGraph.Node, LinqGraph.Edge>(
+                        source: tc.graph.Nodes.Single(n => n.Id == tc.sourceId),
+                        isTarget: n => n.Id == tc.targetId,
+                        getEdgeCost: e => e.Cost);
+
+                    search.Complete();
+
+                    return search;
+                })
+                .ThenReturns()
+                .And((tc, r) => r.Target.Should().Be(null));
     }
 }

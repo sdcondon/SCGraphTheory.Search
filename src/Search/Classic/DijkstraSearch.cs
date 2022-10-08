@@ -83,7 +83,8 @@ namespace SCGraphTheory.Search.Classic
                 var totalCostToNodeViaEdge = bestCost + getEdgeCost(edge);
                 var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
 
-                if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
+                // NB: we prune infinite costs - making the assumption that the heuristic returning infinity for something means its not interested in pursuing it..
+                if (!isAlreadyOnFrontier && !visited.ContainsKey(node) && totalCostToNodeViaEdge < float.PositiveInfinity)
                 {
                     // Node has not been added to the frontier - add it
                     frontier.Enqueue(node, (edge, totalCostToNodeViaEdge));
