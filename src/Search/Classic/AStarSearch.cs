@@ -92,18 +92,21 @@ namespace SCGraphTheory.Search.Classic
                 var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
 
                 // NB: we prune infinite costs - making the assumption that the heuristic returning infinity for something means its not interested in pursuing it..
-                if (!isAlreadyOnFrontier && !visited.ContainsKey(node) && estimatedTotalCostViaNode < float.PositiveInfinity)
+                if (estimatedTotalCostViaNode < float.PositiveInfinity)
                 {
-                    // Node has not been added to the frontier - add it
-                    frontier.Enqueue(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
-                    visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
-                }
-                else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCostToNode)
-                {
-                    // Node is already on the frontier, but the cost via this edge
-                    // is cheaper than has been found previously - increase its priority
-                    frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
-                    visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
+                    if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
+                    {
+                        // Node has not been added to the frontier - add it
+                        frontier.Enqueue(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                        visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
+                    }
+                    else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCostToNode)
+                    {
+                        // Node is already on the frontier, but the cost via this edge
+                        // is cheaper than has been found previously - increase its priority
+                        frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                        visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
+                    }
                 }
             }
 
