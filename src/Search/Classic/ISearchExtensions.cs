@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SCGraphTheory.Search.Classic
 {
@@ -21,6 +23,36 @@ namespace SCGraphTheory.Search.Classic
             while (!search.IsConcluded)
             {
                 search.NextStep();
+            }
+        }
+
+        /// <summary>
+        /// Executes a search to its conclusion asynchronously.
+        /// </summary>
+        /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
+        /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
+        /// <param name="search">The search to be completed.</param>
+        /// <param name="batchSize">The number of steps to attempt between each check of the cancellation token. Optional, the default value is 1.</param>
+        /// <param name="cancellationToken">The cancellation token to respect. Optional, the default value is CancellationToken.None.</param>
+        /// <returns>A <see cref="Task"/> encapsulating the completion of the search.</returns>
+        public static async Task CompleteAsync<TNode, TEdge>(this ISearch<TNode, TEdge> search, int batchSize = 1, CancellationToken cancellationToken = default)
+            where TNode : INode<TNode, TEdge>
+            where TEdge : IEdge<TNode, TEdge>
+        {
+            var i = 0;
+
+            while (!search.IsConcluded)
+            {
+                search.NextStep();
+                i++;
+
+                // Total paranoia, but based on how careless I've been lately..
+                if (i >= batchSize)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await Task.Yield();
+                    i = 0;
+                }
             }
         }
 
