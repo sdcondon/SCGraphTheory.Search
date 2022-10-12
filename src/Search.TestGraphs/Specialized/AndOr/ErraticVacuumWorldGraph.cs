@@ -20,7 +20,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             /// <summary>
             /// Gets the current state of the system.
             /// </summary>
-            public State State { get; }
+            State State { get; }
         }
 
         /// <summary>
@@ -31,12 +31,12 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             /// <summary>
             /// Gets the current state of the system.
             /// </summary>
-            public State State { get; }
+            State State { get; }
 
             /// <summary>
             /// Gets the action being carried out.
             /// </summary>
-            public Actions Action { get; }
+            Actions Action { get; }
         }
 
         /// <summary>

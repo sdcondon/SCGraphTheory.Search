@@ -48,7 +48,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             /// <summary>
             /// Gets the symbol of the (consequent) proposition that the node represents.
             /// </summary>
-            public string Symbol { get; }
+            string Symbol { get; }
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace SCGraphTheory.Search.TestGraphs.Specialized.AndOr
             /// <summary>
             /// Gets the clause explored by the edge.
             /// </summary>
-            public DefiniteClause Clause { get; }
+            DefiniteClause Clause { get; }
         }
 
         /// <summary>
