@@ -98,24 +98,5 @@ namespace SCGraphTheory.Search.Classic
         {
             return search.Visited.Values.Where(a => !object.Equals(a.Edge, default(TEdge))).Select(ke => ke.Edge);
         }
-
-        /// <summary>
-        /// Gets a value indicating whether or not a given search has concluded successfully - that is, has encountered a target node.
-        /// <para/>
-        /// TODO: Minor bug here - if the target node is a default struct it'll return a false negative. A bit of an edge case, but possible.
-        /// Consider for example a graph in which nodes are just an int-valued index into some underlying static data store, and a search for
-        /// which the target node happens to have the index zero. Worth fixing by adding an IsSucceeded prop to the interface and making the
-        /// implementations populate it explicitly - but that's a breaking change and will have to wait until v3.
-        /// </summary>
-        /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
-        /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
-        /// <param name="search">The search to examine.</param>
-        /// <returns>True if and only if the search concluded by finding a target node.</returns>
-        public static bool IsSucceeded<TNode, TEdge>(this ISearch<TNode, TEdge> search)
-            where TNode : INode<TNode, TEdge>
-            where TEdge : IEdge<TNode, TEdge>
-        {
-            return search.IsConcluded && !Equals(search.Target, default(TNode));
-        }
     }
 }

@@ -67,7 +67,7 @@ namespace SCGraphTheory.Search.Classic
             Failed,
 
             /// <summary>
-            /// The ssearch has concluded by finding a target node.
+            /// The search has concluded by finding a target node.
             /// </summary>
             Completed,
         }
@@ -79,6 +79,9 @@ namespace SCGraphTheory.Search.Classic
 
         /// <inheritdoc />
         public bool IsConcluded => State != States.InProgress;
+
+        /// <inheritdoc />
+        public bool IsSucceeded => State == States.Completed;
 
         /// <inheritdoc />
         public TNode Target { get; private set; }

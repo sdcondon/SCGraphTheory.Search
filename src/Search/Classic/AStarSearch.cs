@@ -56,6 +56,9 @@ namespace SCGraphTheory.Search.Classic
         public bool IsConcluded { get; private set; } = false;
 
         /// <inheritdoc />
+        public bool IsSucceeded { get; private set; } = false;
+
+        /// <inheritdoc />
         public TNode Target { get; private set; } = default;
 
         /// <inheritdoc />
@@ -81,6 +84,7 @@ namespace SCGraphTheory.Search.Classic
             {
                 Target = node;
                 IsConcluded = true;
+                IsSucceeded = true;
                 return;
             }
 

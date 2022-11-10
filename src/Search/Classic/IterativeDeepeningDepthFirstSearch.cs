@@ -41,6 +41,9 @@ namespace SCGraphTheory.Search.Classic
         public bool IsConcluded => currentSearch.IsConcluded && currentSearch.State != LimitedDepthFirstSearch<TNode, TEdge>.States.CutOff;
 
         /// <inheritdoc />
+        public bool IsSucceeded => currentSearch.IsSucceeded;
+
+        /// <inheritdoc />
         public TNode Target => currentSearch.Target;
 
         /// <inheritdoc />

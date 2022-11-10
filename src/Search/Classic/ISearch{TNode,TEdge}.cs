@@ -17,6 +17,11 @@ namespace SCGraphTheory.Search.Classic
         bool IsConcluded { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the search is concluded, and found a target node.
+        /// </summary>
+        bool IsSucceeded { get; }
+
+        /// <summary>
         /// Gets the target node if the search is concluded and found a matching node, otherwise returns <see langword="default"/>.
         /// </summary>
         TNode Target { get; }

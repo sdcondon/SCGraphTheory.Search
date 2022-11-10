@@ -42,7 +42,7 @@ namespace SCGraphTheory.Search.Classic
             })
             .ThenReturns()
             .And((tc, r) => r.searchSteps.Should().BeEquivalentTo(tc.expectedSteps))
-            .And((tc, r) => r.search.Visited.Values.Where(v => v.Edge != null).Select(v => (v.Edge.From.Id, v.Edge.To.Id)).Should().BeEquivalentTo(r.searchSteps))
+            .And((tc, r) => r.search.Visited.Values.Where(v => v.Edge != null && v.IsOnFrontier == false).Select(v => (v.Edge.From.Id, v.Edge.To.Id)).Should().BeEquivalentTo(r.searchSteps))
             .And((tc, r) => r.search.Target.Should().Be(tc.graph.Nodes.SingleOrDefault(n => n.Id == tc.targetId)));
 
 
