@@ -52,7 +52,7 @@ namespace SCGraphTheory.Search.Classic
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited => currentSearch.Visited;
 
         /// <inheritdoc />
-        public void NextStep()
+        public TEdge NextStep()
         {
             if (IsConcluded)
             {
@@ -64,7 +64,7 @@ namespace SCGraphTheory.Search.Classic
                 currentSearch = new LimitedDepthFirstSearch<TNode, TEdge>(source, isTarget, ++currentDepthLimit);
             }
 
-            currentSearch.NextStep();
+            return currentSearch.NextStep();
         }
     }
 }

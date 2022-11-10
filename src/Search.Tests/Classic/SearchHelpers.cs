@@ -12,24 +12,8 @@ namespace SCGraphTheory.Search.Classic
             var searchSteps = new List<(int, int)>();
             while (!search.IsConcluded)
             {
-                search.NextStep();
-
-                var exploredEdges = search.Visited.Values
-                    .Where(ke => !ke.IsOnFrontier && ke.Edge != null)
-                    .Select(ke => (ke.Edge.From.Id, ke.Edge.To.Id));
-
-                var addedExploredEdges = exploredEdges.Except(searchSteps);
-                var removedExploredEdges = searchSteps.Except(exploredEdges);
-
-                if (addedExploredEdges.Count() != 1 || removedExploredEdges.Count() != 0)
-                {
-                    // NB: we expect the source node to be added to the search tree in the ctor, so that the first
-                    // step traverses an edge, or the search is immediately complete. This is (admittedly somewhat subjectively)
-                    // more intuitive behaviour than the first step just adding the source node to the search tree.
-                    throw new Exception("Search explored no or multiple edges in a step, or forgot an explored edge");
-                }
-
-                searchSteps.Add(addedExploredEdges.Single());
+                var exploredEdge = search.NextStep();
+                searchSteps.Add((exploredEdge.From.Id, exploredEdge.To.Id));
             }
 
             return searchSteps.ToArray();

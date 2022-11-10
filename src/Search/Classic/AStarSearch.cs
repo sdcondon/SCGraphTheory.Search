@@ -62,7 +62,7 @@ namespace SCGraphTheory.Search.Classic
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
         /// <inheritdoc />
-        public void NextStep()
+        public TEdge NextStep()
         {
             if (IsConcluded)
             {
@@ -72,6 +72,7 @@ namespace SCGraphTheory.Search.Classic
             var node = frontier.Dequeue(out var frontierInfo);
             visited[node] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdge, false);
             Visit(node, frontierInfo.bestCostToNode);
+            return frontierInfo.bestEdge;
         }
 
         private void Visit(TNode node, float bestCostToNode)

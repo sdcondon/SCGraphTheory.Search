@@ -29,6 +29,6 @@ namespace SCGraphTheory.Search.Classic
         /// <summary>
         /// Executes the next step of the search.
         /// </summary>
-        void NextStep();
+        TEdge NextStep();
     }
 }

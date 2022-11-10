@@ -87,7 +87,7 @@ namespace SCGraphTheory.Search.Classic
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
         /// <inheritdoc />
-        public void NextStep()
+        public TEdge NextStep()
         {
             if (IsConcluded)
             {
@@ -97,6 +97,7 @@ namespace SCGraphTheory.Search.Classic
             var next = frontier.Pop();
             visited[next.edge.To] = new KnownEdgeInfo<TEdge>(next.edge, false);
             Visit(next.edge.To, next.depth);
+            return next.edge;
         }
 
         private void Visit(TNode node, int depth)
