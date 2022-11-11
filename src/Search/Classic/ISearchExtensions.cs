@@ -30,11 +30,11 @@ namespace SCGraphTheory.Search.Classic
         /// Executes a search to its conclusion asynchronously.
         /// <para/>
         /// The <see cref="ISearch{TNode, TEdge}"/> interface of course has no async members (..and more generally, there's no support
-        /// for async graph navigation in this lib). Rather, this extension method is just a quality-of-life addition to let you get a
+        /// for async graphs/graph navigation in this lib). Rather, this extension method is just a quality-of-life addition to let you get a
         /// search going and get on with something else in the meantime. It is implemented such that it should not tie up any given thread
         /// for long periods of time - because it continuously yields back the current sync context (with <see cref="Task.Yield"/>).
         /// This does of course come at an overhead cost - which can be modulated somewhat by providing the frequency with which
-        /// it occurs (through specifying a value for the 'batchSize' parameter).
+        /// it occurs as a value for the 'batchSize' parameter.
         /// </summary>
         /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
         /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
