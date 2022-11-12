@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,10 +32,10 @@ namespace SCGraphTheory.Search.Classic
         /// <para/>
         /// The <see cref="ISearch{TNode, TEdge}"/> interface of course has no async members (..and more generally, there's no support
         /// for async graphs/graph navigation in this lib). Rather, this extension method is just a quality-of-life addition to let you get a
-        /// search going and get on with something else in the meantime. It is implemented such that it should not tie up any given thread
-        /// for long periods of time - because it continuously yields back the current sync context (with <see cref="Task.Yield"/>).
-        /// This does of course come at an overhead cost - which can be modulated somewhat by providing the frequency with which
-        /// it occurs as a value for the 'batchSize' parameter.
+        /// search going and get on with something else in the meantime with having to create your own <see cref="Task"/>. It is implemented such that it
+        /// should not tie up any given thread for long periods of time - because it continuously yields back the current sync context
+        /// (with <see cref="Task.Yield"/>). This does of course come at an overhead cost - which can be modulated somewhat by specifying the
+        /// frequency with which it occurs (via the 'batchSize' parameter).
         /// </summary>
         /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
         /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
@@ -46,6 +47,11 @@ namespace SCGraphTheory.Search.Classic
             where TNode : INode<TNode, TEdge>
             where TEdge : IEdge<TNode, TEdge>
         {
+            if (batchSize < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(batchSize), batchSize, "Batch size must be greater than zero");
+            }
+
             var i = 0;
 
             while (!search.IsConcluded)
@@ -53,8 +59,7 @@ namespace SCGraphTheory.Search.Classic
                 search.NextStep();
                 i++;
 
-                // Total paranoia, but based on how careless I've been lately..
-                if (i >= batchSize)
+                if (i == batchSize)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     await Task.Yield();
