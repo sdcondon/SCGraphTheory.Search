@@ -71,19 +71,46 @@ namespace SCGraphTheory.Search.Classic
         /// <summary>
         /// Executes the search to completion.
         /// </summary>
-        public void Complete()
+        /// <param name="cancellationToken">A cancellation token for the operation. Optional, default value is <see cref="CancellationToken.None"/>.</param>
+        public void Complete(CancellationToken cancellationToken = default)
         {
             if (Interlocked.Exchange(ref executeCount, 1) == 1)
             {
                 throw new InvalidOperationException("Search execution has already begun via a prior Complete invocation");
             }
 
-            Visit(source);
+            Visit(source, cancellationToken);
             IsConcluded = true;
         }
 
-        private void Visit(TNode node)
+        /// <summary>
+        /// Gets an enumeration of the edges comprising the path from the source node to the target - or null if the target was not found.
+        /// </summary>
+        /// <returns>An enumeration of the edges comprising the path from the source node to the target - or null if the target was not found.</returns>
+        public IEnumerable<TEdge> PathToTarget()
         {
+            if (Target == null)
+            {
+                return null;
+            }
+
+            var path = new List<TEdge>();
+
+            for (var node = Target; !object.Equals(Visited[node], default(TEdge)); node = Visited[node].From)
+            {
+                path.Add(Visited[node]);
+            }
+
+            // TODO-PERFORMANCE: probably better to use a linked list and continuously add to the front of it. Test me.
+            // Then again, this method is unlikely to sit on any hot paths, so probably not a big deal.
+            path.Reverse();
+            return path;
+        }
+
+        private void Visit(TNode node, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (isTarget(node))
             {
                 Target = node;
@@ -101,7 +128,7 @@ namespace SCGraphTheory.Search.Classic
 
                     if (!visited.ContainsKey(nextNode))
                     {
-                        Visit(nextNode);
+                        Visit(nextNode, cancellationToken);
                         visited[nextNode] = nextEdge;
                     }
                 }
