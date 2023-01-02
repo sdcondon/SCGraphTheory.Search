@@ -28,7 +28,8 @@ namespace SCGraphTheory.Search.Classic
         /// <param name="getEdgeCost">A function for calculating the cost of an edge.</param>
         public DijkstraSearch(TNode source, Predicate<TNode> isTarget, Func<TEdge, float> getEdgeCost)
         {
-            // NB: we don't throw for default structs - which could be valid (struct with a single Id field with value 0, for example)
+            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
+            // (backed by some static store) with a single Id field (that happens to have value 0).
             if (source == null)
             {
                 throw new ArgumentNullException(nameof(source));
