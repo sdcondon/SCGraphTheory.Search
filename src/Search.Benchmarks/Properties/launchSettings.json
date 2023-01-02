@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Benchmarks: RefGridGraph Search ": {
+      "commandName": "Project",
+      "commandLineArgs": "-f *SearchBenchmarks* --anyCategories RefGridGraph --join"
+    },
+    "Benchmarks: ValGridGraph Searches": {
+      "commandName": "Project",
+      "commandLineArgs": "-f *SearchBenchmarks* --anyCategories ValGridGraph --join"
+    },
+    "Benchmarks: AltValGridGraph Searches": {
+      "commandName": "Project",
+      "commandLineArgs": "-f *SearchBenchmarks* --anyCategories AltValGridGraph --join"
+    }
+  }
+}

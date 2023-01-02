@@ -11,32 +11,19 @@ namespace SCGraphTheory.Search.Benchmarks
     [InProcess]
     public class GraphImplementationBenchmarks
     {
-        private const int SIZE = 20;
-
-        private readonly AltValGridGraph altValGraph;
-        private readonly ValGridGraph valGraph;
-        private readonly RefGridGraph refGraph;
-
-        public GraphImplementationBenchmarks()
-        {
-            altValGraph = new AltValGridGraph((SIZE, SIZE));
-            valGraph = new ValGridGraph((SIZE, SIZE));
-            refGraph = new RefGridGraph((SIZE, SIZE), (_, _) => true);
-        }
-
         [Benchmark]
         [BenchmarkCategory("Constructors", nameof(ValGridGraph))]
-        public ValGridGraph MakeValGraph() => new ValGridGraph((SIZE, SIZE));
+        public ValGridGraph MakeValGraph() => new ValGridGraph((20, 20));
 
         [Benchmark]
         [BenchmarkCategory("Constructors", nameof(RefGridGraph))]
-        public RefGridGraph MakeRefGraph() => new RefGridGraph((SIZE, SIZE), (_, _) => true);
+        public RefGridGraph MakeRefGraph() => new RefGridGraph((20, 20), (_, _) => true);
 
         [Benchmark]
         [BenchmarkCategory("EdgeEnumeration", nameof(ValGridGraph))]
         public int ValGraphEdgeEnumerator()
         {
-            var node = (INode<ValGridGraph.Node, ValGridGraph.Edge>)valGraph[0, 0];
+            var node = (INode<ValGridGraph.Node, ValGridGraph.Edge>)BenchmarkGraphs.ValGridGraph[0, 0];
             int i = 0;
             foreach (var edge in node.Edges)
             {
@@ -50,7 +37,7 @@ namespace SCGraphTheory.Search.Benchmarks
         [BenchmarkCategory("EdgeEnumeration", nameof(AltValGridGraph))]
         public int AltValGraphEdgeEnumerator()
         {
-            var node = (INode<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>)altValGraph[0, 0];
+            var node = (INode<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>)BenchmarkGraphs.AltValGridGraph[0, 0];
             int i = 0;
             foreach (var edge in node.Edges)
             {
