@@ -23,7 +23,7 @@ namespace SCGraphTheory.Search.Benchmarks
 
         [Benchmark]
         [BenchmarkCategory(nameof(AltValGridGraph))]
-        public void AltValGridGraph() => new AStarSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+        public void AltValGridGraph() => new AlternativeAbstractions.TEdges.Search.AStarSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
             source: BenchmarkGraphs.AltValGridGraph[0, 0],
             isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner,
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
@@ -32,6 +32,14 @@ namespace SCGraphTheory.Search.Benchmarks
         [Benchmark]
         [BenchmarkCategory(nameof(RefGridGraph))]
         public void RefGridGraph() => new AStarSearch<RefGridGraph.Node, RefGridGraph.Edge>(
+            source: BenchmarkGraphs.RefGridGraph[0, 0],
+            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner,
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
+            getEstimatedCostToTarget: n => EuclideanDistance((BenchmarkGraphs.SIZE - 1, BenchmarkGraphs.SIZE - 1), n.Coordinates)).Complete();
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(RefGridGraph))]
+        public void RefGridGraph_generic() => new Classic.AStarSearch<RefGridGraph.Node, RefGridGraph.Edge, float>(
             source: BenchmarkGraphs.RefGridGraph[0, 0],
             isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner,
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),

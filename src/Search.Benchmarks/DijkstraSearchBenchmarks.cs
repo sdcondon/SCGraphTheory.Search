@@ -23,7 +23,7 @@ namespace SCGraphTheory.Search.Benchmarks
 
         [Benchmark]
         [BenchmarkCategory("Dijkstra", nameof(AltValGridGraph))]
-        public void AltValDijkstra() => new DijkstraSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+        public void AltValDijkstra() => new AlternativeAbstractions.TEdges.Search.DijkstraSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
             source: BenchmarkGraphs.AltValGridGraph[0, 0],
             isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner,
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();

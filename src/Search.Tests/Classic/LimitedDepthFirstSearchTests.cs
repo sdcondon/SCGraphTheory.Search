@@ -11,16 +11,17 @@ namespace SCGraphTheory.Search.Classic
         private record TestCase(LinqGraph graph, int sourceId, int targetId, int depthLimit, (int from, int to)[] expectedSteps, LimitedDepthFirstSearch<LinqGraph.Node, LinqGraph.Edge>.States expectedEndState);
 
         public static Test SearchBehaviour => TestThat
-            .GivenEachOf(() => new[]
+            .GivenEachOf(() => new TestCase[]
             {
-                new TestCase(
+                new (
                     graph: new LinqGraph((1, 2)),
                     sourceId: 1,
                     targetId: 1,
                     depthLimit: 1,
                     expectedSteps: Array.Empty<(int, int)>(),
                     expectedEndState: LimitedDepthFirstSearch<LinqGraph.Node, LinqGraph.Edge>.States.Completed),
-                new TestCase(
+
+                new (
                     graph: new LinqGraph((1, 2), (2, 4), (1, 3), (3, 4)),
                     sourceId: 1,
                     targetId: -1,
@@ -34,14 +35,15 @@ namespace SCGraphTheory.Search.Classic
                 // Of course, keeping track does require more memory (a hashset instead of a bool) and time to do so - and
                 // I'm not sure whether its "worth it" in the general case (obviously not worth it for a tree, for example).
                 // For later consideration I guess:
-                new TestCase(
+                new (
                     graph: new LinqGraph((1, 3), (1, 2), (2, 3)),
                     sourceId: 1,
                     targetId: -1,
                     depthLimit: 1,
                     expectedSteps: new[] { (1, 2), (1, 3) },
                     expectedEndState: LimitedDepthFirstSearch<LinqGraph.Node, LinqGraph.Edge>.States.Failed),
-                new TestCase(
+
+                new (
                     graph: new LinqGraph((1, 2), (2, 4), (1, 3), (3, 4)),
                     sourceId: 1,
                     targetId: 2,

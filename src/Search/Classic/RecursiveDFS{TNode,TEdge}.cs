@@ -5,19 +5,20 @@ using System.Threading;
 
 namespace SCGraphTheory.Search.Classic
 {
-    /// <summary>
-    /// Recursive implementation of a depth-first search. Intended to be of use to those that don't need or want the step-by-step
-    /// execution support required by <see cref="ISearch{TNode, TEdge}"/>. By not requiring step-by-step, we eliminate some overhead
-    /// (e.g. don't need to enumerate all outbound edges if we find the target via the first one), and explore outbound edges
-    /// in order (rather than in reverse order).
-    /// <para/>
-    /// *Might* implement a compromise at some point that uses a separate stack (so can execute step-by-step) - but the stack stores
-    /// enumerators rather than edges. There are some trade-offs there (complexity in establishing the frontier edges at any given
-    /// point without breaking the search, for example), but worth a look, maybe.
-    /// </summary>
-    /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
-    /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
-    public class RecursiveDFS<TNode, TEdge>
+  /// <summary>
+  /// Recursive implementation of a depth-first search. Intended to be of use to those that don't need or want the step-by-step
+  /// execution support required by <see cref="ISearch{TNode, TEdge}"/>. By not requiring step-by-step, we eliminate some overhead
+  /// (e.g. don't need to enumerate all outbound edges if we find the target via the first one), and explore outbound edges
+  /// in order (rather than in reverse order).
+  /// <para/>
+  /// *Might* implement a compromise at some point that uses a separate stack (so can execute step-by-step) - but the stack stores
+  /// enumerators rather than edges. There are some trade-offs there (complexity in establishing the frontier edges at any given
+  /// point without breaking the search, for example), but worth a look, maybe (since I can think of a couple of possible workarounds
+  /// for the issue mentioned).
+  /// </summary>
+  /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
+  /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
+  public class RecursiveDFS<TNode, TEdge>
         where TNode : INode<TNode, TEdge>
         where TEdge : IEdge<TNode, TEdge>
     {

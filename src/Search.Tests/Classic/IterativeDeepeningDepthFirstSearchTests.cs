@@ -11,14 +11,15 @@ namespace SCGraphTheory.Search.Classic
         private record TestCase(LinqGraph graph, int sourceId, int targetId, (int from, int to)[][] expectedSteps);
 
         public static Test SearchBehaviour => TestThat
-            .GivenEachOf(() => new[]
+            .GivenEachOf(() => new TestCase[]
             {
-                new TestCase(
+                new (
                     graph: new LinqGraph((1, 2)),
                     sourceId: 1,
                     targetId: 1,
                     expectedSteps: new (int, int)[][] { Array.Empty<(int, int)>() }),
-                new TestCase(
+
+                new (
                     graph: new LinqGraph((1, 2), (2, 4), (1, 3), (3, 4)),
                     sourceId: 1,
                     targetId: -1,

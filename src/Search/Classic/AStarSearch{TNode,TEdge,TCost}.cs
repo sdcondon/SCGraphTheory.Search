@@ -1,28 +1,32 @@
-﻿using SCGraphTheory.Search.Utility;
+﻿#if NET7_0_OR_GREATER
+using SCGraphTheory.Search.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Numerics;
 
 namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
-    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the A* algorithm (and float-valued costs).
+    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the A* algorithm and allows for user-specified numeric cost type.
     /// </summary>
     /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
     /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
-    public class AStarSearch<TNode, TEdge> : ISearch<TNode, TEdge>
+    /// <typeparam name="TCost">The type of the cost metric.</typeparam>
+    public class AStarSearch<TNode, TEdge, TCost> : ISearch<TNode, TEdge>
         where TNode : INode<TNode, TEdge>
         where TEdge : IEdge<TNode, TEdge>
+        where TCost : INumber<TCost>
     {
         private readonly Predicate<TNode> isTarget;
-        private readonly Func<TEdge, float> getEdgeCost;
-        private readonly Func<TNode, float> getEstimatedCostToTarget;
+        private readonly Func<TEdge, TCost> getEdgeCost;
+        private readonly Func<TNode, TCost> getEstimatedCostToTarget;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly KeyedPriorityQueue<TNode, (TEdge bestEdge, float bestCostToNode, float estimatedBestCostViaNode)> frontier = new KeyedPriorityQueue<TNode, (TEdge, float, float)>(new FrontierPriorityComparer());
+        private readonly KeyedPriorityQueue<TNode, (TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode)> frontier = new KeyedPriorityQueue<TNode, (TEdge, TCost, TCost)>(new FrontierPriorityComparer());
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AStarSearch{TNode, TEdge}"/> class.
+        /// Initializes a new instance of the <see cref="AStarSearch{TNode, TEdge, TCost}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from.</param>
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
@@ -31,8 +35,8 @@ namespace SCGraphTheory.Search.Classic
         public AStarSearch(
             TNode source,
             Predicate<TNode> isTarget,
-            Func<TEdge, float> getEdgeCost,
-            Func<TNode, float> getEstimatedCostToTarget)
+            Func<TEdge, TCost> getEdgeCost,
+            Func<TNode, TCost> getEstimatedCostToTarget)
         {
             // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
             // (backed by some static store) with a single Id field (that happens to have value 0).
@@ -50,7 +54,7 @@ namespace SCGraphTheory.Search.Classic
             // Initialize the search tree with the source node and immediately visit it.
             // The caller having to do a NextStep to discover it is unintuitive.
             visited[source] = new KnownEdgeInfo<TEdge>(default, false);
-            Visit(source, 0f);
+            Visit(source, TCost.AdditiveIdentity);
         }
 
         /// <inheritdoc />
@@ -79,7 +83,7 @@ namespace SCGraphTheory.Search.Classic
             return frontierInfo.bestEdge;
         }
 
-        private void Visit(TNode node, float bestCostToNode)
+        private void Visit(TNode node, TCost bestCostToNode)
         {
             if (isTarget(node))
             {
@@ -96,8 +100,7 @@ namespace SCGraphTheory.Search.Classic
                 var totalCostToNodeViaEdge = bestCostToNode + getEdgeCost(edge);
                 var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
 
-                // NB: we prune infinite costs - making the assumption that the heuristic returning infinity for something means its not interested in pursuing it..
-                if (estimatedTotalCostViaNode < float.PositiveInfinity)
+                if (TCost.IsFinite(estimatedTotalCostViaNode))
                 {
                     var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
 
@@ -123,12 +126,13 @@ namespace SCGraphTheory.Search.Classic
             }
         }
 
-        private class FrontierPriorityComparer : IComparer<(TEdge bestEdge, float bestCostToNode, float estimatedBestCostViaNode)>
+        private class FrontierPriorityComparer : IComparer<(TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode)>
         {
-            public int Compare((TEdge bestEdge, float bestCostToNode, float estimatedBestCostViaNode) x, (TEdge bestEdge, float bestCostToNode, float estimatedBestCostViaNode) y)
+            public int Compare((TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode) x, (TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode) y)
             {
                 return y.estimatedBestCostViaNode.CompareTo(x.estimatedBestCostViaNode);
             }
         }
     }
 }
+#endif

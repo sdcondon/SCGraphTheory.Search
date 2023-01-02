@@ -11,6 +11,9 @@
     "Benchmarks: AltValGridGraph Searches": {
       "commandName": "Project",
       "commandLineArgs": "-f *SearchBenchmarks* --anyCategories AltValGridGraph --join"
+    },
+    "Benchmarks: No args": {
+      "commandName": "Project"
     }
   }
 }
