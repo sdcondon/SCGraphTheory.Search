@@ -4,7 +4,7 @@
     /// A container for information about an edge discovered by a search.
     /// </summary>
     /// <typeparam name="TEdge">The type of the edge.</typeparam>
-    public struct KnownEdgeInfo<TEdge>
+    public readonly struct KnownEdgeInfo<TEdge>
     {
         /// <summary>
         /// The known edge.
