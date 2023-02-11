@@ -43,6 +43,7 @@ The extra is relatively small though, since all of the algorithms require a quic
 Using a Dictionary (as opposed to a HashSet) for this is a relatively minor addition.
 - In the A* and Dijkstra implementations above, costs are float-valued. As of version 3.0.0, when targetting .NET 7 or greater, there are
 alternatives for each that allow a user-specified (possibly non-numeric) cost type to be used.
+- This namespace also contains `RecursiveDFS<TNode, TEdge>` - for consumers that don't need or want step-by-step execution.
 
 ## Local search algorithms
 
