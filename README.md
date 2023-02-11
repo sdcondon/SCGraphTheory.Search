@@ -41,13 +41,15 @@ Notes:
 This does add a little to the memory footprint that is overhead if you don't need this information.
 The extra is relatively small though, since all of the algorithms require a quick way to determine if a node has already been visited anyway.
 Using a Dictionary (as opposed to a HashSet) for this is a relatively minor addition.
+- In the A* and Dijkstra implementations above, costs are float-valued. As of version 3.0.0, when targetting .NET 7 or greater, there are
+alternatives for each that allow a user-specified (possibly non-numeric) cost type to be used.
 
 ## Local search algorithms
 
 The `Local` namespace contains implementations of the (steepest-ascent) hill climb and simulated annealing search algorithms. They should also be fairly intuitive to use. Here are some example instantiations:
 
 ```csharp
-var hillClimb = new HillClimb<MyNodeType, MyEdgeType>(
+var hillClimb = new HillClimb<MyNodeType, MyEdgeType, MyUtilityType>(
     source: mySpecificSourceNode,
     getUtility: n => n.MyUtilityProp);
 

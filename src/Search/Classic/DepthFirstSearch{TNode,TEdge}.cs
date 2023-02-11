@@ -78,6 +78,11 @@ namespace SCGraphTheory.Search.Classic
                 return;
             }
 
+            // TODO: I'm really, really tempted to stick a "Reverse()" here. Yes, the fact that we need
+            // to iterate the whole collection anyway means its still not great (e.g. if that iteration
+            // is expensive), and yes RecursiveDFS exists anyway to account for consumers where this
+            // is a problem, and yes there could be a better solution where we have a stack of IEnumerators,
+            // but it would at least resolve the edges in the reverse order issue.
             foreach (var nextEdge in node.Edges)
             {
                 if (!visited.ContainsKey(nextEdge.To))
