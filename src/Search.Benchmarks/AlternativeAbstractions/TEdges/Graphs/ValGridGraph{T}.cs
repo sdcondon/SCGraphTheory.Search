@@ -174,7 +174,7 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs
 
             private readonly T[,] values;
             private readonly (int X, int Y) coordinates;
-            private byte index = 0;
+            private sbyte index = -1;
 
             internal EdgeEnumerator(T[,] values, (int X, int Y) coordinates)
             {
@@ -206,8 +206,8 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs
                 // value that indicates it's "bad" - probably too much for it to just quickly give you
                 // the next one..
                 (int X, int Y) current;
-                (int X, int Y) min = (values.GetLowerBound(0), values.GetLowerBound(1));
-                (int X, int Y) max = (values.GetUpperBound(0), values.GetUpperBound(1));
+                var maxX = values.GetUpperBound(0);
+                var maxY = values.GetUpperBound(1);
                 do
                 {
                     if (++index > 7)
@@ -218,16 +218,16 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs
                     current = (coordinates.X + Offsets[index].X, coordinates.Y + Offsets[index].Y);
                 }
                 while (
-                    current.X < min.X
-                    || current.X > max.X
-                    || current.Y < min.Y
-                    || current.Y > max.Y);
+                    current.X < 0
+                    || current.X > maxX
+                    || current.Y < 0
+                    || current.Y > maxY);
 
                 return true;
             }
 
             /// <inheritdoc />
-            public void Reset() => index = 0;
+            public void Reset() => index = -1;
         }
     }
 }
