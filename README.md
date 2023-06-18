@@ -4,7 +4,7 @@
 
 [![NuGet version (SCGraphTheory.Search)](https://img.shields.io/nuget/v/SCGraphTheory.Search.svg?style=flat-square)](https://www.nuget.org/packages/SCGraphTheory.Search/) 
 [![NuGet downloads (SCGraphTheory.Search)](https://img.shields.io/nuget/dt/SCGraphTheory.Search.svg?style=flat-square)](https://www.nuget.org/packages/SCGraphTheory.Search/) 
-[![Commits since latest release](https://img.shields.io/github/commits-since/sdcondon/SCGraphTheory.Search/latest?style=flat-square)](https://github.com/sdcondon/SCGraphTheory.Search/compare/3.0.0...main)
+[![Commits since latest release](https://img.shields.io/github/commits-since/sdcondon/SCGraphTheory.Search/latest?style=flat-square)](https://github.com/sdcondon/SCGraphTheory.Search/compare/3.0.1...main)
 
 This repository contains the source code for the SCGraphTheory.Search NuGet package, as well as its tests and performance benchmarks.
 It also contains some test-focused graph implementations, which are used in the tests and performance benchmarks. 
