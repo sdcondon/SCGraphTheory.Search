@@ -1,4 +1,4 @@
-![SCGraphTheory Icon](src/Search/SCGraphTheoryIcon.png)
+![SCGraphTheory Icon](src/Search/_PackageFiles/SCGraphTheoryIcon.png)
 
 # SCGraphTheory.Search
 
