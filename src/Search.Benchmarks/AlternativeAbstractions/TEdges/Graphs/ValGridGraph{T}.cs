@@ -200,11 +200,8 @@ namespace SCGraphTheory.Search.Benchmarks.AlternativeAbstractions.TEdges.Graphs
             /// <inheritdoc />
             public bool MoveNext()
             {
-                // TODO-PERFORMANCE: i think this could be further improved to eliminate
-                // the min/max comparisons. As well as including index, we could include 4 bits
-                // to indicate whether we are at min/max x/y - and have the lookup return a
-                // value that indicates it's "bad" - probably too much for it to just quickly give you
-                // the next one..
+                // TODO-PERFORMANCE: Might try out 16 different look-ups at some point
+                // (one for each min/max x/y combo) - to eliminate the need for the while loop.
                 (int X, int Y) current;
                 var maxX = values.GetUpperBound(0);
                 var maxY = values.GetUpperBound(1);
