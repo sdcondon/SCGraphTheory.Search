@@ -6,7 +6,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
+    <PackageProjectUrl>https://sdcondon.net/SCGraphTheory/search</PackageProjectUrl>
     <PackageReleaseNotes>See https://github.com/sdcondon/SCGraphTheory.Search/releases.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>2020-2023 Simon Condon</Copyright>

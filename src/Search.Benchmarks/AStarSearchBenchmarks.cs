@@ -39,7 +39,7 @@ namespace SCGraphTheory.Search.Benchmarks
 
         [Benchmark]
         [BenchmarkCategory(nameof(RefGridGraph))]
-        public void RefGridGraph_generic() => new Classic.AStarSearch<RefGridGraph.Node, RefGridGraph.Edge, float>(
+        public void RefGridGraph_UserCostType() => new Classic.AStarSearch<RefGridGraph.Node, RefGridGraph.Edge, float>(
             source: BenchmarkGraphs.RefGridGraph[0, 0],
             isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner,
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),

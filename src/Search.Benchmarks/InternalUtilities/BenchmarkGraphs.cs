@@ -14,7 +14,7 @@ namespace SCGraphTheory.Search.Benchmarks
         /// <summary>
         /// Size constant used by the graphs in this constant.
         /// </summary>
-        public const int SIZE = 20;
+        public const int SIZE = 200;
 
         /// <summary>
         /// Gets a (<see cref="SIZE"/> by <see cref="SIZE"/>) instance of <see cref="ALGridGraph{T}"/>.

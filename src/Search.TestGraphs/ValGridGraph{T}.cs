@@ -147,7 +147,7 @@ namespace SCGraphTheory.Search.TestGraphs
                 delta);
         }
 
-        // NB: Used via its interface in search algorithms, so will be getting boxed :(
+        // NB: Used via its interface in search algorithms, so gets boxed :(
         public struct EdgeCollection : IReadOnlyCollection<Edge>
         {
             private readonly T[,] values;
