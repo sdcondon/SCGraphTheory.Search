@@ -13,6 +13,12 @@ namespace SCGraphTheory.Search.Benchmarks
     public class BreadthFirstSearchBenchmarks
     {
         [Benchmark]
+        [BenchmarkCategory(nameof(RefGridGraph))]
+        public void RefGridGraph() => new BreadthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
+            source: BenchmarkGraphs.RefGridGraph[0, 0],
+            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner).Complete();
+
+        [Benchmark]
         [BenchmarkCategory(nameof(ValGridGraph))]
         public void ValGridGraph() => new BreadthFirstSearch<ValGridGraph.Node, ValGridGraph.Edge>(
             source: BenchmarkGraphs.ValGridGraph[0, 0],
@@ -23,12 +29,6 @@ namespace SCGraphTheory.Search.Benchmarks
         public void AltValGridGraph() => new BreadthFirstSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
             source: BenchmarkGraphs.AltValGridGraph[0, 0],
             isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner).Complete();
-
-        [Benchmark]
-        [BenchmarkCategory(nameof(RefGridGraph))]
-        public void RefGridGraph() => new BreadthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-            source: BenchmarkGraphs.RefGridGraph[0, 0],
-            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner).Complete();
     }
 }
 #pragma warning restore SA1600

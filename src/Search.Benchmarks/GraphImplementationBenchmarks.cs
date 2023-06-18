@@ -12,12 +12,12 @@ namespace SCGraphTheory.Search.Benchmarks
     public class GraphImplementationBenchmarks
     {
         [Benchmark]
-        [BenchmarkCategory("Constructors", nameof(ValGridGraph))]
-        public ValGridGraph MakeValGraph() => new ValGridGraph((20, 20));
-
-        [Benchmark]
         [BenchmarkCategory("Constructors", nameof(RefGridGraph))]
         public RefGridGraph MakeRefGraph() => new RefGridGraph((20, 20), (_, _) => true);
+
+        [Benchmark]
+        [BenchmarkCategory("Constructors", nameof(ValGridGraph))]
+        public ValGridGraph MakeValGraph() => new ValGridGraph((20, 20));
 
         [Benchmark]
         [BenchmarkCategory("EdgeEnumeration", nameof(ValGridGraph))]

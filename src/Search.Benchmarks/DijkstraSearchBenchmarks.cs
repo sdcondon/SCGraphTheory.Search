@@ -15,6 +15,13 @@ namespace SCGraphTheory.Search.Benchmarks
     public class DijkstraSearchBenchmarks
     {
         [Benchmark]
+        [BenchmarkCategory("Dijkstra", nameof(RefGridGraph))]
+        public void RefDijkstra() => new DijkstraSearch<RefGridGraph.Node, RefGridGraph.Edge>(
+            source: BenchmarkGraphs.RefGridGraph[0, 0],
+            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner,
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();
+
+        [Benchmark]
         [BenchmarkCategory("Dijkstra", nameof(ValGridGraph))]
         public void ValDijkstra() => new DijkstraSearch<ValGridGraph.Node, ValGridGraph.Edge>(
             source: BenchmarkGraphs.ValGridGraph[0, 0],
@@ -26,13 +33,6 @@ namespace SCGraphTheory.Search.Benchmarks
         public void AltValDijkstra() => new AlternativeAbstractions.TEdges.Search.DijkstraSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
             source: BenchmarkGraphs.AltValGridGraph[0, 0],
             isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner,
-            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();
-
-        [Benchmark]
-        [BenchmarkCategory("Dijkstra", nameof(RefGridGraph))]
-        public void RefDijkstra() => new DijkstraSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-            source: BenchmarkGraphs.RefGridGraph[0, 0],
-            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner,
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates)).Complete();
 
         private static float EuclideanDistance((int x, int y) a, (int x, int y) b)

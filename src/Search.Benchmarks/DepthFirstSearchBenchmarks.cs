@@ -14,6 +14,12 @@ namespace SCGraphTheory.Search.Benchmarks
     public class DepthFirstSearchBenchmarks
     {
         [Benchmark]
+        [BenchmarkCategory(nameof(RefGridGraph))]
+        public void RefGridGraph() => new DepthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
+            source: BenchmarkGraphs.RefGridGraph[0, 0],
+            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner).Complete();
+
+        [Benchmark]
         [BenchmarkCategory(nameof(ValGridGraph))]
         public void ValGridGraph() => new DepthFirstSearch<ValGridGraph.Node, ValGridGraph.Edge>(
             source: BenchmarkGraphs.ValGridGraph[0, 0],
@@ -24,12 +30,6 @@ namespace SCGraphTheory.Search.Benchmarks
         public void AltValGridGraph() => new DepthFirstSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
             source: BenchmarkGraphs.AltValGridGraph[0, 0],
             isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner).Complete();
-
-        [Benchmark]
-        [BenchmarkCategory(nameof(RefGridGraph))]
-        public void RefGridGraph() => new DepthFirstSearch<RefGridGraph.Node, RefGridGraph.Edge>(
-            source: BenchmarkGraphs.RefGridGraph[0, 0],
-            isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner).Complete();
 
         private static float EuclideanDistance((int x, int y) a, (int x, int y) b)
         {

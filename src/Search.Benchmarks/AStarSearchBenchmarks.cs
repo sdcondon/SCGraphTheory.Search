@@ -14,22 +14,6 @@ namespace SCGraphTheory.Search.Benchmarks
     public class AStarSearchBenchmarks
     {
         [Benchmark]
-        [BenchmarkCategory(nameof(ValGridGraph))]
-        public void ValGridGraph() => new AStarSearch<ValGridGraph.Node, ValGridGraph.Edge>(
-            source: BenchmarkGraphs.ValGridGraph[0, 0],
-            isTarget: BenchmarkGraphs.ValGridGraphIsFarCorner,
-            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
-            getEstimatedCostToTarget: n => EuclideanDistance((BenchmarkGraphs.SIZE - 1, BenchmarkGraphs.SIZE - 1), n.Coordinates)).Complete();
-
-        [Benchmark]
-        [BenchmarkCategory(nameof(AltValGridGraph))]
-        public void AltValGridGraph() => new AlternativeAbstractions.TEdges.Search.AStarSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
-            source: BenchmarkGraphs.AltValGridGraph[0, 0],
-            isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner,
-            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
-            getEstimatedCostToTarget: n => EuclideanDistance((BenchmarkGraphs.SIZE - 1, BenchmarkGraphs.SIZE - 1), n.Coordinates)).Complete();
-
-        [Benchmark]
         [BenchmarkCategory(nameof(RefGridGraph))]
         public void RefGridGraph() => new AStarSearch<RefGridGraph.Node, RefGridGraph.Edge>(
             source: BenchmarkGraphs.RefGridGraph[0, 0],
@@ -42,6 +26,22 @@ namespace SCGraphTheory.Search.Benchmarks
         public void RefGridGraph_UserCostType() => new Classic.AStarSearch<RefGridGraph.Node, RefGridGraph.Edge, float>(
             source: BenchmarkGraphs.RefGridGraph[0, 0],
             isTarget: BenchmarkGraphs.RefGridGraphIsFarCorner,
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
+            getEstimatedCostToTarget: n => EuclideanDistance((BenchmarkGraphs.SIZE - 1, BenchmarkGraphs.SIZE - 1), n.Coordinates)).Complete();
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(ValGridGraph))]
+        public void ValGridGraph() => new AStarSearch<ValGridGraph.Node, ValGridGraph.Edge>(
+            source: BenchmarkGraphs.ValGridGraph[0, 0],
+            isTarget: BenchmarkGraphs.ValGridGraphIsFarCorner,
+            getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
+            getEstimatedCostToTarget: n => EuclideanDistance((BenchmarkGraphs.SIZE - 1, BenchmarkGraphs.SIZE - 1), n.Coordinates)).Complete();
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(AltValGridGraph))]
+        public void AltValGridGraph() => new AlternativeAbstractions.TEdges.Search.AStarSearch<AltValGridGraph.Node, AltValGridGraph.Edge, AltValGridGraph.EdgeCollection>(
+            source: BenchmarkGraphs.AltValGridGraph[0, 0],
+            isTarget: BenchmarkGraphs.AltValGridGraphIsFarCorner,
             getEdgeCost: e => EuclideanDistance(e.To.Coordinates, e.From.Coordinates),
             getEstimatedCostToTarget: n => EuclideanDistance((BenchmarkGraphs.SIZE - 1, BenchmarkGraphs.SIZE - 1), n.Coordinates)).Complete();
 

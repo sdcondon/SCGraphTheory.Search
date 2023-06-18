@@ -169,26 +169,30 @@ namespace SCGraphTheory.Search.TestGraphs
 
         public struct EdgeEnumerator : IEnumerator<Edge>
         {
+            // We use an offset lookup rather than calculating them each time, for performance
+            private static readonly (sbyte X, sbyte Y)[] Offsets = new (sbyte, sbyte)[]
+            {
+                (-1, -1), (0, -1), (1, -1),
+                (-1,  0),          (1,  0),
+                (-1,  1), (0,  1), (1,  1),
+            };
+
             private readonly T[,] values;
             private readonly (int X, int Y) coordinates;
-            private (sbyte X, sbyte Y) currentDelta;
+
+            private byte index = 0;
 
             internal EdgeEnumerator(T[,] values, (int X, int Y) coordinates)
             {
                 this.values = values;
                 this.coordinates = coordinates;
-                this.currentDelta = (-2, -1);
             }
 
             /// <inheritdoc />
-            /// <remarks>
-            /// NB: Bugs here - getting Current before MoveNext gives a wrong edge instead of throwing.
-            /// Is also wrong if we've reached end of enumeration.
-            /// </remarks>
-            public Edge Current => new Edge(values, coordinates, currentDelta);
+            public Edge Current => new Edge(values, coordinates, Offsets[index]);
 
             /// <inheritdoc />
-            object IEnumerator.Current => new Edge(values, coordinates, currentDelta);
+            object IEnumerator.Current => new Edge(values, coordinates, Offsets[index]);
 
             /// <inheritdoc />
             public void Dispose()
@@ -198,31 +202,34 @@ namespace SCGraphTheory.Search.TestGraphs
             /// <inheritdoc />
             public bool MoveNext()
             {
-                // TODO-PERFORMANCE: make this more efficient - don't need most of the checks on
-                // any given invocation
+                // TODO-PERFORMANCE: i think this could be further improved to eliminate
+                // the min/max comparisons. As well as including index, we could include 4 bits
+                // to indicate whether we are at min/max x/y - and have the lookup return a
+                // value that indicates it's "bad" - probably too much for it to just quickly give you
+                // the next one..
+                (int X, int Y) current;
+                (int X, int Y) min = (values.GetLowerBound(0), values.GetLowerBound(1));
+                (int X, int Y) max = (values.GetUpperBound(0), values.GetUpperBound(1));
                 do
                 {
-                    if (++currentDelta.X > 1)
+                    if (++index > 7)
                     {
-                        currentDelta.X = -1;
-                        if (++currentDelta.Y > 1)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
+
+                    current = (coordinates.X + Offsets[index].X, coordinates.Y + Offsets[index].Y);
                 }
                 while (
-                    coordinates.X + currentDelta.X < values.GetLowerBound(0)
-                    || coordinates.X + currentDelta.X > values.GetUpperBound(0)
-                    || coordinates.Y + currentDelta.Y < values.GetLowerBound(1)
-                    || coordinates.Y + currentDelta.Y > values.GetUpperBound(1)
-                    || currentDelta == (0, 0));
+                    current.X < min.X
+                    || current.X > max.X
+                    || current.Y < min.Y
+                    || current.Y > max.Y);
 
                 return true;
             }
 
             /// <inheritdoc />
-            public void Reset() => currentDelta = (-2, -1);
+            public void Reset() => index = 0;
         }
     }
 }
