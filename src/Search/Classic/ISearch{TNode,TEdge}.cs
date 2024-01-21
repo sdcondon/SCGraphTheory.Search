@@ -34,6 +34,7 @@ namespace SCGraphTheory.Search.Classic
         /// <summary>
         /// Executes the next step of the search.
         /// </summary>
+        /// <returns>The edge that was explored by this step.</returns>
         TEdge NextStep();
     }
 }

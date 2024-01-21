@@ -125,7 +125,7 @@ namespace SCGraphTheory.Search.AndOr
         /// <summary>
         /// Container for the outcome of a <see cref="AndOrDFS{TNode,TEdge}"/> search. Just a friendly struct wrapped around an optional <see cref="Tree"/>.
         /// </summary>
-        private struct Outcome
+        private readonly struct Outcome
         {
             /// <summary>
             /// Initializes a new instance of the <see cref="Outcome"/> struct that either indicates failure, or success with an empty tree (because a target node has been reached).

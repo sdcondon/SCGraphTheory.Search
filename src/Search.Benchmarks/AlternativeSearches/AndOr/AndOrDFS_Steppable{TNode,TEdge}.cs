@@ -16,7 +16,7 @@ namespace SCGraphTheory.Search.AndOr
         private readonly Predicate<TNode> isTarget;
         private readonly Predicate<TEdge> isAndEdgeCollection;
 
-        private readonly Stack<(IContext cxt, TEdge edge)> frontier = new Stack<(IContext cxt, TEdge edge)>();
+        private readonly Stack<(IContext cxt, TEdge edge)> frontier = new ();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AndOrDFS_Steppable{TNode, TEdge}"/> class.
@@ -38,6 +38,9 @@ namespace SCGraphTheory.Search.AndOr
             Visit(new RootContext(this), source);
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the search is concluded (irrespective of whether it was successful or not).
+        /// </summary>
         public bool IsConcluded { get; private set; }
 
         /// <summary>
@@ -50,6 +53,10 @@ namespace SCGraphTheory.Search.AndOr
         /// </summary>
         public Tree Result { get; private set; }
 
+        /// <summary>
+        /// Executes the search to completion.
+        /// </summary>
+        /// <param name="ct">the cancellation token to respect while executing the search.</param>
         public void Complete()
         {
             while (!IsConcluded)
@@ -259,7 +266,7 @@ namespace SCGraphTheory.Search.AndOr
         {
             private readonly IContext parentContext;
             private readonly TEdge parentEdge;
-            private readonly Dictionary<TNode, Tree> subTrees = new Dictionary<TNode, Tree>();
+            private readonly Dictionary<TNode, Tree> subTrees = new ();
             private int edgeCount;
 
             public AndContext(OrContext parentContext, TEdge parentEdge, int edgeCount)

@@ -64,6 +64,25 @@ namespace SCGraphTheory.Search.TestGraphs
         }
 
         /// <summary>
+        /// Edge type for <see cref="AdjacencyMatrixGraph"/>.
+        /// </summary>
+        public readonly struct Edge : IEdge<Node, Edge>
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Edge"/> struct.
+            /// </summary>
+            /// <param name="from">The node to connect from.</param>
+            /// <param name="to">The node to connect to.</param>
+            internal Edge(Node from, Node to) => (From, To) = (from, to);
+
+            /// <inheritdoc />
+            public Node From { get; }
+
+            /// <inheritdoc />
+            public Node To { get; }
+        }
+
+        /// <summary>
         /// Node type for <see cref="AdjacencyMatrixGraph"/>.
         /// </summary>
         public class Node : INode<Node, Edge>
@@ -86,25 +105,6 @@ namespace SCGraphTheory.Search.TestGraphs
 
             /// <inheritdoc />
             public IReadOnlyCollection<Edge> Edges { get; }
-        }
-
-        /// <summary>
-        /// Edge type for <see cref="AdjacencyMatrixGraph"/>.
-        /// </summary>
-        public struct Edge : IEdge<Node, Edge>
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Edge"/> struct.
-            /// </summary>
-            /// <param name="from">The node to connect from.</param>
-            /// <param name="to">The node to connect to.</param>
-            internal Edge(Node from, Node to) => (From, To) = (from, to);
-
-            /// <inheritdoc />
-            public Node From { get; }
-
-            /// <inheritdoc />
-            public Node To { get; }
         }
 
         private class EdgeCollection : IReadOnlyCollection<Edge>
