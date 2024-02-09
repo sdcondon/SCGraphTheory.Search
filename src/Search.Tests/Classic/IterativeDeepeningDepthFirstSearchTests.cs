@@ -4,45 +4,51 @@ using SCGraphTheory.Search.TestGraphs;
 using System;
 using System.Linq;
 
-namespace SCGraphTheory.Search.Classic
+namespace SCGraphTheory.Search.Classic;
+
+public static class IterativeDeepeningDepthFirstSearchTests
 {
-    public static class IterativeDeepeningDepthFirstSearchTests
+    public static Test SearchBehaviour => TestThat
+        .GivenEachOf(() => new TestCase[]
+        {
+            new (
+                Graph: new LinqGraph((1, 2)),
+                SourceId: 1,
+                TargetId: 1,
+                ExpectedSteps:
+                [
+                    []
+                ]),
+
+            new (
+                Graph: new LinqGraph((1, 2), (2, 4), (1, 3), (3, 4)),
+                SourceId: 1,
+                TargetId: -1,
+                ExpectedSteps:
+                [
+                    [(1, 3), (1, 2)],
+                    [(1, 3), (3, 4), (1, 2)],
+                ]),
+        })
+        .When(tc =>
+        {
+            var search = new IterativeDeepeningDepthFirstSearch<LinqGraph.Node, LinqGraph.Edge>(
+                source: tc.Graph.Nodes.Single(n => n.Id == tc.SourceId),
+                isTarget: n => n.Id == tc.TargetId);
+
+            var searchSteps = SearchHelpers.GetIterativeDeepeningStepsToCompletion(search);
+
+            return new { search, searchSteps };
+        })
+        .ThenReturns()
+        .And((tc, r) => r.searchSteps.Should().BeEquivalentTo(tc.ExpectedSteps))
+        .And((tc, r) => r.search.Target.Should().Be(tc.Graph.Nodes.SingleOrDefault(n => n.Id == tc.TargetId)));
+
+    private record TestCase(LinqGraph Graph, int SourceId, int TargetId, (int from, int to)[][] ExpectedSteps)
     {
-        private record TestCase(LinqGraph graph, int sourceId, int targetId, (int from, int to)[][] expectedSteps);
-
-        public static Test SearchBehaviour => TestThat
-            .GivenEachOf(() => new TestCase[]
-            {
-                new (
-                    graph: new LinqGraph((1, 2)),
-                    sourceId: 1,
-                    targetId: 1,
-                    expectedSteps: new (int, int)[][] { Array.Empty<(int, int)>() }),
-
-                new (
-                    graph: new LinqGraph((1, 2), (2, 4), (1, 3), (3, 4)),
-                    sourceId: 1,
-                    targetId: -1,
-#pragma warning disable SA1118 // Parameter should not span multiple lines
-                    expectedSteps: new (int, int)[][]
-                    {
-                        new (int, int)[] { (1, 3), (1, 2) },
-                        new (int, int)[] { (1, 3), (3, 4), (1, 2) },
-                    }),
-#pragma warning restore SA1118 // Parameter should not span multiple lines
-            })
-            .When(tc =>
-            {
-                var search = new IterativeDeepeningDepthFirstSearch<LinqGraph.Node, LinqGraph.Edge>(
-                    source: tc.graph.Nodes.Single(n => n.Id == tc.sourceId),
-                    isTarget: n => n.Id == tc.targetId);
-
-                var searchSteps = SearchHelpers.GetIterativeDeepeningStepsToCompletion(search);
-
-                return new { search, searchSteps };
-            })
-            .ThenReturns()
-            .And((tc, r) => r.searchSteps.Should().BeEquivalentTo(tc.expectedSteps))
-            .And((tc, r) => r.search.Target.Should().Be(tc.graph.Nodes.SingleOrDefault(n => n.Id == tc.targetId)));
+        public override string ToString()
+        {
+            return $"{{ Graph: {string.Join(", ", Graph.Edges.Select(e => $"({e.From.Id}, {e.To.Id})"))}, Source: {SourceId}, Target: {TargetId} }}";
+        }
     }
 }

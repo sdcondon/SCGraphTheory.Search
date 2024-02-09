@@ -9,12 +9,19 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.3" />
-    <PackageReference Include="SCGraphTheory.AdjacencyList" Version="1.0.3" />
+    <PackageReference Include="SCGraphTheory.AdjacencyList" Version="1.0.8" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Search.TestGraphs\Search.TestGraphs.csproj" />
     <ProjectReference Include="..\Search\Search.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="StyleCop.Analyzers" Version="1.2.0-beta.556">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

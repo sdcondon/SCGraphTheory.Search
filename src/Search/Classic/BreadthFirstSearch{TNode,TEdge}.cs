@@ -78,6 +78,10 @@ namespace SCGraphTheory.Search.Classic
                 return;
             }
 
+            // TODO?: Iterates whole collection when it shouldn't need to to explore the next edge.
+            // We should probably be maintaining a queue of enumerators instead. *Although*, perhaps not?
+            // Consumers will probably expect to see all of the outbound edges on the frontier, and if
+            // the enumeration were expensive, they'd probably be using an async graph instead.. Hmm..
             foreach (var nextEdge in node.Edges)
             {
                 if (!visited.ContainsKey(nextEdge.To))

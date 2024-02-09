@@ -1,33 +1,36 @@
-﻿using System;
+﻿#if NET6_0_OR_GREATER
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
-    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the limited depth-first search algorithm.
+    /// Implementation of <see cref="IAsyncSearch{TNode, TEdge}"/> that uses the limited depth-first search algorithm.
     /// </summary>
-    /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
-    /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
-    public class LimitedDepthFirstSearch<TNode, TEdge> : ISearch<TNode, TEdge>
-        where TNode : INode<TNode, TEdge>
-        where TEdge : IEdge<TNode, TEdge>
+    /// <typeparam name="TNode">The node type of the async graph to search.</typeparam>
+    /// <typeparam name="TEdge">The edge type of the async graph to search.</typeparam>
+    public class LimitedDepthFirstAsyncSearch<TNode, TEdge> : IAsyncSearch<TNode, TEdge>
+        where TNode : IAsyncNode<TNode, TEdge>
+        where TEdge : IAsyncEdge<TNode, TEdge>
     {
         private readonly Predicate<TNode> isTarget;
         private readonly int depthLimit;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly Stack<(TEdge edge, int depth)> frontier = new Stack<(TEdge, int)>();
+        private readonly Stack<FrontierNodeInfo> frontier = new Stack<FrontierNodeInfo>();
 
         private readonly HashSet<TNode> cutoffNodes = new HashSet<TNode>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LimitedDepthFirstSearch{TNode, TEdge}"/> class.
+        /// Initializes a new instance of the <see cref="LimitedDepthFirstAsyncSearch{TNode, TEdge}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from.</param>
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
-        /// <param name="depthLimit">The depth at which the search should be cut off. A zero value means that only the source node will be examined.</param>
-        public LimitedDepthFirstSearch(TNode source, Predicate<TNode> isTarget, int depthLimit)
+        /// <param name="depthLimit">The depth at which the search should be cut off.</param>
+        public LimitedDepthFirstAsyncSearch(TNode source, Predicate<TNode> isTarget, int depthLimit)
         {
             // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
             // (backed by some static store) with a single Id field (that happens to have value 0).
@@ -41,10 +44,12 @@ namespace SCGraphTheory.Search.Classic
 
             Visited = new ReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>>(visited);
 
-            // Initialize the search tree with the source node and immediately visit it.
-            // The caller having to do a NextStep to discover it is unintuitive.
-            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
-            Visit(source, 0);
+            // Initialize the search tree with the source node. NB: unlike the synchronous version,
+            // we do NOT immediately visit it. While the caller having to do a NextStepAsync to "discover" it
+            // is perhaps unintuitive, queuing up its outbound edges is async here, and we shouldn't be doing
+            // potentially long-running operations in a ctor.
+            frontier.Push(new (source, default, 0));
+            visited[source] = new KnownEdgeInfo<TEdge>(default, true);
         }
 
         /// <summary>
@@ -91,20 +96,20 @@ namespace SCGraphTheory.Search.Classic
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
         /// <inheritdoc />
-        public TEdge NextStep()
+        public async ValueTask<TEdge> NextStepAsync(CancellationToken cancellationToken)
         {
             if (IsConcluded)
             {
                 throw new InvalidOperationException("Search is concluded");
             }
 
-            var (edge, depth) = frontier.Pop();
-            visited[edge.To] = new KnownEdgeInfo<TEdge>(edge, false);
-            Visit(edge.To, depth);
-            return edge;
+            var next = frontier.Pop();
+            visited[next.node] = new KnownEdgeInfo<TEdge>(next.edgeToNode, false);
+            await VisitAsync(next.node, next.depth, cancellationToken);
+            return next.edgeToNode;
         }
 
-        private void Visit(TNode node, int depth)
+        private async ValueTask VisitAsync(TNode node, int depth, CancellationToken cancellationToken)
         {
             if (isTarget(node))
             {
@@ -113,13 +118,13 @@ namespace SCGraphTheory.Search.Classic
                 return;
             }
 
-            foreach (var nextEdge in node.Edges)
+            await foreach (var nextEdge in node.Edges.WithCancellation(cancellationToken))
             {
                 if (!visited.ContainsKey(nextEdge.To))
                 {
                     if (depth < depthLimit)
                     {
-                        frontier.Push((nextEdge, depth + 1));
+                        frontier.Push(new (nextEdge.To, nextEdge, depth + 1));
                         visited[nextEdge.To] = new KnownEdgeInfo<TEdge>(nextEdge, true);
                         cutoffNodes.Remove(nextEdge.To);
                     }
@@ -135,5 +140,11 @@ namespace SCGraphTheory.Search.Classic
                 State = cutoffNodes.Count > 0 ? States.CutOff : States.Failed;
             }
         }
+
+        // TODO: wasteful - only need node or edge. could probably turn me into a union?
+        // How would we be able to distinguish, though? An "initialised" field to indicate that the first visit is complete?
+        // Hmm. Perhaps should just visit first node in ctor after all..
+        private record struct FrontierNodeInfo(TNode node, TEdge edgeToNode, int depth);
     }
 }
+#endif

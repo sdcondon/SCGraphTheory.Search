@@ -19,9 +19,9 @@ namespace SCGraphTheory.Search.Classic
     /// when added - a "zero").
     /// </para>
     /// <para>
-    /// NB #2: One limitation of non-numeric types can arise if you need some notion of "infinite" cost in your search (i.e. some
-    /// edge that is considered non-navigable for the purposes of the search). While we can allow for this with numeric costs by checking
-    /// for infinite values, MS (very sensibly) hasn't created a separate interface for types with a notion of infinity, so we can't allow
+    /// NB #2: the one limitation of using a non-numeric cost type is the inability to account for an "infinite" cost in your search
+    /// (i.e. some edge that is considered essentially non-navigable for the purposes of the search). While we can allow for this with numeric
+    /// costs by checking for infinite values, MS hasn't created a separate interface for types with a notion of infinity, so we can't allow
     /// for it here.
     /// </para>
     /// </summary>

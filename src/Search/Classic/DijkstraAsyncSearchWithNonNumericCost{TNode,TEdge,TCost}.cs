@@ -4,12 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SCGraphTheory.Search.Classic
 {
     /// <summary>
     /// <para>
-    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses the A* algorithm and allows for user-specified non-numeric cost type.
+    /// Implementation of <see cref="ISearch{TNode, TEdge}"/> that uses Dijkstra's algorithm and allows for user-specified non-numeric cost type.
     /// Intended as useful if costs are complex in their behaviour - tiered costs, for example, where one component is less important than another,
     /// regardless of how large it gets.
     /// </para>
@@ -25,33 +27,27 @@ namespace SCGraphTheory.Search.Classic
     /// for it here.
     /// </para>
     /// </summary>
-    /// <typeparam name="TNode">The node type of the graph being searched.</typeparam>
-    /// <typeparam name="TEdge">The edge type of the graph being searched.</typeparam>
+    /// <typeparam name="TNode">The node type of the graph to search.</typeparam>
+    /// <typeparam name="TEdge">The edge type of the graph to search.</typeparam>
     /// <typeparam name="TCost">The type of the cost metric.</typeparam>
-    public class AStarSearchWithNonNumericCost<TNode, TEdge, TCost> : ISearch<TNode, TEdge>
-        where TNode : INode<TNode, TEdge>
-        where TEdge : IEdge<TNode, TEdge>
+    public class DijkstraAsyncSearchWithNonNumericCost<TNode, TEdge, TCost> : IAsyncSearch<TNode, TEdge>
+        where TNode : IAsyncNode<TNode, TEdge>
+        where TEdge : IAsyncEdge<TNode, TEdge>
         where TCost : IComparable<TCost>, IComparisonOperators<TCost, TCost, bool>, IAdditionOperators<TCost, TCost, TCost>, IAdditiveIdentity<TCost, TCost>
-    {
+  {
         private readonly Predicate<TNode> isTarget;
         private readonly Func<TEdge, TCost> getEdgeCost;
-        private readonly Func<TNode, TCost> getEstimatedCostToTarget;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
-        private readonly KeyedPriorityQueue<TNode, (TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode)> frontier = new KeyedPriorityQueue<TNode, (TEdge, TCost, TCost)>(new FrontierPriorityComparer());
+        private readonly KeyedPriorityQueue<TNode, FrontierNodeInfo> frontier = new KeyedPriorityQueue<TNode, FrontierNodeInfo>(new FrontierPriorityComparer());
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AStarSearchWithNonNumericCost{TNode, TEdge, TCost}"/> class.
+        /// Initializes a new instance of the <see cref="DijkstraAsyncSearchWithNonNumericCost{TNode, TEdge, TCost}"/> class.
         /// </summary>
         /// <param name="source">The node to initiate the search from.</param>
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
         /// <param name="getEdgeCost">A function for calculating the cost of an edge.</param>
-        /// <param name="getEstimatedCostToTarget">A function for estimating the cost to the target from a given node.</param>
-        public AStarSearchWithNonNumericCost(
-            TNode source,
-            Predicate<TNode> isTarget,
-            Func<TEdge, TCost> getEdgeCost,
-            Func<TNode, TCost> getEstimatedCostToTarget)
+        public DijkstraAsyncSearchWithNonNumericCost(TNode source, Predicate<TNode> isTarget, Func<TEdge, TCost> getEdgeCost)
         {
             // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
             // (backed by some static store) with a single Id field (that happens to have value 0).
@@ -62,14 +58,15 @@ namespace SCGraphTheory.Search.Classic
 
             this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
             this.getEdgeCost = getEdgeCost ?? throw new ArgumentNullException(nameof(getEdgeCost));
-            this.getEstimatedCostToTarget = getEstimatedCostToTarget ?? throw new ArgumentNullException(nameof(getEstimatedCostToTarget));
 
             Visited = new ReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>>(visited);
 
-            // Initialize the search tree with the source node and immediately visit it.
-            // The caller having to do a NextStep to discover it is unintuitive.
-            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
-            Visit(source, TCost.AdditiveIdentity);
+            // Initialize the search frontier with the source node. NB: unlike the synchronous version,
+            // we do NOT immediately visit it. While the caller having to do a NextStepAsync to "discover" it
+            // is perhaps unintuitive, queuing up its outbound edges is async here, and we shouldn't be doing
+            // potentially long-running operations in a ctor.
+            frontier.Enqueue(source, new (default, TCost.AdditiveIdentity));
+            visited[source] = new KnownEdgeInfo<TEdge>(default, true);
         }
 
         /// <inheritdoc />
@@ -79,13 +76,13 @@ namespace SCGraphTheory.Search.Classic
         public bool IsSucceeded { get; private set; } = false;
 
         /// <inheritdoc />
-        public TNode Target { get; private set; } = default;
+        public TNode Target { get; private set; }
 
         /// <inheritdoc />
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
         /// <inheritdoc />
-        public TEdge NextStep()
+        public async ValueTask<TEdge> NextStepAsync(CancellationToken cancellationToken)
         {
             if (IsConcluded)
             {
@@ -93,12 +90,12 @@ namespace SCGraphTheory.Search.Classic
             }
 
             var node = frontier.Dequeue(out var frontierInfo);
-            visited[node] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdge, false);
-            Visit(node, frontierInfo.bestCostToNode);
-            return frontierInfo.bestEdge;
+            visited[node] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdgeToNode, false);
+            await VisitAsync(node, frontierInfo.bestCostToNode, cancellationToken);
+            return frontierInfo.bestEdgeToNode;
         }
 
-        private void Visit(TNode node, TCost bestCostToNode)
+        private async ValueTask VisitAsync(TNode node, TCost bestCost, CancellationToken cancellationToken)
         {
             if (isTarget(node))
             {
@@ -108,26 +105,24 @@ namespace SCGraphTheory.Search.Classic
                 return;
             }
 
-            foreach (var edge in node.Edges)
+            await foreach (var edge in node.Edges.WithCancellation(cancellationToken))
             {
                 node = edge.To;
 
-                var totalCostToNodeViaEdge = bestCostToNode + getEdgeCost(edge);
-                var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
-
+                var totalCostToNodeViaEdge = bestCost + getEdgeCost(edge);
                 var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
 
                 if (!isAlreadyOnFrontier && !visited.ContainsKey(node))
                 {
                     // Node has not been added to the frontier - add it
-                    frontier.Enqueue(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                    frontier.Enqueue(node, new (edge, totalCostToNodeViaEdge));
                     visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
                 }
                 else if (isAlreadyOnFrontier && totalCostToNodeViaEdge < frontierDetails.bestCostToNode)
                 {
                     // Node is already on the frontier, but the cost via this edge
-                    // is cheaper than has been found previously - increase its priority
-                    frontier.IncreasePriority(node, (edge, totalCostToNodeViaEdge, estimatedTotalCostViaNode));
+                    // is cheaper than has been found previously - update the frontier
+                    frontier.IncreasePriority(node, new (edge, totalCostToNodeViaEdge));
                     visited[node] = new KnownEdgeInfo<TEdge>(edge, true);
                 }
             }
@@ -138,13 +133,15 @@ namespace SCGraphTheory.Search.Classic
             }
         }
 
-        private class FrontierPriorityComparer : IComparer<(TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode)>
+        private class FrontierPriorityComparer : IComparer<FrontierNodeInfo>
         {
-            public int Compare((TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode) x, (TEdge bestEdge, TCost bestCostToNode, TCost estimatedBestCostViaNode) y)
+            public int Compare(FrontierNodeInfo x, FrontierNodeInfo y)
             {
-                return y.estimatedBestCostViaNode.CompareTo(x.estimatedBestCostViaNode);
+                return y.bestCostToNode.CompareTo(x.bestCostToNode);
             }
         }
+
+        private record struct FrontierNodeInfo(TEdge bestEdgeToNode, TCost bestCostToNode);
     }
 }
 #endif
