@@ -8,8 +8,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>graph theory search a* dijkstra depth-first breadth-first</PackageTags>
-    <PackageProjectUrl>https://github.com/sdcondon/SCGraphTheory.Search</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/sdcondon/SCGraphTheory.Search.git</RepositoryUrl>
     <PackageIcon>SCGraphTheoryIcon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 

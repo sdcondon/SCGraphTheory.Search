@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://sdcondon.net/SCGraphTheory/search</PackageProjectUrl>
     <PackageReleaseNotes>See https://github.com/sdcondon/SCGraphTheory.Search/releases.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>2020-2023 Simon Condon</Copyright>
+    <Copyright>2020-2024 Simon Condon</Copyright>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
