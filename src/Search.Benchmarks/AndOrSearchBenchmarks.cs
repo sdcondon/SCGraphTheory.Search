@@ -1,5 +1,4 @@
-﻿#pragma warning disable SA1600 // Elements should be documented
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using SCGraphTheory.Search.AndOr;
 using SCGraphTheory.Search.Benchmarks.AlternativeSearches.AndOr;
 using SCGraphTheory.Search.TestGraphs.Specialized.AndOr;
@@ -79,4 +78,3 @@ namespace SCGraphTheory.Search.Benchmarks
             isTarget: n => knownTruths.Contains(n.Symbol));
     }
 }
-#pragma warning restore SA1600
