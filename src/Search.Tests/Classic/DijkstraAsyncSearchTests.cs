@@ -47,16 +47,16 @@ public static class DijkstraAsyncSearchTests
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => new ((int)e.Cost)),
         })
-        .When(async (tc, makeSearch) =>
+        .WhenAsync(async (tc, makeSearch) =>
         {
             var search = await makeSearch(tc);
             var searchSteps = await SearchHelpers.GetStepsToCompletionAsync(search);
             return new { search, searchSteps };
         })
         .ThenReturns()
-        .And((tc, _, r) => r.GetAwaiter().GetResult().searchSteps.Should().BeEquivalentTo(tc.ExpectedSteps))
-        .And((_, _, r) => r.GetAwaiter().GetResult().search.Visited.Values.Where(v => v.Edge != null && v.IsOnFrontier == false).Select(v => (v.Edge.From.Id, v.Edge.To.Id)).Should().BeEquivalentTo(r.GetAwaiter().GetResult().searchSteps))
-        .And((tc, _, r) => r.GetAwaiter().GetResult().search.Target.Should().Be(tc.Graph.Nodes.SingleOrDefaultAsync(n => n.Id == tc.TargetId).AsTask().GetAwaiter().GetResult()));
+        .And((tc, _, r) => r.searchSteps.Should().BeEquivalentTo(tc.ExpectedSteps))
+        .And((_, _, r) => r.search.Visited.Values.Where(v => v.Edge != null && v.IsOnFrontier == false).Select(v => (v.Edge.From.Id, v.Edge.To.Id)).Should().BeEquivalentTo(r.searchSteps))
+        .AndAsync(async (tc, _, r) => r.search.Target.Should().Be(await tc.Graph.Nodes.SingleOrDefaultAsync(n => n.Id == tc.TargetId)));
 
     public static Test InfiniteCostBehaviour => TestThat
         .GivenEachOf(() => new AsyncSearchBehaviourTestCase[]

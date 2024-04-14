@@ -38,7 +38,7 @@ public static class IterativeDeepeningDepthFirstAsyncSearchTests
                     [(1, 3), (3, 4), (1, 2)],
                 ]),
         })
-        .When(async tc =>
+        .WhenAsync(async tc =>
         {
             var search = new IterativeDeepeningDepthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
@@ -49,6 +49,6 @@ public static class IterativeDeepeningDepthFirstAsyncSearchTests
             return new { search, searchSteps };
         })
         .ThenReturns()
-        .And((tc, r) => r.GetAwaiter().GetResult().searchSteps.Should().BeEquivalentTo(tc.ExpectedSteps))
-        .And((tc, r) => r.GetAwaiter().GetResult().search.Target.Should().Be(tc.Graph.Nodes.SingleOrDefaultAsync(n => n.Id == tc.TargetId).AsTask().GetAwaiter().GetResult()));
+        .And((tc, r) => r.searchSteps.Should().BeEquivalentTo(tc.ExpectedSteps))
+        .AndAsync(async (tc, r) => r.search.Target.Should().Be(await tc.Graph.Nodes.SingleOrDefaultAsync(n => n.Id == tc.TargetId)));
 }

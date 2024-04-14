@@ -37,7 +37,7 @@ public static class RecursiveAsyncDFSTests
                 TargetId: -1,
                 ExpectedSteps: new[] { (1, 2), (2, 4), (1, 3), (3, 5) }),
         })
-        .When(async tc =>
+        .WhenAsync(async tc =>
         {
             var search = new RecursiveAsyncDFS<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
@@ -47,6 +47,6 @@ public static class RecursiveAsyncDFSTests
             return search;
         })
         .ThenReturns()
-        .And((tc, r) => r.GetAwaiter().GetResult().Visited.Values.Where(e => e != null).Select(e => (e.From.Id, e.To.Id)).Should().BeEquivalentTo(tc.ExpectedSteps))
-        .And((tc, r) => r.GetAwaiter().GetResult().Target.Should().Be(tc.Graph.Nodes.SingleOrDefaultAsync(n => n.Id == tc.TargetId).AsTask().GetAwaiter().GetResult()));
+        .And((tc, r) => r.Visited.Values.Where(e => e != null).Select(e => (e.From.Id, e.To.Id)).Should().BeEquivalentTo(tc.ExpectedSteps))
+        .AndAsync(async (tc, r) => r.Target.Should().Be(await tc.Graph.Nodes.SingleOrDefaultAsync(n => n.Id == tc.TargetId)));
 }
