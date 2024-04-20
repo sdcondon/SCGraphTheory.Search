@@ -20,7 +20,7 @@ namespace SCGraphTheory.Search.Classic
         where TEdge : IAsyncEdge<TNode, TEdge>
     {
         private readonly TNode source;
-        private readonly Predicate<TNode> isTarget;
+        private readonly Func<TNode, ValueTask<bool>> isTargetAsync;
 
         private readonly Dictionary<TNode, TEdge> visited = new Dictionary<TNode, TEdge>();
 
@@ -32,6 +32,16 @@ namespace SCGraphTheory.Search.Classic
         /// <param name="source">The node to initiate the search from.</param>
         /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
         public RecursiveAsyncDFS(TNode source, Predicate<TNode> isTarget)
+            : this(source, n => ValueTask.FromResult(isTarget(n)))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecursiveAsyncDFS{TNode, TEdge}"/> class.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from.</param>
+        /// <param name="isTargetAsync">An async predicate for identifying the target node of the search.</param>
+        public RecursiveAsyncDFS(TNode source, Func<TNode, ValueTask<bool>> isTargetAsync)
         {
             // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
             // (backed by some static store) with a single Id field (that happens to have value 0).
@@ -41,7 +51,7 @@ namespace SCGraphTheory.Search.Classic
             }
 
             this.source = source;
-            this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
+            this.isTargetAsync = isTargetAsync ?? throw new ArgumentNullException(nameof(isTargetAsync));
 
             Visited = new ReadOnlyDictionary<TNode, TEdge>(visited);
             visited[source] = default;
@@ -111,7 +121,7 @@ namespace SCGraphTheory.Search.Classic
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (isTarget(node))
+            if (await isTargetAsync(node))
             {
                 Target = node;
                 IsSucceeded = true;

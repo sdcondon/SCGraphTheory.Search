@@ -33,14 +33,13 @@ public static class IterativeDeepeningDepthFirstAsyncSearchTests
                 TargetId: -1,
                 ExpectedSteps:
                 [
-                    [],
                     [(1, 3), (1, 2)],
                     [(1, 3), (3, 4), (1, 2)],
                 ]),
         })
         .WhenAsync(async tc =>
         {
-            var search = new IterativeDeepeningDepthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            var search = await IterativeDeepeningDepthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId);
 

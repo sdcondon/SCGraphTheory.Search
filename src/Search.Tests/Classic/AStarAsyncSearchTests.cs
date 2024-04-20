@@ -32,19 +32,19 @@ public static class AStarAsyncSearchTests
         })
         .AndEachOf(() => new Func<AsyncSearchBehaviourTestCase, Task<IAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>>>[]
         {
-            async tc => new AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            async tc => await AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost,
                 getEstimatedCostToTarget: n => tc.TargetId - n.Id),
 
-            async tc => new AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>(
+            async tc => await AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost,
                 getEstimatedCostToTarget: n => tc.TargetId - n.Id),
 
-            async tc => new AStarAsyncSearchWithNonNumericCost<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, SearchHelpers.NonNumericCost>(
+            async tc => await AStarAsyncSearchWithNonNumericCost<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, SearchHelpers.NonNumericCost>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => new ((int)e.Cost),
@@ -78,13 +78,13 @@ public static class AStarAsyncSearchTests
         })
         .AndEachOf(() => new Func<AsyncSearchBehaviourTestCase, Task<IAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>>>[]
         {
-            async tc => new AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            async tc => await AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost,
                 getEstimatedCostToTarget: n => tc.TargetId >= n.Id ? tc.TargetId - n.Id : float.PositiveInfinity),
 
-            async tc => new AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>(
+            async tc => await AStarAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost,

@@ -16,7 +16,7 @@ namespace SCGraphTheory.Search.Classic
         where TNode : IAsyncNode<TNode, TEdge>
         where TEdge : IAsyncEdge<TNode, TEdge>
     {
-        private readonly Predicate<TNode> isTarget;
+        private readonly Func<TNode, ValueTask<bool>> isTargetAsync;
         private readonly int depthLimit;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
@@ -24,32 +24,12 @@ namespace SCGraphTheory.Search.Classic
 
         private readonly HashSet<TNode> cutoffNodes = new HashSet<TNode>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LimitedDepthFirstAsyncSearch{TNode, TEdge}"/> class.
-        /// </summary>
-        /// <param name="source">The node to initiate the search from.</param>
-        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
-        /// <param name="depthLimit">The depth at which the search should be cut off.</param>
-        public LimitedDepthFirstAsyncSearch(TNode source, Predicate<TNode> isTarget, int depthLimit)
+        private LimitedDepthFirstAsyncSearch(Func<TNode, ValueTask<bool>> isTargetAsync, int depthLimit)
         {
-            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
-            // (backed by some static store) with a single Id field (that happens to have value 0).
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
+            this.isTargetAsync = isTargetAsync ?? throw new ArgumentNullException(nameof(isTargetAsync));
             this.depthLimit = depthLimit;
 
             Visited = new ReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>>(visited);
-
-            // Initialize the search tree with the source node. NB: unlike the synchronous version,
-            // we do NOT immediately visit it. While the caller having to do a NextStepAsync to "discover" it
-            // is perhaps unintuitive, queuing up its outbound edges is async here, and we shouldn't be doing
-            // potentially long-running operations in a ctor.
-            frontier.Push(new (source, default, 0));
-            visited[source] = new KnownEdgeInfo<TEdge>(default, true);
         }
 
         /// <summary>
@@ -95,6 +75,60 @@ namespace SCGraphTheory.Search.Classic
         /// <inheritdoc />
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="LimitedDepthFirstAsyncSearch{TNode, TEdge}"/> class,
+        /// and progresses it to the point at which the nodes adjacent to the source node are on the frontier.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from.</param>
+        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
+        /// <param name="depthLimit">The depth at which the search should be cut off.</param>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask" /> that will return the new search.</returns>
+        public static ValueTask<LimitedDepthFirstAsyncSearch<TNode, TEdge>> CreateAsync(
+            TNode source,
+            Predicate<TNode> isTarget,
+            int depthLimit,
+            CancellationToken cancellationToken = default)
+        {
+            return CreateAsync(
+                source,
+                n => ValueTask.FromResult(isTarget(n)),
+                depthLimit,
+                cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="LimitedDepthFirstAsyncSearch{TNode, TEdge}"/> class,
+        /// and progresses it to the point at which the nodes adjacent to the source node are on the frontier.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from.</param>
+        /// <param name="isTargetAsync">An async predicate for identifying the target node of the search.</param>
+        /// <param name="depthLimit">The depth at which the search should be cut off.</param>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask" /> that will return the new search.</returns>
+        public static async ValueTask<LimitedDepthFirstAsyncSearch<TNode, TEdge>> CreateAsync(
+            TNode source,
+            Func<TNode, ValueTask<bool>> isTargetAsync,
+            int depthLimit,
+            CancellationToken cancellationToken = default)
+        {
+            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
+            // (backed by some static store) with a single Id field (that happens to have value 0).
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            var search = new LimitedDepthFirstAsyncSearch<TNode, TEdge>(isTargetAsync, depthLimit);
+
+            // Initialize the search tree with the source node and immediately visit it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            search.visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            await search.VisitAsync(source, 0, cancellationToken);
+
+            return search;
+        }
+
         /// <inheritdoc />
         public async ValueTask<TEdge> NextStepAsync(CancellationToken cancellationToken)
         {
@@ -111,7 +145,7 @@ namespace SCGraphTheory.Search.Classic
 
         private async ValueTask VisitAsync(TNode node, int depth, CancellationToken cancellationToken)
         {
-            if (isTarget(node))
+            if (await isTargetAsync(node))
             {
                 Target = node;
                 State = States.Completed;

@@ -37,7 +37,7 @@ public static class DepthFirstAsyncSearchTests
         })
         .WhenAsync(async tc =>
         {
-            var search = new DepthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            var search = await DepthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId);
 

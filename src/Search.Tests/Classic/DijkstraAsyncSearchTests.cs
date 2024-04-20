@@ -32,17 +32,17 @@ public static class DijkstraAsyncSearchTests
         })
         .AndEachOf(() => new Func<AsyncSearchBehaviourTestCase, Task<IAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>>>[]
         {
-            async tc => new DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            async tc => await DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost),
 
-            async tc => new DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>(
+            async tc => await DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost),
 
-            async tc => new DijkstraAsyncSearchWithNonNumericCost<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, SearchHelpers.NonNumericCost>(
+            async tc => await DijkstraAsyncSearchWithNonNumericCost<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, SearchHelpers.NonNumericCost>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => new ((int)e.Cost)),
@@ -69,12 +69,12 @@ public static class DijkstraAsyncSearchTests
         })
         .AndEachOf(() => new Func<AsyncSearchBehaviourTestCase, Task<IAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>>>[]
         {
-            async tc => new DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            async tc => await DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost),
 
-            async tc => new DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>(
+            async tc => await DijkstraAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, double>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => e.Cost),

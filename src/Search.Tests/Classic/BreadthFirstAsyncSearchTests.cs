@@ -37,7 +37,7 @@ public static class BreadthFirstAsyncSearchTests
         })
         .WhenAsync(async tc =>
         {
-            var search = new BreadthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>(
+            var search = await BreadthFirstAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId);
 

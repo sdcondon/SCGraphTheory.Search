@@ -35,45 +35,23 @@ namespace SCGraphTheory.Search.Classic
         where TEdge : IAsyncEdge<TNode, TEdge>
         where TCost : IComparable<TCost>, IComparisonOperators<TCost, TCost, bool>, IAdditionOperators<TCost, TCost, TCost>, IAdditiveIdentity<TCost, TCost>
     {
-        private readonly Predicate<TNode> isTarget;
-        private readonly Func<TEdge, TCost> getEdgeCost;
-        private readonly Func<TNode, TCost> getEstimatedCostToTarget;
+        private readonly Func<TNode, ValueTask<bool>> isTargetAsync;
+        private readonly Func<TEdge, ValueTask<TCost>> getEdgeCostAsync;
+        private readonly Func<TNode, ValueTask<TCost>> getEstimatedCostToTargetAsync;
 
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
         private readonly KeyedPriorityQueue<TNode, FrontierNodeInfo> frontier = new KeyedPriorityQueue<TNode, FrontierNodeInfo>(new FrontierPriorityComparer());
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AStarAsyncSearchWithNonNumericCost{TNode, TEdge, TCost}"/> class.
-        /// </summary>
-        /// <param name="source">The node to initiate the search from.</param>
-        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
-        /// <param name="getEdgeCost">A function for calculating the cost of an edge.</param>
-        /// <param name="getEstimatedCostToTarget">A function for estimating the cost to the target from a given node.</param>
-        public AStarAsyncSearchWithNonNumericCost(
-            TNode source,
-            Predicate<TNode> isTarget,
-            Func<TEdge, TCost> getEdgeCost,
-            Func<TNode, TCost> getEstimatedCostToTarget)
+        private AStarAsyncSearchWithNonNumericCost(
+            Func<TNode, ValueTask<bool>> isTargetAsync,
+            Func<TEdge, ValueTask<TCost>> getEdgeCostAsync,
+            Func<TNode, ValueTask<TCost>> getEstimatedCostToTargetAsync)
         {
-            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
-            // (backed by some static store) with a single Id field (that happens to have value 0).
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            this.isTarget = isTarget ?? throw new ArgumentNullException(nameof(isTarget));
-            this.getEdgeCost = getEdgeCost ?? throw new ArgumentNullException(nameof(getEdgeCost));
-            this.getEstimatedCostToTarget = getEstimatedCostToTarget ?? throw new ArgumentNullException(nameof(getEstimatedCostToTarget));
+            this.isTargetAsync = isTargetAsync ?? throw new ArgumentNullException(nameof(isTargetAsync));
+            this.getEdgeCostAsync = getEdgeCostAsync ?? throw new ArgumentNullException(nameof(getEdgeCostAsync));
+            this.getEstimatedCostToTargetAsync = getEstimatedCostToTargetAsync ?? throw new ArgumentNullException(nameof(getEstimatedCostToTargetAsync));
 
             Visited = new ReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>>(visited);
-
-            // Initialize the search tree with the source node. NB: unlike the synchronous version,
-            // we do NOT immediately visit it. While the caller having to do a NextStepAsync to "discover" it
-            // is perhaps unintuitive, queuing up its outbound edges is async here, and we shouldn't be doing
-            // potentially long-running operations in a ctor.
-            frontier.Enqueue(source, new (default, TCost.AdditiveIdentity, getEstimatedCostToTarget(source)));
-            visited[source] = new KnownEdgeInfo<TEdge>(default, true);
         }
 
         /// <inheritdoc />
@@ -87,6 +65,65 @@ namespace SCGraphTheory.Search.Classic
 
         /// <inheritdoc />
         public IReadOnlyDictionary<TNode, KnownEdgeInfo<TEdge>> Visited { get; }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="AStarAsyncSearchWithNonNumericCost{TNode, TEdge, TCost}"/> class,
+        /// and progresses it to the point at which the nodes adjacent to the source node are on the frontier.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from.</param>
+        /// <param name="isTarget">A predicate for identifying the target node of the search.</param>
+        /// <param name="getEdgeCost">A function for calculating the cost of an edge.</param>
+        /// <param name="getEstimatedCostToTarget">A function for estimating the cost to the target from a given node.</param>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask" /> that will return the new search.</returns>
+        public static ValueTask<AStarAsyncSearchWithNonNumericCost<TNode, TEdge, TCost>> CreateAsync(
+            TNode source,
+            Predicate<TNode> isTarget,
+            Func<TEdge, TCost> getEdgeCost,
+            Func<TNode, TCost> getEstimatedCostToTarget,
+            CancellationToken cancellationToken = default)
+        {
+            return CreateAsync(
+                source,
+                n => ValueTask.FromResult(isTarget(n)),
+                e => ValueTask.FromResult(getEdgeCost(e)),
+                n => ValueTask.FromResult(getEstimatedCostToTarget(n)),
+                cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="AStarAsyncSearchWithNonNumericCost{TNode, TEdge, TCost}"/> class,
+        /// and progresses it to the point at which the nodes adjacent to the source node are on the frontier.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from.</param>
+        /// <param name="isTargetAsync">An async predicate for identifying the target node of the search.</param>
+        /// <param name="getEdgeCostAsync">An async function for calculating the cost of an edge.</param>
+        /// <param name="getEstimatedCostToTargetAsync">An async function for estimating the cost to the target from a given node.</param>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask" /> that will return the new search.</returns>
+        public static async ValueTask<AStarAsyncSearchWithNonNumericCost<TNode, TEdge, TCost>> CreateAsync(
+            TNode source,
+            Func<TNode, ValueTask<bool>> isTargetAsync,
+            Func<TEdge, ValueTask<TCost>> getEdgeCostAsync,
+            Func<TNode, ValueTask<TCost>> getEstimatedCostToTargetAsync,
+            CancellationToken cancellationToken = default)
+        {
+            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
+            // (backed by some static store) with a single Id field (that happens to have value 0).
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            var search = new AStarAsyncSearchWithNonNumericCost<TNode, TEdge, TCost>(isTargetAsync, getEdgeCostAsync, getEstimatedCostToTargetAsync);
+
+            // Initialize the search tree with the source node and immediately visit it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            search.visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            await search.VisitAsync(source, TCost.AdditiveIdentity, cancellationToken);
+
+            return search;
+        }
 
         /// <inheritdoc />
         public async ValueTask<TEdge> NextStepAsync(CancellationToken cancellationToken)
@@ -104,7 +141,7 @@ namespace SCGraphTheory.Search.Classic
 
         private async ValueTask VisitAsync(TNode node, TCost bestCostToNode, CancellationToken cancellationToken)
         {
-            if (isTarget(node))
+            if (await isTargetAsync(node))
             {
                 Target = node;
                 IsConcluded = true;
@@ -116,8 +153,8 @@ namespace SCGraphTheory.Search.Classic
             {
                 node = edge.To;
 
-                var totalCostToNodeViaEdge = bestCostToNode + getEdgeCost(edge);
-                var estimatedTotalCostViaNode = totalCostToNodeViaEdge + getEstimatedCostToTarget(node);
+                var totalCostToNodeViaEdge = bestCostToNode + await getEdgeCostAsync(edge);
+                var estimatedTotalCostViaNode = totalCostToNodeViaEdge + await getEstimatedCostToTargetAsync(node);
 
                 var isAlreadyOnFrontier = frontier.TryGetPriority(node, out var frontierDetails);
 

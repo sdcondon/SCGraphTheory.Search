@@ -25,9 +25,6 @@ internal static class SearchHelpers
     {
         var searchSteps = new List<(int, int)>();
 
-        // for async searches, the first step is expected to "discover" the source node
-        await search.NextStepAsync();
-
         while (!search.IsConcluded)
         {
             var exploredEdge = await search.NextStepAsync();
@@ -70,11 +67,8 @@ internal static class SearchHelpers
 
     public static async Task<(int from, int to)[][]> GetIterativeDeepeningStepsToCompletionAsync(IAsyncSearch<AsyncLinqGraph.Node, AsyncLinqGraph.Edge> search)
     {
-        // NB: For async searches, the first step (of any given iteration) is expected
-        // to "discover" the source node.
         var currentIteration = new List<(int, int)>();
         var searchSteps = new List<List<(int, int)>>() { currentIteration };
-        await search.NextStepAsync();
         while (!search.IsConcluded)
         {
             await search.NextStepAsync();
@@ -93,9 +87,8 @@ internal static class SearchHelpers
             }
             else
             {
-                // New iteration. NB: For async searches, the first step (of any given iteration) is expected
-                // to "discover" the source node.
-                currentIteration = [];
+                // New iteration
+                currentIteration = [.. exploredEdges];
                 searchSteps.Add(currentIteration);
             }
         }

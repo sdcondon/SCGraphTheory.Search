@@ -31,7 +31,7 @@ public static class DijkstraAsyncSearchWithNonNumericCostTests
         })
         .WhenAsync(async tc =>
         {
-            var search = new DijkstraAsyncSearchWithNonNumericCost<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, SearchHelpers.NonNumericCost>(
+            var search = await DijkstraAsyncSearchWithNonNumericCost<AsyncLinqGraph.Node, AsyncLinqGraph.Edge, SearchHelpers.NonNumericCost>.CreateAsync(
                 source: await tc.Graph.Nodes.SingleAsync(n => n.Id == tc.SourceId),
                 isTarget: n => n.Id == tc.TargetId,
                 getEdgeCost: e => new ((int)e.Cost));
