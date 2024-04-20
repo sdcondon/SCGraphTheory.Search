@@ -42,7 +42,13 @@ namespace SCGraphTheory.Search.Classic
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
         private readonly KeyedPriorityQueue<TNode, FrontierNodeInfo> frontier = new KeyedPriorityQueue<TNode, FrontierNodeInfo>(new FrontierPriorityComparer());
 
-        private AStarAsyncSearchWithNonNumericCost(
+        /// <summary>
+        /// Initialises a new instance of the <see cref="AStarAsyncSearchWithNonNumericCost{TNode, TEdge, TCost}"/> class.
+        /// </summary>
+        /// <param name="isTargetAsync">An async predicate for identifying the target node of the search.</param>
+        /// <param name="getEdgeCostAsync">An async function for calculating the cost of an edge.</param>
+        /// <param name="getEstimatedCostToTargetAsync">An async function for estimating the cost to the target from a given node.</param>
+        protected AStarAsyncSearchWithNonNumericCost(
             Func<TNode, ValueTask<bool>> isTargetAsync,
             Func<TEdge, ValueTask<TCost>> getEdgeCostAsync,
             Func<TNode, ValueTask<TCost>> getEstimatedCostToTargetAsync)
@@ -108,20 +114,8 @@ namespace SCGraphTheory.Search.Classic
             Func<TNode, ValueTask<TCost>> getEstimatedCostToTargetAsync,
             CancellationToken cancellationToken = default)
         {
-            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
-            // (backed by some static store) with a single Id field (that happens to have value 0).
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
             var search = new AStarAsyncSearchWithNonNumericCost<TNode, TEdge, TCost>(isTargetAsync, getEdgeCostAsync, getEstimatedCostToTargetAsync);
-
-            // Initialize the search tree with the source node and immediately visit it.
-            // The caller having to do a NextStep to discover it is unintuitive.
-            search.visited[source] = new KnownEdgeInfo<TEdge>(default, false);
-            await search.VisitAsync(source, TCost.AdditiveIdentity, cancellationToken);
-
+            await search.InitialiseAsync(source, cancellationToken);
             return search;
         }
 
@@ -137,6 +131,33 @@ namespace SCGraphTheory.Search.Classic
             visited[node] = new KnownEdgeInfo<TEdge>(frontierInfo.bestEdge, false);
             await VisitAsync(node, frontierInfo.bestCostToNode, cancellationToken);
             return frontierInfo.bestEdge;
+        }
+
+        /// <summary>
+        /// Initialises the search by conducting the first search step, which adds all of the 
+        /// adjacent nodes of a given source node to the search frontier.
+        /// </summary>
+        /// <param name="source">The source node of the search.</param>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask"/> representing completion of the operation.</returns>
+        protected async ValueTask InitialiseAsync(TNode source, CancellationToken cancellationToken = default)
+        {
+            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
+            // (backed by some static store) with a single Id field (that happens to have value 0).
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (visited.Count > 0)
+            {
+                throw new InvalidOperationException("Search already initialised");
+            }
+
+            // Initialize the search tree with the source node and immediately visit it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            await VisitAsync(source, TCost.AdditiveIdentity, cancellationToken);
         }
 
         private async ValueTask VisitAsync(TNode node, TCost bestCostToNode, CancellationToken cancellationToken)

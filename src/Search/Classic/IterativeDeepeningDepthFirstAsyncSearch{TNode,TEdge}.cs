@@ -21,7 +21,12 @@ namespace SCGraphTheory.Search.Classic
         private int currentDepthLimit = 0;
         private LimitedDepthFirstAsyncSearch<TNode, TEdge> currentSearch;
 
-        private IterativeDeepeningDepthFirstAsyncSearch(TNode source, Func<TNode, ValueTask<bool>> isTargetAsync)
+        /// <summary>
+        /// Initialises a new instance of the <see cref="IterativeDeepeningDepthFirstAsyncSearch{TNode, TEdge}"/> class.
+        /// </summary>
+        /// <param name="source">The node to initiate the search from.</param>
+        /// <param name="isTargetAsync">An async predicate for identifying the target node of the search.</param>
+        protected IterativeDeepeningDepthFirstAsyncSearch(TNode source, Func<TNode, ValueTask<bool>> isTargetAsync)
         {
             // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
             // (backed by some static store) with a single Id field (that happens to have value 0).
@@ -32,7 +37,6 @@ namespace SCGraphTheory.Search.Classic
 
             this.source = source;
             this.isTargetAsync = isTargetAsync ?? throw new ArgumentNullException(nameof(isTargetAsync));
-            this.currentDepthLimit = 0;
         }
 
         /// <inheritdoc />
@@ -85,9 +89,7 @@ namespace SCGraphTheory.Search.Classic
             CancellationToken cancellationToken = default)
         {
             var search = new IterativeDeepeningDepthFirstAsyncSearch<TNode, TEdge>(source, isTargetAsync);
-
-            search.currentSearch = await LimitedDepthFirstAsyncSearch<TNode, TEdge>.CreateAsync(source, isTargetAsync, search.currentDepthLimit, cancellationToken);
-
+            await search.InitialiseAsync(cancellationToken);
             return search;
         }
 
@@ -105,6 +107,17 @@ namespace SCGraphTheory.Search.Classic
             }
 
             return await currentSearch.NextStepAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Initialises the search by conducting the first search step, which adds all of the 
+        /// adjacent nodes of its source node to the search frontier.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask"/> representing completion of the operation.</returns>
+        protected async ValueTask InitialiseAsync(CancellationToken cancellationToken = default)
+        {
+            currentSearch = await LimitedDepthFirstAsyncSearch<TNode, TEdge>.CreateAsync(source, isTargetAsync, currentDepthLimit, cancellationToken);
         }
     }
 }

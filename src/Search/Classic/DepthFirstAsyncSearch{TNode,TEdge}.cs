@@ -21,7 +21,11 @@ namespace SCGraphTheory.Search.Classic
         private readonly Dictionary<TNode, KnownEdgeInfo<TEdge>> visited = new Dictionary<TNode, KnownEdgeInfo<TEdge>>();
         private readonly Stack<FrontierNodeInfo> frontier = new Stack<FrontierNodeInfo>();
 
-        private DepthFirstAsyncSearch(Func<TNode, ValueTask<bool>> isTargetAsync)
+        /// <summary>
+        /// Initialises a new instance of the <see cref="DepthFirstAsyncSearch{TNode, TEdge}"/> class.
+        /// </summary>
+        /// <param name="isTargetAsync">An async predicate for identifying the target node of the search.</param>
+        protected DepthFirstAsyncSearch(Func<TNode, ValueTask<bool>> isTargetAsync)
         {
             this.isTargetAsync = isTargetAsync ?? throw new ArgumentNullException(nameof(isTargetAsync));
 
@@ -72,20 +76,8 @@ namespace SCGraphTheory.Search.Classic
             Func<TNode, ValueTask<bool>> isTargetAsync,
             CancellationToken cancellationToken = default)
         {
-            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
-            // (backed by some static store) with a single Id field (that happens to have value 0).
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
             var search = new DepthFirstAsyncSearch<TNode, TEdge>(isTargetAsync);
-
-            // Initialize the search tree with the source node and immediately visit it.
-            // The caller having to do a NextStep to discover it is unintuitive.
-            search.visited[source] = new KnownEdgeInfo<TEdge>(default, false);
-            await search.VisitAsync(source, cancellationToken);
-
+            await search.InitialiseAsync(source, cancellationToken);
             return search;
         }
 
@@ -101,6 +93,33 @@ namespace SCGraphTheory.Search.Classic
             visited[node] = new KnownEdgeInfo<TEdge>(edge, false);
             await VisitAsync(node, cancellationToken);
             return edge;
+        }
+
+        /// <summary>
+        /// Initialises the search by conducting the first search step, which adds all of the 
+        /// adjacent nodes of a given source node to the search frontier.
+        /// </summary>
+        /// <param name="source">The source node of the search.</param>
+        /// <param name="cancellationToken">A cancellation token for the operation.</param>
+        /// <returns>A <see cref="ValueTask"/> representing completion of the operation.</returns>
+        protected async ValueTask InitialiseAsync(TNode source, CancellationToken cancellationToken = default)
+        {
+            // NB: we don't throw for default structs - which could be valid. For example, we could have a struct
+            // (backed by some static store) with a single Id field (that happens to have value 0).
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (visited.Count > 0)
+            {
+                throw new InvalidOperationException("Search already initialised");
+            }
+
+            // Initialize the search tree with the source node and immediately visit it.
+            // The caller having to do a NextStep to discover it is unintuitive.
+            visited[source] = new KnownEdgeInfo<TEdge>(default, false);
+            await VisitAsync(source, cancellationToken);
         }
 
         private async ValueTask VisitAsync(TNode node, CancellationToken cancellationToken)
