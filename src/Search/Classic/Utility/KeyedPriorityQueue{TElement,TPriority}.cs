@@ -117,6 +117,8 @@ namespace SCGraphTheory.Search.Utility
             var i = indicesByElement[item];
             ref var entry = ref heap[i];
 
+            // TODO-PERFORMANCE: do we need this check - should perhaps just be a debug assert?
+            // This is an internal type..
             if (priorityComparer.Compare(newPriority, entry.priority) < 0)
             {
                 throw new ArgumentException("Priority reduction not supported", nameof(newPriority));
